@@ -8,6 +8,11 @@ class DataSource(models.Model):
 		CSV = "csv", "CSV"
 		EXCEL = "excel", "Excel"
 
+	class ProcessingStatus(models.TextChoices):
+		PENDING = "pending", "Pending"
+		PROCESSED = "processed", "Processed"
+		FAILED = "failed", "Failed"
+
 	project = models.ForeignKey(
 		PortfolioProject,
 		on_delete=models.CASCADE,
@@ -22,6 +27,12 @@ class DataSource(models.Model):
 	original_filename = models.CharField(max_length=255, blank=True)
 	columns_schema = models.JSONField(default=dict, blank=True)
 	row_count = models.PositiveIntegerField(null=True, blank=True)
+	processing_status = models.CharField(
+		max_length=20,
+		choices=ProcessingStatus.choices,
+		default=ProcessingStatus.PENDING,
+	)
+	processing_error = models.TextField(blank=True)
 	is_active = models.BooleanField(default=True)
 	uploaded_at = models.DateTimeField(auto_now_add=True)
 	updated_at = models.DateTimeField(auto_now=True)
