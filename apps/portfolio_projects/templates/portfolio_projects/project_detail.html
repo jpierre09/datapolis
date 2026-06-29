@@ -10,5 +10,54 @@
     <p><strong>Category:</strong> {{ project.category }}</p>
     <p><strong>Project type:</strong> {{ project.project_type }}</p>
     <p><strong>Owner:</strong> {{ project.owner }}</p>
+
+    <section>
+      <h2>Fuentes de datos</h2>
+
+      {% if data_sources %}
+        {% for data_source in data_sources %}
+          <article>
+            <h3>{{ data_source.name }}</h3>
+            <p><strong>Source type:</strong> {{ data_source.source_type }}</p>
+            <p><strong>Processing status:</strong> {{ data_source.processing_status }}</p>
+            <p><strong>Row count:</strong> {{ data_source.row_count|default:"-" }}</p>
+            <p><strong>Original filename:</strong> {{ data_source.original_filename|default:"-" }}</p>
+
+            {% if data_source.processing_status == "failed" and data_source.processing_error %}
+              <p><strong>Processing error:</strong> {{ data_source.processing_error }}</p>
+            {% endif %}
+
+            {% with columns=data_source.columns_schema.columns %}
+              {% if columns %}
+                <table>
+                  <thead>
+                    <tr>
+                      <th>Name</th>
+                      <th>Type</th>
+                      <th>Original dtype</th>
+                      <th>Nullable</th>
+                      <th>Null count</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {% for column in columns %}
+                      <tr>
+                        <td>{{ column.name }}</td>
+                        <td>{{ column.type }}</td>
+                        <td>{{ column.original_dtype }}</td>
+                        <td>{{ column.nullable }}</td>
+                        <td>{{ column.null_count }}</td>
+                      </tr>
+                    {% endfor %}
+                  </tbody>
+                </table>
+              {% endif %}
+            {% endwith %}
+          </article>
+        {% endfor %}
+      {% else %}
+        <p>Este proyecto aún no tiene fuentes de datos asociadas.</p>
+      {% endif %}
+    </section>
   </main>
 {% endblock %}

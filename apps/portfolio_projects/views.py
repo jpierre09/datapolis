@@ -18,4 +18,9 @@ def project_detail(request, slug):
 		slug=slug,
 		status=PortfolioProject.Status.PUBLISHED,
 	)
-	return render(request, "portfolio_projects/project_detail.html", {"project": project})
+	data_sources = project.data_sources.filter(is_active=True).order_by("-uploaded_at")
+	return render(
+		request,
+		"portfolio_projects/project_detail.html",
+		{"project": project, "data_sources": data_sources},
+	)
