@@ -22,4 +22,4 @@ createsuperuser:
 	docker compose exec web python manage.py createsuperuser
 
 check:
-	docker compose exec web python manage.py check
+	docker compose run --rm web python manage.py check
