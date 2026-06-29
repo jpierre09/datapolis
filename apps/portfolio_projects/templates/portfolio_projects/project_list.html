@@ -1,0 +1,24 @@
+{% extends "base/base.html" %}
+
+{% block content %}
+  <main>
+    <h1>Projects</h1>
+
+    {% if projects %}
+      <ul>
+        {% for project in projects %}
+          <li>
+            <h2>{{ project.title }}</h2>
+            <p><strong>Question:</strong> {{ project.question }}</p>
+            <p><strong>Category:</strong> {{ project.category }}</p>
+            <p><strong>Project type:</strong> {{ project.project_type }}</p>
+            <p><strong>Status:</strong> {{ project.status }}</p>
+            <p><a href="{% url 'portfolio_projects:project_detail' project.slug %}">View detail</a></p>
+          </li>
+        {% endfor %}
+      </ul>
+    {% else %}
+      <p>No published projects yet.</p>
+    {% endif %}
+  </main>
+{% endblock %}
