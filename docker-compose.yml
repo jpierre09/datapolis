@@ -1,0 +1,33 @@
+services:
+  web:
+    build: .
+    command: sh -c "python manage.py migrate && python manage.py runserver 0.0.0.0:8000"
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      DJANGO_DEBUG: ${DJANGO_DEBUG:-1}
+      DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me}
+      DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
+      DATABASE_URL: ${DATABASE_URL:-postgresql://datapolis:datapolis@db:5432/datapolis}
+    depends_on:
+      db:
+        condition: service_healthy
+
+  db:
+    image: postgres:16-alpine
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-datapolis}
+      POSTGRES_USER: ${POSTGRES_USER:-datapolis}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-datapolis}
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-datapolis} -d ${POSTGRES_DB:-datapolis}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
