@@ -15,6 +15,9 @@ def build_visualization_payload(project_visualization):
         )
 
     source_dataset = project_visualization.source_dataset
+    if source_dataset is None:
+        raise VisualizationEngineError("Visualization has no source_dataset configured.")
+
     if source_dataset.processing_status != "processed":
         raise VisualizationEngineError(
             "Source dataset must be processed before building a visualization payload."
@@ -48,5 +51,10 @@ def build_visualization_payload(project_visualization):
         data = apply_aggregation(dataframe, x_column, y_column, aggregation_method)
     except Exception as exc:
         raise VisualizationEngineError(f"Failed to aggregate visualization data: {exc}") from exc
+
+    if data is None:
+        data = []
+    elif not isinstance(data, list):
+        raise VisualizationEngineError("Visualization data contract error: data must be a list.")
 
     return build_payload(project_visualization, data)

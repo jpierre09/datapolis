@@ -1,5 +1,3 @@
-import json
-
 from django.shortcuts import get_object_or_404, render
 
 from apps.data_visualizations.engine.builder import build_visualization_payload
@@ -39,7 +37,7 @@ def project_detail(request, slug):
 				{
 					"visualization": visualization,
 					"payload": payload,
-					"payload_json": json.dumps(payload),
+					"payload_script_id": f"payload-{visualization.id}",
 					"error": "",
 				}
 			)
@@ -48,7 +46,7 @@ def project_detail(request, slug):
 				{
 					"visualization": visualization,
 					"payload": None,
-					"payload_json": "",
+					"payload_script_id": "",
 					"error": str(exc),
 				}
 			)

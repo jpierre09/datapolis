@@ -1,4 +1,6 @@
 def build_payload(project_visualization, data):
+    normalized_data = data if isinstance(data, list) else []
+
     return {
         "schema_version": 1,
         "visualization": {
@@ -19,5 +21,5 @@ def build_payload(project_visualization, data):
             "y": project_visualization.y_axis_column,
             "aggregation": project_visualization.aggregation_method,
         },
-        "data": data,
+        "data": normalized_data,
     }

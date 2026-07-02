@@ -71,9 +71,14 @@
             {% if item.error %}
               <p>{{ item.error }}</p>
             {% elif item.payload and item.payload.visualization.type == "bar_chart" %}
-              <div id="chart-{{ item.visualization.id }}" style="height: 360px;"></div>
+              {% if item.payload.data %}
+                <div id="chart-{{ item.visualization.id }}" style="height: 360px;"></div>
+              {% else %}
+                <p>Esta visualización no tiene datos disponibles.</p>
+              {% endif %}
+              {{ item.payload|json_script:item.payload_script_id }}
             {% else %}
-              <p>Este tipo de visualización aún no se renderiza públicamente.</p>
+              <p>Este tipo de visualización aún no está soportado en el render público.</p>
             {% endif %}
           </article>
         {% endfor %}
@@ -86,10 +91,19 @@
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script>
     {% for item in visualization_payloads %}
-      {% if item.payload and item.payload.visualization.type == "bar_chart" %}
+      {% if item.payload and item.payload.visualization.type == "bar_chart" and item.payload.data %}
         (function () {
-          const payload = JSON.parse('{{ item.payload_json|escapejs }}');
+          const payloadNode = document.getElementById('{{ item.payload_script_id }}');
+          if (!payloadNode) {
+            return;
+          }
+
+          const payload = JSON.parse(payloadNode.textContent || '{}');
           const rows = payload.data || [];
+          if (!rows.length) {
+            return;
+          }
+
           const x = rows.map(function (row) { return row.x; });
           const y = rows.map(function (row) { return row.y; });
 
