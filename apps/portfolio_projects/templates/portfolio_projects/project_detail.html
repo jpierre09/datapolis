@@ -59,5 +59,48 @@
         <p>Este proyecto aún no tiene fuentes de datos asociadas.</p>
       {% endif %}
     </section>
+
+    <section>
+      <h2>Visualizaciones</h2>
+
+      {% if visualization_payloads %}
+        {% for item in visualization_payloads %}
+          <article>
+            <h3>{{ item.visualization.title }}</h3>
+
+            {% if item.error %}
+              <p>{{ item.error }}</p>
+            {% elif item.payload and item.payload.visualization.type == "bar_chart" %}
+              <div id="chart-{{ item.visualization.id }}" style="height: 360px;"></div>
+            {% else %}
+              <p>Este tipo de visualización aún no se renderiza públicamente.</p>
+            {% endif %}
+          </article>
+        {% endfor %}
+      {% else %}
+        <p>Este proyecto aún no tiene visualizaciones configuradas.</p>
+      {% endif %}
+    </section>
   </main>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    {% for item in visualization_payloads %}
+      {% if item.payload and item.payload.visualization.type == "bar_chart" %}
+        (function () {
+          const payload = JSON.parse('{{ item.payload_json|escapejs }}');
+          const rows = payload.data || [];
+          const x = rows.map(function (row) { return row.x; });
+          const y = rows.map(function (row) { return row.y; });
+
+          Plotly.newPlot(
+            'chart-{{ item.visualization.id }}',
+            [{ type: 'bar', x: x, y: y }],
+            { title: payload.visualization.title, margin: { t: 50, r: 20, b: 60, l: 50 } },
+            { responsive: true }
+          );
+        })();
+      {% endif %}
+    {% endfor %}
+  </script>
 {% endblock %}
