@@ -1,0 +1,37 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}Dashboard | Proyectos{% endblock %}
+
+{% block dashboard_content %}
+  <header class="page-header">
+    <h2>Proyectos</h2>
+    <p>Organiza tus análisis por tipo y estado.</p>
+  </header>
+
+  <section class="chips">
+    {% for value, label in status_options %}
+      <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
+    {% endfor %}
+  </section>
+
+  {% for group in grouped_projects %}
+    <section>
+      <h3 class="section-title">{{ group.type_name }}</h3>
+      {% if group.cards %}
+        <div class="cards-grid">
+          {% for card in group.cards %}
+            <article class="card">
+              <h4>{{ card.title }}</h4>
+              <p>{{ card.question }}</p>
+              <p><strong>Estado:</strong> {{ card.status_label }}</p>
+              <p><strong>Dataset principal:</strong> {{ card.main_dataset_name }}</p>
+              <a href="{% url 'dashboard:project_detail' card.slug %}">Abrir</a>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>No hay proyectos en este tipo con el filtro actual.</p>
+      {% endif %}
+    </section>
+  {% endfor %}
+{% endblock %}

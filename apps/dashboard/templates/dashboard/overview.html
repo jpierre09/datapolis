@@ -1,0 +1,61 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}Dashboard | Mi portafolio{% endblock %}
+
+{% block dashboard_content %}
+  <header class="page-header">
+    <h2>Mi portafolio</h2>
+    <p>Resumen de tus proyectos, datasets y visualizaciones.</p>
+  </header>
+
+  <section class="metrics-grid">
+    <article class="card">
+      <p class="metric-label">Total proyectos</p>
+      <p class="metric-value">{{ metrics.total_projects }}</p>
+    </article>
+    <article class="card">
+      <p class="metric-label">Publicados</p>
+      <p class="metric-value">{{ metrics.published_projects }}</p>
+    </article>
+    <article class="card">
+      <p class="metric-label">Borradores</p>
+      <p class="metric-value">{{ metrics.draft_projects }}</p>
+    </article>
+    <article class="card">
+      <p class="metric-label">Datasets</p>
+      <p class="metric-value">{{ metrics.datasets }}</p>
+    </article>
+    <article class="card">
+      <p class="metric-label">Visualizaciones</p>
+      <p class="metric-value">{{ metrics.visualizations }}</p>
+    </article>
+  </section>
+
+  <section>
+    <h3 class="section-title">Proyectos recientes</h3>
+    {% if recent_projects %}
+      <div class="cards-grid">
+        {% for project in recent_projects %}
+          <article class="card">
+            <h4>{{ project.title }}</h4>
+            <p>{{ project.question }}</p>
+            <p><strong>Estado:</strong> {{ project.status_label }}</p>
+            <p><strong>Dataset principal:</strong> {{ project.main_dataset_name }}</p>
+            <a href="{% url 'dashboard:project_detail' project.slug %}">Abrir</a>
+          </article>
+        {% endfor %}
+      </div>
+    {% else %}
+      <p>No hay proyectos recientes aún.</p>
+    {% endif %}
+  </section>
+
+  <section>
+    <h3 class="section-title">Accesos rápidos</h3>
+    <div class="quick-links">
+      <a href="{% url 'dashboard:project_list' %}">Ver proyectos</a>
+      <a href="{% url 'portfolio_projects:project_list' %}">Ver portafolio publicado</a>
+      <a href="{% url 'dashboard:project_list' %}">Revisar datasets</a>
+    </div>
+  </section>
+{% endblock %}

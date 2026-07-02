@@ -1,0 +1,212 @@
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}Dashboard Datapolis{% endblock %}</title>
+    <style>
+      :root {
+        --color-primary-dark: #3E7C7B;
+        --color-primary-soft: #7FB7BE;
+        --color-neutral: #B7C4C7;
+        --color-background: #E6E8E6;
+        --color-accent: #D8A7B1;
+        --color-card: #FFFFFF;
+        --color-text: #1f2a2d;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Segoe UI", "Helvetica Neue", Arial, sans-serif;
+        color: var(--color-text);
+        background: var(--color-background);
+      }
+
+      .layout {
+        min-height: 100vh;
+        display: grid;
+        grid-template-columns: 250px 1fr;
+      }
+
+      .sidebar {
+        background: var(--color-primary-dark);
+        color: #ffffff;
+        padding: 24px 18px;
+      }
+
+      .sidebar h1 {
+        margin: 0 0 20px;
+        font-size: 1.1rem;
+        letter-spacing: 0.02em;
+      }
+
+      .sidebar nav {
+        display: grid;
+        gap: 8px;
+      }
+
+      .sidebar a,
+      .sidebar span {
+        text-decoration: none;
+        color: #ffffff;
+        padding: 10px 12px;
+        border-radius: 8px;
+        display: block;
+        background: transparent;
+      }
+
+      .sidebar a:hover,
+      .sidebar a.active {
+        background: rgba(255, 255, 255, 0.14);
+      }
+
+      .sidebar .disabled {
+        opacity: 0.55;
+        cursor: not-allowed;
+      }
+
+      .content {
+        padding: 28px;
+      }
+
+      .page-header {
+        margin-bottom: 22px;
+      }
+
+      .page-header h2 {
+        margin: 0;
+        font-size: 1.7rem;
+      }
+
+      .page-header p {
+        margin: 8px 0 0;
+        color: #3f5559;
+      }
+
+      .card {
+        background: var(--color-card);
+        border: 1px solid var(--color-neutral);
+        border-radius: 12px;
+        padding: 16px;
+      }
+
+      .metrics-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+        gap: 12px;
+        margin-bottom: 20px;
+      }
+
+      .metric-label {
+        margin: 0;
+        color: #4a6367;
+        font-size: 0.92rem;
+      }
+
+      .metric-value {
+        margin: 6px 0 0;
+        font-size: 1.6rem;
+        color: var(--color-primary-dark);
+        font-weight: 700;
+      }
+
+      .cards-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 12px;
+      }
+
+      .chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-bottom: 16px;
+      }
+
+      .chip {
+        display: inline-block;
+        padding: 8px 12px;
+        border-radius: 999px;
+        text-decoration: none;
+        border: 1px solid var(--color-neutral);
+        color: #2a3b3e;
+        background: #ffffff;
+      }
+
+      .chip.active {
+        background: var(--color-primary-soft);
+        border-color: var(--color-primary-soft);
+      }
+
+      .section-title {
+        margin: 20px 0 10px;
+        padding-bottom: 6px;
+        border-bottom: 2px solid var(--color-primary-soft);
+      }
+
+      .detail-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
+        gap: 14px;
+      }
+
+      .meta-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: grid;
+        gap: 10px;
+      }
+
+      .meta-list strong {
+        color: var(--color-primary-dark);
+      }
+
+      .quick-links {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .quick-links a {
+        text-decoration: none;
+        color: #213235;
+        background: var(--color-accent);
+        padding: 8px 12px;
+        border-radius: 8px;
+      }
+
+      @media (max-width: 920px) {
+        .layout {
+          grid-template-columns: 1fr;
+        }
+
+        .detail-grid {
+          grid-template-columns: 1fr;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="layout">
+      <aside class="sidebar">
+        <h1>Datapolis</h1>
+        <nav>
+          <a href="{% url 'dashboard:overview' %}" class="{% if dashboard_section == 'overview' %}active{% endif %}">Mi portafolio</a>
+          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'projects' %}active{% endif %}">Proyectos</a>
+          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'datasets' %}active{% endif %}">Datasets</a>
+          <a href="{% url 'portfolio_projects:project_list' %}">Portafolio publicado</a>
+          <span class="disabled">Analíticas (próximamente)</span>
+        </nav>
+      </aside>
+
+      <main class="content">
+        {% block dashboard_content %}{% endblock %}
+      </main>
+    </div>
+  </body>
+</html>

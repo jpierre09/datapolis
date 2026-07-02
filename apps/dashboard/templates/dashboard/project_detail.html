@@ -1,0 +1,50 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}Dashboard | {{ project.title }}{% endblock %}
+
+{% block dashboard_content %}
+  <header class="page-header">
+    <h2>{{ project.title }}</h2>
+    <p>{{ project.question }}</p>
+  </header>
+
+  <div class="detail-grid">
+    <section class="card">
+      <h3 class="section-title">Descripción</h3>
+      <p>{{ project.description|default:"Sin descripción." }}</p>
+
+      <h3 class="section-title">Visualizaciones</h3>
+      {% if project.active_visualizations %}
+        <div class="cards-grid">
+          {% for visualization in project.active_visualizations %}
+            <article class="card">
+              <h4>{{ visualization.title }}</h4>
+              <p><strong>Tipo:</strong> {{ visualization.get_visualization_type_display }}</p>
+              <p>{{ visualization.description|default:"Sin descripción." }}</p>
+            </article>
+          {% endfor %}
+        </div>
+      {% else %}
+        <p>Este proyecto aún no tiene visualizaciones activas.</p>
+      {% endif %}
+
+      <h3 class="section-title">Hallazgos</h3>
+      <p>{{ project.findings|default:"Sin hallazgos registrados." }}</p>
+
+      <h3 class="section-title">Conclusión</h3>
+      <p>{{ project.conclusion|default:"Sin conclusión registrada." }}</p>
+    </section>
+
+    <aside class="card">
+      <ul class="meta-list">
+        <li><strong>Estado:</strong> {{ status_label }}</li>
+        <li><strong>Categoría:</strong> {{ project.category.name }}</li>
+        <li><strong>Tipo:</strong> {{ project.project_type.name }}</li>
+        <li><strong>Dataset principal:</strong> {% if main_dataset %}{{ main_dataset.name }}{% else %}Sin dataset{% endif %}</li>
+        <li><strong># datasets:</strong> {{ datasets_count }}</li>
+        <li><strong># visualizaciones:</strong> {{ visualizations_count }}</li>
+        <li><strong>Página pública:</strong> <a href="{{ public_project_url }}">Abrir</a></li>
+      </ul>
+    </aside>
+  </div>
+{% endblock %}

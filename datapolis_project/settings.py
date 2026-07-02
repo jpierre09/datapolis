@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     "apps.data_sources.apps.DataSourcesConfig",
     "apps.data_visualizations.apps.DataVisualizationsConfig",
     "apps.external_dashboards.apps.ExternalDashboardsConfig",
+    "apps.dashboard.apps.DashboardConfig",
 ]
 
 MIDDLEWARE = [
