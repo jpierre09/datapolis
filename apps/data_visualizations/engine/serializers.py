@@ -8,6 +8,7 @@ def build_payload(project_visualization, data):
             "title": project_visualization.title,
             "description": project_visualization.description,
             "type": project_visualization.visualization_type,
+            "config": project_visualization.visualization_config or {},
             "display_order": project_visualization.display_order,
             "is_active": project_visualization.is_active,
         },

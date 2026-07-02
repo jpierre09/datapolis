@@ -70,13 +70,47 @@
 
             {% if item.error %}
               <p>{{ item.error }}</p>
-            {% elif item.payload and item.payload.visualization.type == "bar_chart" or item.payload and item.payload.visualization.type == "line_chart" or item.payload and item.payload.visualization.type == "scatter_plot" %}
-              {% if item.payload.data %}
-                <div id="chart-{{ item.visualization.id }}" style="height: 360px;"></div>
-              {% else %}
-                <p>Esta visualización no tiene datos disponibles.</p>
-              {% endif %}
-              {{ item.payload|json_script:item.payload_script_id }}
+            {% elif item.payload %}
+              {% with vtype=item.payload.visualization.type %}
+                {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
+                  {% if item.payload.data %}
+                    <div id="chart-{{ item.visualization.id }}"></div>
+                  {% else %}
+                    <p>Esta visualización no tiene datos disponibles.</p>
+                  {% endif %}
+                  {{ item.payload|json_script:item.payload_script_id }}
+                {% elif vtype == "data_table" %}
+                  {% if item.payload.data %}
+                    <div id="table-wrap-{{ item.visualization.id }}">
+                      <table id="table-{{ item.visualization.id }}">
+                        <thead>
+                          <tr>
+                            <th id="table-x-header-{{ item.visualization.id }}">X</th>
+                            <th id="table-y-header-{{ item.visualization.id }}">Y</th>
+                          </tr>
+                        </thead>
+                        <tbody id="table-body-{{ item.visualization.id }}"></tbody>
+                      </table>
+                    </div>
+                  {% else %}
+                    <p>Esta visualización no tiene datos disponibles.</p>
+                  {% endif %}
+                  {{ item.payload|json_script:item.payload_script_id }}
+                {% elif vtype == "kpi_card" %}
+                  {% if item.payload.data %}
+                    <div id="kpi-card-{{ item.visualization.id }}">
+                      <p><strong>{{ item.payload.visualization.title }}</strong></p>
+                      <p id="kpi-value-{{ item.visualization.id }}"></p>
+                      <p id="kpi-label-{{ item.visualization.id }}"></p>
+                    </div>
+                  {% else %}
+                    <p>Esta visualización no tiene datos disponibles.</p>
+                  {% endif %}
+                  {{ item.payload|json_script:item.payload_script_id }}
+                {% else %}
+                  <p>Este tipo de visualización aún no está soportado en el render público.</p>
+                {% endif %}
+              {% endwith %}
             {% else %}
               <p>Este tipo de visualización aún no está soportado en el render público.</p>
             {% endif %}
@@ -110,11 +144,108 @@
         return { type: 'scatter', mode: 'markers', x: series.x, y: series.y };
       }
 
+      if (visualizationType === 'pie_chart') {
+        return { type: 'pie', labels: series.x, values: series.y };
+      }
+
       return null;
     }
 
+    function getVisualizationConfig(payload) {
+      const config = payload && payload.visualization && payload.visualization.config;
+      return config && typeof config === 'object' ? config : {};
+    }
+
+    function getChartLayout(payload) {
+      const config = getVisualizationConfig(payload);
+      const chartHeight = typeof config.chart_height === 'number' ? config.chart_height : 420;
+      const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+      const defaultShowLegend = visualizationType === 'pie_chart';
+      const showLegend = typeof config.show_legend === 'boolean' ? config.show_legend : defaultShowLegend;
+      const xAxisTitle = typeof config.x_axis_title === 'string' && config.x_axis_title.trim()
+        ? config.x_axis_title
+        : payload.encoding.x;
+      const yAxisTitle = typeof config.y_axis_title === 'string' && config.y_axis_title.trim()
+        ? config.y_axis_title
+        : payload.encoding.y;
+
+      return {
+        title: payload.visualization.title,
+        height: chartHeight,
+        showlegend: showLegend,
+        margin: { t: 50, r: 20, b: 60, l: 50 },
+        xaxis: { title: { text: xAxisTitle } },
+        yaxis: { title: { text: yAxisTitle } }
+      };
+    }
+
+    function getMaxRows(payload) {
+      const config = getVisualizationConfig(payload);
+      const maxRows = Number(config.max_rows);
+      if (Number.isFinite(maxRows) && maxRows > 0) {
+        return Math.floor(maxRows);
+      }
+      return 20;
+    }
+
+    function getKpiMetricLabel(payload) {
+      const config = getVisualizationConfig(payload);
+      if (typeof config.metric_label === 'string' && config.metric_label.trim()) {
+        return config.metric_label;
+      }
+      return payload.encoding && payload.encoding.y ? payload.encoding.y : '';
+    }
+
+    function getKpiValueText(payload) {
+      const config = getVisualizationConfig(payload);
+      const firstRow = Array.isArray(payload.data) && payload.data.length ? payload.data[0] : null;
+      const value = firstRow ? firstRow.y : '';
+      const valuePrefix = typeof config.value_prefix === 'string' ? config.value_prefix : '';
+      const valueSuffix = typeof config.value_suffix === 'string' ? config.value_suffix : '';
+      return '' + valuePrefix + value + valueSuffix;
+    }
+
+    function renderDataTable(payload, visualizationId) {
+      const bodyNode = document.getElementById('table-body-' + visualizationId);
+      const xHeaderNode = document.getElementById('table-x-header-' + visualizationId);
+      const yHeaderNode = document.getElementById('table-y-header-' + visualizationId);
+      if (!bodyNode || !xHeaderNode || !yHeaderNode) {
+        return;
+      }
+
+      xHeaderNode.textContent = payload.encoding && payload.encoding.x ? payload.encoding.x : 'X';
+      yHeaderNode.textContent = payload.encoding && payload.encoding.y ? payload.encoding.y : 'Y';
+
+      const maxRows = getMaxRows(payload);
+      const rows = (payload.data || []).slice(0, maxRows);
+      rows.forEach(function (row) {
+        const tr = document.createElement('tr');
+
+        const xCell = document.createElement('td');
+        xCell.textContent = row.x;
+        tr.appendChild(xCell);
+
+        const yCell = document.createElement('td');
+        yCell.textContent = row.y;
+        tr.appendChild(yCell);
+
+        bodyNode.appendChild(tr);
+      });
+    }
+
+    function renderKpiCard(payload, visualizationId) {
+      const valueNode = document.getElementById('kpi-value-' + visualizationId);
+      const labelNode = document.getElementById('kpi-label-' + visualizationId);
+      if (!valueNode || !labelNode) {
+        return;
+      }
+
+      valueNode.textContent = getKpiValueText(payload);
+      labelNode.textContent = getKpiMetricLabel(payload);
+    }
+
     {% for item in visualization_payloads %}
-      {% if item.payload and item.payload.visualization.type == "bar_chart" or item.payload and item.payload.visualization.type == "line_chart" or item.payload and item.payload.visualization.type == "scatter_plot" %}
+      {% if item.payload %}
         (function () {
           const payloadNode = document.getElementById('{{ item.payload_script_id }}');
           if (!payloadNode) {
@@ -122,21 +253,34 @@
           }
 
           const payload = JSON.parse(payloadNode.textContent || '{}');
+          const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
           const rows = payload.data || [];
           if (!rows.length) {
             return;
           }
 
+          if (visualizationType === 'data_table') {
+            renderDataTable(payload, '{{ item.visualization.id }}');
+            return;
+          }
+
+          if (visualizationType === 'kpi_card') {
+            renderKpiCard(payload, '{{ item.visualization.id }}');
+            return;
+          }
+
           const series = getPlotSeries(rows);
-          const trace = getPlotlyTrace(payload.visualization.type, series);
+          const trace = getPlotlyTrace(visualizationType, series);
           if (!trace) {
             return;
           }
 
+          const layout = getChartLayout(payload);
+
           Plotly.newPlot(
             'chart-{{ item.visualization.id }}',
             [trace],
-            { title: payload.visualization.title, margin: { t: 50, r: 20, b: 60, l: 50 } },
+            layout,
             { responsive: true }
           );
         })();
