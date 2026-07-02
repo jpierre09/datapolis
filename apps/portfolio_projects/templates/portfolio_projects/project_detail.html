@@ -70,7 +70,7 @@
 
             {% if item.error %}
               <p>{{ item.error }}</p>
-            {% elif item.payload and item.payload.visualization.type == "bar_chart" %}
+            {% elif item.payload and item.payload.visualization.type == "bar_chart" or item.payload and item.payload.visualization.type == "line_chart" or item.payload and item.payload.visualization.type == "scatter_plot" %}
               {% if item.payload.data %}
                 <div id="chart-{{ item.visualization.id }}" style="height: 360px;"></div>
               {% else %}
@@ -90,8 +90,31 @@
 
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script>
+    function getPlotSeries(rows) {
+      return {
+        x: rows.map(function (row) { return row.x; }),
+        y: rows.map(function (row) { return row.y; })
+      };
+    }
+
+    function getPlotlyTrace(visualizationType, series) {
+      if (visualizationType === 'bar_chart') {
+        return { type: 'bar', x: series.x, y: series.y };
+      }
+
+      if (visualizationType === 'line_chart') {
+        return { type: 'scatter', mode: 'lines+markers', x: series.x, y: series.y };
+      }
+
+      if (visualizationType === 'scatter_plot') {
+        return { type: 'scatter', mode: 'markers', x: series.x, y: series.y };
+      }
+
+      return null;
+    }
+
     {% for item in visualization_payloads %}
-      {% if item.payload and item.payload.visualization.type == "bar_chart" and item.payload.data %}
+      {% if item.payload and item.payload.visualization.type == "bar_chart" or item.payload and item.payload.visualization.type == "line_chart" or item.payload and item.payload.visualization.type == "scatter_plot" %}
         (function () {
           const payloadNode = document.getElementById('{{ item.payload_script_id }}');
           if (!payloadNode) {
@@ -104,12 +127,15 @@
             return;
           }
 
-          const x = rows.map(function (row) { return row.x; });
-          const y = rows.map(function (row) { return row.y; });
+          const series = getPlotSeries(rows);
+          const trace = getPlotlyTrace(payload.visualization.type, series);
+          if (!trace) {
+            return;
+          }
 
           Plotly.newPlot(
             'chart-{{ item.visualization.id }}',
-            [{ type: 'bar', x: x, y: y }],
+            [trace],
             { title: payload.visualization.title, margin: { t: 50, r: 20, b: 60, l: 50 } },
             { responsive: true }
           );
