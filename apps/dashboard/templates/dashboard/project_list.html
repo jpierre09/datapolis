@@ -1,18 +1,20 @@
 {% extends "dashboard/base_dashboard.html" %}
 
 {% block title %}Dashboard | Proyectos{% endblock %}
+{% block page_title %}Proyectos{% endblock %}
 
 {% block dashboard_content %}
-  <header class="page-header">
-    <h2>Proyectos</h2>
-    <p>Organiza tus análisis por tipo y estado.</p>
+  <header class="page-header section-head-inline">
+    <div>
+      <h2>Proyectos</h2>
+      <p>Organiza tus análisis por tipo y estado.</p>
+    </div>
+    <div class="chips" aria-label="Filtro de estado">
+      {% for value, label in status_options %}
+        <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
+      {% endfor %}
+    </div>
   </header>
-
-  <section class="chips">
-    {% for value, label in status_options %}
-      <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
-    {% endfor %}
-  </section>
 
   {% for group in grouped_projects %}
     <section>

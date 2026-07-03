@@ -29,52 +29,122 @@
       .layout {
         min-height: 100vh;
         display: grid;
-        grid-template-columns: 250px 1fr;
+        grid-template-columns: 270px 1fr;
       }
 
       .sidebar {
-        background: var(--color-primary-dark);
-        color: #ffffff;
-        padding: 24px 18px;
+        background: linear-gradient(180deg, rgba(127, 183, 190, 0.18) 0%, rgba(230, 232, 230, 0.55) 100%);
+        border-right: 1px solid rgba(62, 124, 123, 0.2);
+        color: var(--color-text);
+        padding: 20px 12px;
+        transition: transform 0.24s ease;
       }
 
-      .sidebar h1 {
-        margin: 0 0 20px;
-        font-size: 1.1rem;
-        letter-spacing: 0.02em;
+      .sidebar-header {
+        padding: 8px 12px 14px;
+        border-bottom: 1px solid rgba(62, 124, 123, 0.22);
+        margin-bottom: 12px;
+      }
+
+      .sidebar-header h1 {
+        margin: 0;
+        font-size: 1.02rem;
+        color: var(--color-primary-dark);
       }
 
       .sidebar nav {
         display: grid;
-        gap: 8px;
+        gap: 4px;
       }
 
       .sidebar a,
       .sidebar span {
         text-decoration: none;
-        color: #ffffff;
+        color: #233335;
         padding: 10px 12px;
-        border-radius: 8px;
-        display: block;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
         background: transparent;
+        border-left: 3px solid transparent;
+        transition: background-color 0.2s ease, border-color 0.2s ease, transform 0.2s ease;
       }
 
       .sidebar a:hover,
       .sidebar a.active {
-        background: rgba(255, 255, 255, 0.14);
+        background: rgba(127, 183, 190, 0.2);
+        border-left-color: var(--color-primary-dark);
+        transform: translateX(1px);
+      }
+
+      .sidebar-link-icon {
+        width: 16px;
+        height: 16px;
+        flex-shrink: 0;
       }
 
       .sidebar .disabled {
-        opacity: 0.55;
+        opacity: 0.56;
         cursor: not-allowed;
       }
 
+      .content-shell {
+        display: grid;
+        grid-template-rows: auto 1fr auto;
+        min-height: 100vh;
+      }
+
+      .topbar {
+        background: var(--color-card);
+        border-bottom: 1px solid rgba(62, 124, 123, 0.2);
+        padding: 12px 20px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      .menu-toggle {
+        display: none;
+        border: 1px solid var(--color-neutral);
+        background: #fff;
+        color: var(--color-primary-dark);
+        border-radius: 8px;
+        width: 38px;
+        height: 34px;
+        cursor: pointer;
+      }
+
+      .brand {
+        font-weight: 700;
+        color: var(--color-primary-dark);
+      }
+
+      .section-name {
+        margin: 0;
+        font-size: 1.02rem;
+        color: #2f4448;
+      }
+
+      .topbar-spacer {
+        flex: 1;
+      }
+
+      .avatar-slot {
+        border: 1px dashed var(--color-neutral);
+        border-radius: 999px;
+        padding: 6px 10px;
+        font-size: 0.82rem;
+        color: #5a6f72;
+        background: rgba(255, 255, 255, 0.8);
+      }
+
       .content {
-        padding: 28px;
+        padding: 24px;
       }
 
       .page-header {
-        margin-bottom: 22px;
+        margin-bottom: 18px;
       }
 
       .page-header h2 {
@@ -89,9 +159,16 @@
 
       .card {
         background: var(--color-card);
-        border: 1px solid var(--color-neutral);
+        border: 1px solid rgba(183, 196, 199, 0.85);
         border-radius: 12px;
-        padding: 16px;
+        padding: 18px;
+        box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
+        transition: transform 0.2s ease, box-shadow 0.2s ease;
+      }
+
+      .card:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 8px 20px rgba(33, 50, 53, 0.12);
       }
 
       .metrics-grid {
@@ -117,41 +194,58 @@
       .cards-grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
-        gap: 12px;
+        gap: 14px;
       }
 
       .chips {
         display: flex;
-        flex-wrap: wrap;
+        flex-wrap: nowrap;
         gap: 8px;
-        margin-bottom: 16px;
+        margin: 0;
+        overflow-x: auto;
+        padding-bottom: 2px;
       }
 
       .chip {
         display: inline-block;
-        padding: 8px 12px;
+        padding: 6px 12px;
         border-radius: 999px;
         text-decoration: none;
         border: 1px solid var(--color-neutral);
         color: #2a3b3e;
-        background: #ffffff;
+        background: rgba(183, 196, 199, 0.4);
+        white-space: nowrap;
+        font-size: 0.9rem;
+        transition: background-color 0.2s ease, border-color 0.2s ease;
+      }
+
+      .chip:hover {
+        background: rgba(183, 196, 199, 0.72);
       }
 
       .chip.active {
-        background: var(--color-primary-soft);
-        border-color: var(--color-primary-soft);
+        background: rgba(216, 167, 177, 0.62);
+        border-color: rgba(216, 167, 177, 0.92);
+        color: #2f282a;
       }
 
       .section-title {
-        margin: 20px 0 10px;
+        margin: 22px 0 10px;
         padding-bottom: 6px;
         border-bottom: 2px solid var(--color-primary-soft);
+      }
+
+      .section-head-inline {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
       }
 
       .detail-grid {
         display: grid;
         grid-template-columns: minmax(0, 2fr) minmax(260px, 1fr);
-        gap: 14px;
+        gap: 16px;
       }
 
       .meta-list {
@@ -178,6 +272,31 @@
         background: var(--color-accent);
         padding: 8px 12px;
         border-radius: 8px;
+        transition: filter 0.2s ease;
+      }
+
+      .quick-links a:hover {
+        filter: brightness(0.96);
+      }
+
+      .dashboard-footer {
+        border-top: 1px solid rgba(62, 124, 123, 0.2);
+        padding: 12px 24px 18px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 10px;
+        font-size: 0.9rem;
+        color: #4a6266;
+      }
+
+      .dashboard-footer a {
+        color: var(--color-primary-dark);
+        text-decoration: none;
+      }
+
+      .dashboard-footer a:hover {
+        text-decoration: underline;
       }
 
       @media (max-width: 920px) {
@@ -185,8 +304,32 @@
           grid-template-columns: 1fr;
         }
 
+        .sidebar {
+          position: fixed;
+          left: 0;
+          top: 0;
+          bottom: 0;
+          width: 260px;
+          z-index: 20;
+          transform: translateX(-100%);
+        }
+
+        .layout.sidebar-open .sidebar {
+          transform: translateX(0);
+        }
+
+        .menu-toggle {
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+        }
+
         .detail-grid {
           grid-template-columns: 1fr;
+        }
+
+        .chips {
+          max-width: 100%;
         }
       }
     </style>
@@ -194,19 +337,68 @@
   <body>
     <div class="layout">
       <aside class="sidebar">
-        <h1>Datapolis</h1>
+        <div class="sidebar-header">
+          <h1>Datapolis</h1>
+        </div>
         <nav>
-          <a href="{% url 'dashboard:overview' %}" class="{% if dashboard_section == 'overview' %}active{% endif %}">Mi portafolio</a>
-          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'projects' %}active{% endif %}">Proyectos</a>
-          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'datasets' %}active{% endif %}">Datasets</a>
-          <a href="{% url 'portfolio_projects:project_list' %}">Portafolio publicado</a>
-          <span class="disabled">Analíticas (próximamente)</span>
+          <a href="{% url 'dashboard:overview' %}" class="{% if dashboard_section == 'overview' %}active{% endif %}">
+            <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12h18"/><path d="M7 7h10"/><path d="M7 17h10"/></svg>
+            Mi portafolio
+          </a>
+          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'projects' %}active{% endif %}">
+            <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 5h16v14H4z"/><path d="M8 9h8"/><path d="M8 13h8"/></svg>
+            Proyectos
+          </a>
+          <a href="{% url 'dashboard:project_list' %}" class="{% if dashboard_section == 'datasets' %}active{% endif %}">
+            <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><ellipse cx="12" cy="6" rx="7" ry="3"/><path d="M5 6v8c0 1.7 3.1 3 7 3s7-1.3 7-3V6"/></svg>
+            Datasets
+          </a>
+          <a href="{% url 'portfolio_projects:project_list' %}">
+            <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 12l9-8 9 8"/><path d="M5 10v10h14V10"/></svg>
+            Portafolio publicado
+          </a>
+          <span class="disabled">
+            <svg class="sidebar-link-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M4 18V6"/><path d="M10 18V9"/><path d="M16 18v-5"/><path d="M22 18v-9"/></svg>
+            Analíticas (próximamente)
+          </span>
         </nav>
       </aside>
 
-      <main class="content">
-        {% block dashboard_content %}{% endblock %}
-      </main>
+      <div class="content-shell">
+        <header class="topbar">
+          <button class="menu-toggle" id="menu-toggle" aria-label="Abrir menú">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M3 6h18"/><path d="M3 12h18"/><path d="M3 18h18"/></svg>
+          </button>
+          <div class="brand">Datapolis</div>
+          <h2 class="section-name">{% block page_title %}Dashboard{% endblock %}</h2>
+          <div class="topbar-spacer"></div>
+          <div class="avatar-slot">Usuario</div>
+        </header>
+
+        <main class="content">
+          {% block dashboard_content %}{% endblock %}
+        </main>
+
+        <footer class="dashboard-footer">
+          <span>© Datapolis 2026</span>
+          <a href="{% url 'portfolio_projects:project_list' %}">Portafolio público</a>
+        </footer>
+      </div>
     </div>
+
+    <script>
+      (function () {
+        var layout = document.querySelector('.layout');
+        var toggle = document.getElementById('menu-toggle');
+
+        if (!layout || !toggle) {
+          return;
+        }
+
+        toggle.addEventListener('click', function () {
+          layout.classList.toggle('sidebar-open');
+        });
+      })();
+    </script>
   </body>
 </html>
