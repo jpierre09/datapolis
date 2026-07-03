@@ -4,32 +4,6 @@
 {% block page_title %}Proyectos{% endblock %}
 
 {% block dashboard_content %}
-  <style>
-    .project-list-actions {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      justify-content: flex-end;
-    }
-
-    .new-project-btn {
-      display: inline-block;
-      text-decoration: none;
-      background: #3E7C7B;
-      color: #FFFFFF;
-      border-radius: 999px;
-      padding: 7px 14px;
-      font-size: 0.9rem;
-      border: 1px solid #3E7C7B;
-      white-space: nowrap;
-    }
-
-    .new-project-btn:hover {
-      filter: brightness(0.96);
-    }
-  </style>
-
   <header class="page-header section-head-inline">
     <div>
       <h2>Proyectos</h2>
@@ -38,30 +12,36 @@
     <div class="project-list-actions">
       <div class="chips" aria-label="Filtro de estado">
         {% for value, label in status_options %}
-          <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
+          <a class="dashboard-pill {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
         {% endfor %}
       </div>
-      <a href="{% url 'dashboard:project_create' %}" class="new-project-btn">Nuevo proyecto</a>
+      <a href="{% url 'dashboard:project_create' %}" class="dashboard-button-primary">Nuevo proyecto</a>
     </div>
   </header>
 
+
+
   {% for group in grouped_projects %}
     <section>
-      <h3 class="section-title">{{ group.type_name }}</h3>
+      <h3 class="dashboard-section-title">{{ group.type_name }}</h3>
       {% if group.cards %}
-        <div class="cards-grid">
+        <div class="dashboard-grid dashboard-grid-projects">
           {% for card in group.cards %}
-            <article class="card">
-              <h4>{{ card.title }}</h4>
-              <p>{{ card.question }}</p>
-              <p><strong>Estado:</strong> {{ card.status_label }}</p>
-              <p><strong>Dataset principal:</strong> {{ card.main_dataset_name }}</p>
-              <a href="{% url 'dashboard:project_detail' card.slug %}">Abrir</a>
+            <article class="dashboard-card dashboard-card-dashed">
+              <div class="dashboard-card-header">
+                <h4 class="dashboard-card-title">{{ card.title }}</h4>
+                <span class="dashboard-badge">{{ card.status_label }}</span>
+              </div>
+              <p class="dashboard-card-text">{{ card.question }}</p>
+              <ul class="dashboard-card-meta">
+                <li><strong>Dataset principal:</strong> {{ card.main_dataset_name }}</li>
+              </ul>
+              <a class="dashboard-card-link" href="{% url 'dashboard:project_detail' card.slug %}">Abrir</a>
             </article>
           {% endfor %}
         </div>
       {% else %}
-        <p>No hay proyectos en este tipo con el filtro actual.</p>
+        <p class="dashboard-empty-state">Aún no hay proyectos de este tipo.</p>
       {% endif %}
     </section>
   {% endfor %}

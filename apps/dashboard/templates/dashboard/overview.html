@@ -5,125 +5,492 @@
 
 {% block dashboard_content %}
   <style>
-    .dashboard-overview-grid {
+    .dashboard-profile-grid {
       display: grid;
-      grid-template-columns: 2fr 1fr;
-      gap: 24px;
-      align-items: start;
+      grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+      gap: 18px;
+      align-items: stretch;
     }
 
-    .overview-left {
+    .profile-panel,
+    .main-panel {
       min-width: 0;
     }
 
-    .stat-strip {
+    .profile-panel {
       display: flex;
+    }
+
+    .profile-card,
+    .panel-card,
+    .featured-card,
+    .activity-card,
+    .recent-activity-card,
+    .metrics-strip {
       background: #FFFFFF;
       border: 1px solid rgba(183, 196, 199, 0.9);
-      border-radius: 12px;
+      border-radius: 14px;
       box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
-      overflow-x: auto;
     }
 
-    .stat-item {
-      flex: 1;
-      min-width: 150px;
-      padding: 16px 18px;
-      border-right: 1px solid #E6E8E6;
+    .profile-card {
+      padding: 18px;
+      position: sticky;
+      top: 14px;
+      min-height: 100%;
+      display: flex;
+      flex-direction: column;
     }
 
-    .stat-item:last-child {
-      border-right: 0;
+    .avatar-shell {
+      width: 112px;
+      height: 112px;
+      border-radius: 50%;
+      margin: 0 0 14px;
+      display: grid;
+      place-items: center;
+      background: radial-gradient(circle at 30% 30%, rgba(127, 183, 190, 0.35), rgba(62, 124, 123, 0.15));
+      border: 4px solid rgba(255, 255, 255, 0.95);
+      box-shadow: 0 10px 22px rgba(33, 50, 53, 0.12);
+      font-size: 2.25rem;
+      font-weight: 800;
+      color: #3E7C7B;
+      letter-spacing: 0.06em;
     }
 
-    .stat-value {
+    .profile-name {
       margin: 0;
-      font-size: 1.9rem;
-      line-height: 1.1;
+      font-size: 1.42rem;
+      color: #213436;
+    }
+
+    .profile-username {
+      margin: 4px 0 10px;
+      color: #5b696d;
+      font-size: 0.96rem;
+    }
+
+    .profile-bio {
+      margin: 0 0 14px;
+      color: #314548;
+      line-height: 1.45;
+    }
+
+    .profile-status {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 7px 12px;
+      border-radius: 999px;
+      background: rgba(127, 183, 190, 0.18);
+      color: #2a4548;
+      font-size: 0.88rem;
+      border: 1px solid rgba(127, 183, 190, 0.28);
+      margin-bottom: 8px;
+    }
+
+    .profile-meta {
+      margin: 0 0 14px;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 8px;
+      color: #46595d;
+      font-size: 0.94rem;
+    }
+
+    .profile-meta strong {
+      color: #3E7C7B;
+    }
+
+    .profile-summary {
+      display: grid;
+      gap: 6px;
+      margin: 14px 0 14px;
+    }
+
+    .summary-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 8px 0;
+      border-bottom: 1px solid #E6E8E6;
+    }
+
+    .summary-row:last-child {
+      border-bottom: 0;
+    }
+
+    .summary-label {
+      color: #5a6b6f;
+      font-size: 0.9rem;
+    }
+
+    .summary-value {
       font-weight: 700;
       color: #3E7C7B;
     }
 
-    .stat-label {
-      margin: 6px 0 0;
-      color: #5b696d;
-      font-size: 0.86rem;
+    .profile-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
     }
 
-    .recent-card {
+    .btn-link,
+    .btn-primary,
+    .btn-secondary {
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 9px 12px;
+      border: 1px solid transparent;
+      font-size: 0.92rem;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.18s ease, background-color 0.18s ease, opacity 0.18s ease;
+    }
+
+    .btn-link:hover,
+    .btn-primary:hover,
+    .btn-secondary:hover {
+      transform: translateY(-1px);
+    }
+
+    .btn-primary {
+      background: #3E7C7B;
+      color: #FFFFFF;
+      border-color: #3E7C7B;
+    }
+
+    .btn-secondary {
       background: #FFFFFF;
-      border: 1px solid rgba(183, 196, 199, 0.9);
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
+      color: #2e4144;
+      border-color: #B7C4C7;
+    }
+
+    .main-panel {
+      display: grid;
+      gap: 14px;
+    }
+
+    .panel-card,
+    .featured-card,
+    .activity-card,
+    .recent-activity-card {
       padding: 16px;
     }
 
-    .recent-title {
-      margin: 0 0 12px;
-      font-size: 1.02rem;
-      color: #2d4043;
+    .panel-header,
+    .section-header,
+    .featured-top {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 12px;
+      flex-wrap: wrap;
     }
 
-    .recent-list {
-      list-style: none;
+    .section-title {
       margin: 0;
-      padding: 0;
-      display: grid;
-      gap: 8px;
-    }
-
-    .recent-item {
-      padding: 10px 0;
-      border-bottom: 1px solid #E6E8E6;
-    }
-
-    .recent-item:last-child {
-      border-bottom: 0;
-      padding-bottom: 6px;
-    }
-
-    .recent-project-title {
-      margin: 0;
-      font-size: 0.95rem;
-      font-weight: 600;
+      font-size: 1.1rem;
       color: #213436;
     }
 
-    .status-badge {
-      display: inline-block;
-      margin-top: 6px;
-      font-size: 0.74rem;
-      line-height: 1;
-      padding: 5px 8px;
-      border-radius: 999px;
-      background: rgba(127, 183, 190, 0.2);
-      color: #2a4548;
-      border: 1px solid rgba(127, 183, 190, 0.45);
+    .section-subtitle {
+      margin: 3px 0 0;
+      color: #5a6b6f;
+      font-size: 0.9rem;
     }
 
-    .recent-link {
-      display: inline-block;
-      margin-top: 12px;
+    .featured-grid {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .project-card {
+      background: linear-gradient(180deg, rgba(255, 255, 255, 0.98) 0%, rgba(250, 251, 250, 0.98) 100%);
+      border: 1px dashed rgba(127, 183, 190, 0.72);
+      border-radius: 14px;
+      padding: 14px;
+      box-shadow: 0 2px 10px rgba(33, 50, 53, 0.05);
+      transition: transform 0.18s ease, box-shadow 0.18s ease;
+      min-height: 234px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .project-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(33, 50, 53, 0.12);
+    }
+
+    .project-card-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+
+    .project-title {
+      margin: 0;
+      font-size: 1rem;
+      font-weight: 700;
+      color: #213436;
+      line-height: 1.25;
+      flex: 1;
+    }
+
+    .project-question {
+      margin: 0 0 12px;
+      color: #4a5f63;
+      line-height: 1.42;
+      flex: 0 0 auto;
+    }
+
+    .project-meta {
+      display: grid;
+      gap: 6px;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      color: #4a5f63;
+      font-size: 0.92rem;
+      flex: 1;
+    }
+
+    .status-badge {
+      display: inline-flex;
+      align-items: center;
+      padding: 5px 9px;
+      border-radius: 999px;
+      background: rgba(216, 167, 177, 0.58);
+      color: #2f282a;
+      border: 1px solid rgba(216, 167, 177, 0.85);
+      font-size: 0.76rem;
+      font-weight: 700;
+      letter-spacing: 0.02em;
+      flex-shrink: 0;
+      white-space: nowrap;
+      margin-top: 2px;
+    }
+
+    .project-open-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 6px;
+      margin-top: 14px;
+      align-self: flex-start;
+      padding: 8px 11px;
+      border-radius: 10px;
+      background: rgba(127, 183, 190, 0.14);
+      border: 1px solid rgba(127, 183, 190, 0.34);
       color: #3E7C7B;
-      font-weight: 600;
+      font-weight: 700;
       text-decoration: none;
     }
 
-    .recent-link:hover {
+    .project-open-link:hover {
       text-decoration: underline;
     }
 
-    @media (max-width: 920px) {
-      .dashboard-overview-grid {
+    .new-project-card {
+      background: linear-gradient(180deg, rgba(127, 183, 190, 0.18) 0%, rgba(255, 255, 255, 0.98) 100%);
+      border-style: dashed;
+      border-color: rgba(62, 124, 123, 0.48);
+      justify-content: space-between;
+    }
+
+    .new-project-card .project-title {
+      font-size: 1.05rem;
+    }
+
+    .new-project-hero {
+      display: grid;
+      place-items: center;
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      background: rgba(62, 124, 123, 0.12);
+      border: 1px solid rgba(62, 124, 123, 0.22);
+      color: #3E7C7B;
+      font-size: 1.9rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    .new-project-copy {
+      margin: 0 0 12px;
+      color: #4a5f63;
+      line-height: 1.45;
+    }
+
+    .new-project-link {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      padding: 9px 12px;
+      border-radius: 10px;
+      background: #3E7C7B;
+      color: #FFFFFF;
+      font-weight: 700;
+      text-decoration: none;
+      border: 1px solid #3E7C7B;
+      align-self: flex-start;
+    }
+
+    .new-project-link:hover {
+      text-decoration: underline;
+    }
+
+    .project-card-empty {
+      background: rgba(255, 255, 255, 0.72);
+      border-style: dashed;
+      border-color: rgba(183, 196, 199, 0.72);
+      box-shadow: none;
+      color: #5a6b6f;
+      justify-content: center;
+      align-items: flex-start;
+    }
+
+    .project-card-empty .project-title {
+      color: #5a6b6f;
+    }
+
+    .project-card-empty .project-question,
+    .project-card-empty .project-meta,
+    .project-card-empty .project-open-link {
+      display: none;
+    }
+
+    .activity-layout {
+      display: grid;
+      grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
+      gap: 14px;
+    }
+
+    .activity-graph {
+      display: grid;
+      grid-template-columns: repeat(7, minmax(16px, 1fr));
+      gap: 6px;
+      margin-top: 10px;
+    }
+
+    .activity-block {
+      aspect-ratio: 1;
+      border-radius: 4px;
+      background: rgba(183, 196, 199, 0.35);
+      border: 1px solid rgba(183, 196, 199, 0.65);
+    }
+
+    .activity-block.level-1 { background: rgba(127, 183, 190, 0.18); }
+    .activity-block.level-2 { background: rgba(127, 183, 190, 0.32); }
+    .activity-block.level-3 { background: rgba(127, 183, 190, 0.5); }
+    .activity-block.level-4 { background: rgba(62, 124, 123, 0.62); }
+
+    .activity-caption {
+      margin: 10px 0 0;
+      color: #5a6b6f;
+      font-size: 0.88rem;
+      line-height: 1.4;
+    }
+
+    .recent-feed {
+      margin: 0;
+      padding: 0;
+      list-style: none;
+      display: grid;
+      gap: 10px;
+    }
+
+    .recent-feed-item {
+      display: flex;
+      align-items: flex-start;
+      gap: 10px;
+      padding-bottom: 10px;
+      border-bottom: 1px solid #E6E8E6;
+    }
+
+    .recent-feed-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 0;
+    }
+
+    .recent-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background: #D8A7B1;
+      margin-top: 5px;
+      flex-shrink: 0;
+    }
+
+    .recent-feed-title {
+      margin: 0;
+      font-weight: 700;
+      color: #213436;
+      font-size: 0.94rem;
+    }
+
+    .recent-feed-text {
+      margin: 4px 0 0;
+      color: #5a6b6f;
+      font-size: 0.9rem;
+      line-height: 1.4;
+    }
+
+    .empty-state {
+      margin: 0;
+      color: #5a6b6f;
+      font-size: 0.94rem;
+      line-height: 1.5;
+    }
+
+    .section-footer-link {
+      display: inline-flex;
+      margin-top: 14px;
+      color: #3E7C7B;
+      font-weight: 700;
+      text-decoration: none;
+    }
+
+    .section-footer-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 1080px) {
+      .dashboard-profile-grid {
         grid-template-columns: 1fr;
       }
 
-      .stat-strip {
-        flex-wrap: wrap;
+      .profile-card {
+        position: static;
       }
 
-      .stat-item {
-        min-width: 140px;
+      .activity-layout {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .featured-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-layout {
+        grid-template-columns: 1fr;
+      }
+
+      .activity-graph {
+        grid-template-columns: repeat(7, minmax(12px, 1fr));
       }
     }
   </style>
@@ -133,47 +500,184 @@
     <p>Resumen de tus proyectos, datasets y visualizaciones.</p>
   </header>
 
-  <section class="dashboard-overview-grid">
-    <div class="overview-left">
-      <div class="stat-strip">
-        <div class="stat-item">
-          <p class="stat-value">{{ metrics.total_projects }}</p>
-          <p class="stat-label">Total proyectos</p>
-        </div>
-        <div class="stat-item">
-          <p class="stat-value">{{ metrics.published_projects }}</p>
-          <p class="stat-label">Publicados</p>
-        </div>
-        <div class="stat-item">
-          <p class="stat-value">{{ metrics.draft_projects }}</p>
-          <p class="stat-label">Borradores</p>
-        </div>
-        <div class="stat-item">
-          <p class="stat-value">{{ metrics.datasets }}</p>
-          <p class="stat-label">Datasets</p>
-        </div>
-        <div class="stat-item">
-          <p class="stat-value">{{ metrics.visualizations }}</p>
-          <p class="stat-label">Visualizaciones</p>
-        </div>
-      </div>
-    </div>
+  <section class="dashboard-profile-grid">
+    <aside class="profile-panel">
+      <article class="profile-card">
+        <div class="avatar-shell" aria-hidden="true">DP</div>
+        <h3 class="profile-name">Analista Datapolis</h3>
+        <p class="profile-username">@datapolis-portfolio</p>
+        <p class="profile-bio">Portafolio analítico para proyectos de datos, datasets curados y visualizaciones públicas con foco en claridad editorial.</p>
 
-    <aside class="recent-card">
-      <h3 class="recent-title">Proyectos recientes</h3>
-      {% if recent_projects %}
-        <ul class="recent-list">
-          {% for project in recent_projects|slice:":5" %}
-            <li class="recent-item">
-              <p class="recent-project-title">{{ project.title }}</p>
-              <span class="status-badge">{{ project.status_label }}</span>
-            </li>
-          {% endfor %}
+        <div class="profile-status">
+          <span>●</span>
+          <span>{% if metrics.published_projects > 0 %}Portafolio público activo{% else %}Portafolio público en construcción{% endif %}</span>
+        </div>
+
+        <ul class="profile-meta">
+          <li><strong>Ubicación:</strong> No configurada</li>
+          <li><strong>Identidad:</strong> Perfil analítico de lectura pública</li>
         </ul>
-      {% else %}
-        <p>No hay proyectos recientes aún.</p>
-      {% endif %}
-      <a class="recent-link" href="{% url 'dashboard:project_list' %}">Ver todos →</a>
+
+        <div class="profile-summary" aria-label="Resumen del perfil">
+          <div class="summary-row">
+            <span class="summary-label">Total proyectos</span>
+            <span class="summary-value">{{ metrics.total_projects }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Datasets</span>
+            <span class="summary-value">{{ metrics.datasets }}</span>
+          </div>
+          <div class="summary-row">
+            <span class="summary-label">Visualizaciones</span>
+            <span class="summary-value">{{ metrics.visualizations }}</span>
+          </div>
+        </div>
+
+        <div class="profile-actions">
+          <a href="#" class="btn-primary" aria-disabled="true" title="Disponible en una fase posterior">Editar perfil público</a>
+          <a href="{% url 'portfolio_projects:project_list' %}" class="btn-secondary">Ver portafolio público</a>
+        </div>
+
+      </article>
     </aside>
+
+    <div class="main-panel">
+      <section class="featured-card">
+        <div class="featured-top">
+          <div>
+            <h3 class="section-title">Proyectos destacados</h3>
+            <p class="section-subtitle">Una selección de tus análisis más recientes, organizada como un portafolio de trabajo vivo.</p>
+          </div>
+        </div>
+
+        {% with highlighted_projects=recent_projects|slice:":2" %}
+          <div class="featured-grid">
+            {% for project in highlighted_projects %}
+              <article class="project-card">
+                <div class="project-card-header">
+                  <h4 class="project-title">{{ project.title }}</h4>
+                  <span class="status-badge">{{ project.status_label }}</span>
+                </div>
+                <p class="project-question">{{ project.question }}</p>
+                <ul class="project-meta">
+                  <li><strong>Tipo:</strong> {{ project.project_type.name }}</li>
+                  <li><strong>Dataset:</strong> {{ project.main_dataset_name }}</li>
+                  <li><strong>Visualizaciones:</strong> {{ project.project_visualizations.count }}</li>
+                </ul>
+                <a class="project-open-link" href="{% url 'dashboard:project_detail' project.slug %}">Abrir</a>
+              </article>
+            {% endfor %}
+
+            {% if highlighted_projects|length == 1 %}
+              <article class="project-card project-card-empty" aria-hidden="true">
+                <h4 class="project-title">Espacio para un segundo proyecto</h4>
+                <p class="project-question">Cuando tengas otro análisis publicado, aparecerá aquí con la misma jerarquía visual.</p>
+              </article>
+            {% endif %}
+
+            <article class="project-card new-project-card">
+              <div>
+                <div class="new-project-hero" aria-hidden="true">+</div>
+                <h4 class="project-title">Nuevo proyecto</h4>
+                <p class="new-project-copy">Empieza un nuevo análisis y publícalo.</p>
+              </div>
+              <a class="new-project-link" href="{% url 'dashboard:project_create' %}">Crear proyecto</a>
+            </article>
+
+            {% if not highlighted_projects %}
+              <article class="project-card project-card-empty" aria-hidden="true">
+                <h4 class="project-title">Sin proyectos destacados todavía</h4>
+                <p class="project-question">Cuando publiques tus dos primeros análisis, esta sección se completará automáticamente.</p>
+              </article>
+              <article class="project-card project-card-empty" aria-hidden="true">
+                <h4 class="project-title">Segundo espacio disponible</h4>
+                <p class="project-question">Se reserva para mantener la misma composición de tres cards.</p>
+              </article>
+            {% endif %}
+          </div>
+        {% endwith %}
+      </section>
+
+      <div class="activity-layout">
+        <section class="activity-card">
+          <div class="section-header">
+            <div>
+              <h3 class="section-title">Actividad del portafolio</h3>
+              <p class="section-subtitle">Una lectura visual de la evolución reciente del trabajo.</p>
+            </div>
+          </div>
+
+          <div class="activity-graph" aria-hidden="true">
+            <div class="activity-block level-1"></div>
+            <div class="activity-block level-2"></div>
+            <div class="activity-block level-1"></div>
+            <div class="activity-block"></div>
+            <div class="activity-block level-3"></div>
+            <div class="activity-block level-2"></div>
+            <div class="activity-block level-4"></div>
+            <div class="activity-block"></div>
+            <div class="activity-block level-1"></div>
+            <div class="activity-block level-2"></div>
+            <div class="activity-block level-3"></div>
+            <div class="activity-block level-1"></div>
+            <div class="activity-block"></div>
+            <div class="activity-block level-2"></div>
+            <div class="activity-block level-1"></div>
+            <div class="activity-block level-4"></div>
+            <div class="activity-block level-2"></div>
+            <div class="activity-block"></div>
+            <div class="activity-block level-3"></div>
+            <div class="activity-block level-1"></div>
+            <div class="activity-block level-2"></div>
+          </div>
+
+          <p class="activity-caption">Los bloques representan una evolución visual del portafolio. En una fase posterior podrán conectarse a actividad real.</p>
+        </section>
+
+        <section class="recent-activity-card">
+          <div class="section-header">
+            <div>
+              <h3 class="section-title">Actividad reciente</h3>
+              <p class="section-subtitle">Eventos simples que resumen el estado actual del portafolio.</p>
+            </div>
+          </div>
+
+          {% if metrics.published_projects or metrics.datasets or metrics.visualizations %}
+            <ul class="recent-feed">
+              {% if metrics.published_projects %}
+                <li class="recent-feed-item">
+                  <span class="recent-dot"></span>
+                  <div>
+                    <p class="recent-feed-title">Proyecto publicado</p>
+                    <p class="recent-feed-text">{{ metrics.published_projects }} proyecto{{ metrics.published_projects|pluralize }} publicados.</p>
+                  </div>
+                </li>
+              {% endif %}
+              {% if metrics.datasets %}
+                <li class="recent-feed-item">
+                  <span class="recent-dot"></span>
+                  <div>
+                    <p class="recent-feed-title">Dataset agregado</p>
+                    <p class="recent-feed-text">{{ metrics.datasets }} dataset{{ metrics.datasets|pluralize }} activos en el portafolio.</p>
+                  </div>
+                </li>
+              {% endif %}
+              {% if metrics.visualizations %}
+                <li class="recent-feed-item">
+                  <span class="recent-dot"></span>
+                  <div>
+                    <p class="recent-feed-title">Visualización creada</p>
+                    <p class="recent-feed-text">{{ metrics.visualizations }} visualización{{ metrics.visualizations|pluralize }} activas listas para lectura pública.</p>
+                  </div>
+                </li>
+              {% endif %}
+            </ul>
+          {% else %}
+            <p class="empty-state">Sin actividad reciente todavía. Cuando empieces a publicar proyectos, datasets o visualizaciones, aparecerán aquí.</p>
+          {% endif %}
+        </section>
+      </div>
+
+    </div>
   </section>
 {% endblock %}
