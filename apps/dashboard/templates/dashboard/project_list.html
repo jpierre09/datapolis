@@ -4,15 +4,44 @@
 {% block page_title %}Proyectos{% endblock %}
 
 {% block dashboard_content %}
+  <style>
+    .project-list-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      justify-content: flex-end;
+    }
+
+    .new-project-btn {
+      display: inline-block;
+      text-decoration: none;
+      background: #3E7C7B;
+      color: #FFFFFF;
+      border-radius: 999px;
+      padding: 7px 14px;
+      font-size: 0.9rem;
+      border: 1px solid #3E7C7B;
+      white-space: nowrap;
+    }
+
+    .new-project-btn:hover {
+      filter: brightness(0.96);
+    }
+  </style>
+
   <header class="page-header section-head-inline">
     <div>
       <h2>Proyectos</h2>
       <p>Organiza tus análisis por tipo y estado.</p>
     </div>
-    <div class="chips" aria-label="Filtro de estado">
-      {% for value, label in status_options %}
-        <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
-      {% endfor %}
+    <div class="project-list-actions">
+      <div class="chips" aria-label="Filtro de estado">
+        {% for value, label in status_options %}
+          <a class="chip {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
+        {% endfor %}
+      </div>
+      <a href="{% url 'dashboard:project_create' %}" class="new-project-btn">Nuevo proyecto</a>
     </div>
   </header>
 

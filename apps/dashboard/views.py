@@ -1,10 +1,14 @@
+from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
+from django.utils.text import slugify
 from django.urls import reverse
 
 from apps.data_sources.models import DataSource
 from apps.data_visualizations.models import ProjectVisualization
 from apps.portfolio_projects.models import PortfolioProject, ProjectType
+
+from .forms import ProjectCreateForm
 
 STATUS_LABELS = {
     PortfolioProject.Status.DRAFT: "Borrador",
@@ -146,3 +150,45 @@ def project_detail(request, slug):
             "public_project_url": reverse("portfolio_projects:project_detail", kwargs={"slug": project.slug}),
         },
     )
+
+
+def project_create(request):
+    if request.method == "POST":
+        form = ProjectCreateForm(request.POST)
+        if form.is_valid():
+            user = get_user_model().objects.order_by("id").first()
+            if not user:
+                form.add_error(None, "No hay usuarios disponibles para asignar el proyecto.")
+            else:
+                project = form.save(commit=False)
+                analysis_question = form.cleaned_data["analysis_question"]
+                project.question = analysis_question
+                project.description = analysis_question
+                project.status = PortfolioProject.Status.DRAFT
+                project.owner = user
+                project.slug = _build_unique_slug(project.title)
+                project.save()
+                return redirect("dashboard:project_detail", slug=project.slug)
+    else:
+        form = ProjectCreateForm()
+
+    return render(
+        request,
+        "dashboard/project_create.html",
+        {
+            "dashboard_section": "projects",
+            "form": form,
+        },
+    )
+
+
+def _build_unique_slug(title):
+    base_slug = slugify(title) or "proyecto"
+    candidate = base_slug
+    index = 2
+
+    while PortfolioProject.objects.filter(slug=candidate).exists():
+        candidate = f"{base_slug}-{index}"
+        index += 1
+
+    return candidate

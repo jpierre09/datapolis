@@ -4,59 +4,176 @@
 {% block page_title %}Mi portafolio{% endblock %}
 
 {% block dashboard_content %}
+  <style>
+    .dashboard-overview-grid {
+      display: grid;
+      grid-template-columns: 2fr 1fr;
+      gap: 24px;
+      align-items: start;
+    }
+
+    .overview-left {
+      min-width: 0;
+    }
+
+    .stat-strip {
+      display: flex;
+      background: #FFFFFF;
+      border: 1px solid rgba(183, 196, 199, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
+      overflow-x: auto;
+    }
+
+    .stat-item {
+      flex: 1;
+      min-width: 150px;
+      padding: 16px 18px;
+      border-right: 1px solid #E6E8E6;
+    }
+
+    .stat-item:last-child {
+      border-right: 0;
+    }
+
+    .stat-value {
+      margin: 0;
+      font-size: 1.9rem;
+      line-height: 1.1;
+      font-weight: 700;
+      color: #3E7C7B;
+    }
+
+    .stat-label {
+      margin: 6px 0 0;
+      color: #5b696d;
+      font-size: 0.86rem;
+    }
+
+    .recent-card {
+      background: #FFFFFF;
+      border: 1px solid rgba(183, 196, 199, 0.9);
+      border-radius: 12px;
+      box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
+      padding: 16px;
+    }
+
+    .recent-title {
+      margin: 0 0 12px;
+      font-size: 1.02rem;
+      color: #2d4043;
+    }
+
+    .recent-list {
+      list-style: none;
+      margin: 0;
+      padding: 0;
+      display: grid;
+      gap: 8px;
+    }
+
+    .recent-item {
+      padding: 10px 0;
+      border-bottom: 1px solid #E6E8E6;
+    }
+
+    .recent-item:last-child {
+      border-bottom: 0;
+      padding-bottom: 6px;
+    }
+
+    .recent-project-title {
+      margin: 0;
+      font-size: 0.95rem;
+      font-weight: 600;
+      color: #213436;
+    }
+
+    .status-badge {
+      display: inline-block;
+      margin-top: 6px;
+      font-size: 0.74rem;
+      line-height: 1;
+      padding: 5px 8px;
+      border-radius: 999px;
+      background: rgba(127, 183, 190, 0.2);
+      color: #2a4548;
+      border: 1px solid rgba(127, 183, 190, 0.45);
+    }
+
+    .recent-link {
+      display: inline-block;
+      margin-top: 12px;
+      color: #3E7C7B;
+      font-weight: 600;
+      text-decoration: none;
+    }
+
+    .recent-link:hover {
+      text-decoration: underline;
+    }
+
+    @media (max-width: 920px) {
+      .dashboard-overview-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .stat-strip {
+        flex-wrap: wrap;
+      }
+
+      .stat-item {
+        min-width: 140px;
+      }
+    }
+  </style>
+
   <header class="page-header">
     <h2>Mi portafolio</h2>
     <p>Resumen de tus proyectos, datasets y visualizaciones.</p>
   </header>
 
-  <section class="metrics-grid">
-    <article class="card">
-      <p class="metric-label">Total proyectos</p>
-      <p class="metric-value">{{ metrics.total_projects }}</p>
-    </article>
-    <article class="card">
-      <p class="metric-label">Publicados</p>
-      <p class="metric-value">{{ metrics.published_projects }}</p>
-    </article>
-    <article class="card">
-      <p class="metric-label">Borradores</p>
-      <p class="metric-value">{{ metrics.draft_projects }}</p>
-    </article>
-    <article class="card">
-      <p class="metric-label">Datasets</p>
-      <p class="metric-value">{{ metrics.datasets }}</p>
-    </article>
-    <article class="card">
-      <p class="metric-label">Visualizaciones</p>
-      <p class="metric-value">{{ metrics.visualizations }}</p>
-    </article>
-  </section>
-
-  <section>
-    <h3 class="section-title">Proyectos recientes</h3>
-    {% if recent_projects %}
-      <div class="cards-grid">
-        {% for project in recent_projects %}
-          <article class="card">
-            <h4>{{ project.title }}</h4>
-            <p>{{ project.question }}</p>
-            <p><strong>Estado:</strong> {{ project.status_label }}</p>
-            <p><strong>Dataset principal:</strong> {{ project.main_dataset_name }}</p>
-            <a href="{% url 'dashboard:project_detail' project.slug %}">Abrir</a>
-          </article>
-        {% endfor %}
+  <section class="dashboard-overview-grid">
+    <div class="overview-left">
+      <div class="stat-strip">
+        <div class="stat-item">
+          <p class="stat-value">{{ metrics.total_projects }}</p>
+          <p class="stat-label">Total proyectos</p>
+        </div>
+        <div class="stat-item">
+          <p class="stat-value">{{ metrics.published_projects }}</p>
+          <p class="stat-label">Publicados</p>
+        </div>
+        <div class="stat-item">
+          <p class="stat-value">{{ metrics.draft_projects }}</p>
+          <p class="stat-label">Borradores</p>
+        </div>
+        <div class="stat-item">
+          <p class="stat-value">{{ metrics.datasets }}</p>
+          <p class="stat-label">Datasets</p>
+        </div>
+        <div class="stat-item">
+          <p class="stat-value">{{ metrics.visualizations }}</p>
+          <p class="stat-label">Visualizaciones</p>
+        </div>
       </div>
-    {% else %}
-      <p>No hay proyectos recientes aún.</p>
-    {% endif %}
-  </section>
-
-  <section>
-    <h3 class="section-title">Accesos rápidos</h3>
-    <div class="quick-links">
-      <a href="{% url 'dashboard:project_list' %}">Ver proyectos</a>
-      <a href="{% url 'portfolio_projects:project_list' %}">Ver portafolio publicado</a>
-      <a href="{% url 'dashboard:project_list' %}">Revisar datasets</a>
     </div>
+
+    <aside class="recent-card">
+      <h3 class="recent-title">Proyectos recientes</h3>
+      {% if recent_projects %}
+        <ul class="recent-list">
+          {% for project in recent_projects|slice:":5" %}
+            <li class="recent-item">
+              <p class="recent-project-title">{{ project.title }}</p>
+              <span class="status-badge">{{ project.status_label }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p>No hay proyectos recientes aún.</p>
+      {% endif %}
+      <a class="recent-link" href="{% url 'dashboard:project_list' %}">Ver todos →</a>
+    </aside>
   </section>
 {% endblock %}
