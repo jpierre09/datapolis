@@ -4,48 +4,75 @@
 {% block page_title %}Detalle de proyecto{% endblock %}
 
 {% block dashboard_content %}
-  <header class="page-header">
-    <h2>{{ project.title }}</h2>
-    <p>{{ project.question }}</p>
-  </header>
-
-  <div class="detail-grid">
-    <section class="card">
-      <h3 class="section-title">Descripción</h3>
-      <p>{{ project.description|default:"Sin descripción." }}</p>
-
-      <h3 class="section-title">Visualizaciones</h3>
-      {% if project.active_visualizations %}
-        <div class="cards-grid">
-          {% for visualization in project.active_visualizations %}
-            <article class="card">
-              <h4>{{ visualization.title }}</h4>
-              <p><strong>Tipo:</strong> {{ visualization.get_visualization_type_display }}</p>
-              <p>{{ visualization.description|default:"Sin descripción." }}</p>
-            </article>
-          {% endfor %}
+  <section class="dashboard-project-detail-layout dashboard-profile-layout">
+    <aside class="profile-panel dashboard-profile-sidebar">
+      <article class="dashboard-card dashboard-profile-card dashboard-project-detail-sidebar-card">
+        <div class="dashboard-project-detail-meta">
+          <span class="dashboard-badge">{{ status_label }}</span>
+          <h3 class="dashboard-card-title">Resumen</h3>
+          <ul class="dashboard-project-detail-meta-list">
+            <li><strong>Categoría:</strong> {{ project.category.name }}</li>
+            <li><strong>Tipo:</strong> {{ project.project_type.name }}</li>
+            <li><strong>Dataset principal:</strong> {% if main_dataset %}{{ main_dataset.name }}{% else %}Sin dataset{% endif %}</li>
+            <li><strong># datasets:</strong> {{ datasets_count }}</li>
+            <li><strong># visualizaciones:</strong> {{ visualizations_count }}</li>
+          </ul>
         </div>
-      {% else %}
-        <p>Este proyecto aún no tiene visualizaciones activas.</p>
-      {% endif %}
 
-      <h3 class="section-title">Hallazgos</h3>
-      <p>{{ project.findings|default:"Sin hallazgos registrados." }}</p>
-
-      <h3 class="section-title">Conclusión</h3>
-      <p>{{ project.conclusion|default:"Sin conclusión registrada." }}</p>
-    </section>
-
-    <aside class="card">
-      <ul class="meta-list">
-        <li><strong>Estado:</strong> {{ status_label }}</li>
-        <li><strong>Categoría:</strong> {{ project.category.name }}</li>
-        <li><strong>Tipo:</strong> {{ project.project_type.name }}</li>
-        <li><strong>Dataset principal:</strong> {% if main_dataset %}{{ main_dataset.name }}{% else %}Sin dataset{% endif %}</li>
-        <li><strong># datasets:</strong> {{ datasets_count }}</li>
-        <li><strong># visualizaciones:</strong> {{ visualizations_count }}</li>
-        <li><strong>Página pública:</strong> <a href="{{ public_project_url }}">Abrir</a></li>
-      </ul>
+        <div class="dashboard-form-actions dashboard-project-detail-sidebar-actions">
+          <a href="{% url 'dashboard:project_edit' project.slug %}" class="dashboard-button-primary">Editar proyecto</a>
+          <a href="{% url 'dashboard:project_list' %}" class="dashboard-button-secondary">Volver a proyectos</a>
+        </div>
+      </article>
     </aside>
-  </div>
+
+    <div class="main-panel dashboard-profile-main dashboard-project-detail-stack">
+      <header class="page-header section-head-inline dashboard-profile-page-header dashboard-project-detail-header">
+        <div class="dashboard-project-detail-title">
+          <div>
+            <h2>{{ project.title }}</h2>
+            <p>{{ project.question }}</p>
+          </div>
+        </div>
+      </header>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Descripción</h3>
+        <p class="dashboard-project-detail-copy">{{ project.description|default:"Sin descripción." }}</p>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <div class="section-head-inline">
+          <h3 class="dashboard-section-title">Visualizaciones</h3>
+        </div>
+
+        {% if project.active_visualizations %}
+          <div class="dashboard-visualization-grid">
+            {% for visualization in project.active_visualizations %}
+              <article class="dashboard-card dashboard-card-dashed dashboard-visualization-card">
+                <div class="dashboard-card-header">
+                  <h4 class="dashboard-card-title">{{ visualization.title }}</h4>
+                  <span class="dashboard-badge">{{ visualization.get_visualization_type_display }}</span>
+                </div>
+                <p class="dashboard-visualization-type"><strong>Tipo:</strong> {{ visualization.get_visualization_type_display }}</p>
+                <p class="dashboard-project-detail-copy">{{ visualization.description|default:"Sin descripción." }}</p>
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="dashboard-empty-state">Este proyecto aún no tiene visualizaciones activas.</p>
+        {% endif %}
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Hallazgos</h3>
+        <p class="dashboard-project-detail-copy">{{ project.findings|default:"Sin hallazgos registrados." }}</p>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Conclusión</h3>
+        <p class="dashboard-project-detail-copy">{{ project.conclusion|default:"Sin conclusión registrada." }}</p>
+      </section>
+    </div>
+  </section>
 {% endblock %}

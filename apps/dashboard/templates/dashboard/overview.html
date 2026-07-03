@@ -7,9 +7,9 @@
   <style>
     .dashboard-profile-grid {
       display: grid;
-      grid-template-columns: minmax(300px, 340px) minmax(0, 1fr);
+      grid-template-columns: 320px minmax(0, 1fr);
       gap: 18px;
-      align-items: stretch;
+      align-items: start;
     }
 
     .profile-panel,
@@ -495,53 +495,19 @@
     }
   </style>
 
-  <header class="page-header">
-    <h2>Mi portafolio</h2>
-    <p>Resumen de tus proyectos, datasets y visualizaciones.</p>
-  </header>
-
-  <section class="dashboard-profile-grid">
-    <aside class="profile-panel">
-      <article class="profile-card">
-        <div class="avatar-shell" aria-hidden="true">DP</div>
-        <h3 class="profile-name">Analista Datapolis</h3>
-        <p class="profile-username">@datapolis-portfolio</p>
-        <p class="profile-bio">Portafolio analítico para proyectos de datos, datasets curados y visualizaciones públicas con foco en claridad editorial.</p>
-
-        <div class="profile-status">
-          <span>●</span>
-          <span>{% if metrics.published_projects > 0 %}Portafolio público activo{% else %}Portafolio público en construcción{% endif %}</span>
-        </div>
-
-        <ul class="profile-meta">
-          <li><strong>Ubicación:</strong> No configurada</li>
-          <li><strong>Identidad:</strong> Perfil analítico de lectura pública</li>
-        </ul>
-
-        <div class="profile-summary" aria-label="Resumen del perfil">
-          <div class="summary-row">
-            <span class="summary-label">Total proyectos</span>
-            <span class="summary-value">{{ metrics.total_projects }}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-label">Datasets</span>
-            <span class="summary-value">{{ metrics.datasets }}</span>
-          </div>
-          <div class="summary-row">
-            <span class="summary-label">Visualizaciones</span>
-            <span class="summary-value">{{ metrics.visualizations }}</span>
-          </div>
-        </div>
-
-        <div class="profile-actions">
-          <a href="#" class="btn-primary" aria-disabled="true" title="Disponible en una fase posterior">Editar perfil público</a>
-          <a href="{% url 'portfolio_projects:project_list' %}" class="btn-secondary">Ver portafolio público</a>
-        </div>
-
-      </article>
+  <section class="dashboard-profile-layout dashboard-profile-grid">
+    <aside class="profile-panel dashboard-profile-sidebar">
+      {% include "dashboard/partials/analyst_profile_card.html" %}
     </aside>
 
-    <div class="main-panel">
+    <div class="main-panel dashboard-profile-main">
+      <header class="page-header section-head-inline dashboard-profile-page-header">
+        <div>
+          <h2>Mi portafolio</h2>
+          <p>Resumen de tus proyectos, datasets y visualizaciones.</p>
+        </div>
+      </header>
+
       <section class="featured-card">
         <div class="featured-top">
           <div>
@@ -553,7 +519,7 @@
         {% with highlighted_projects=recent_projects|slice:":2" %}
           <div class="featured-grid">
             {% for project in highlighted_projects %}
-              <article class="project-card">
+              <a class="project-card dashboard-repo-link" href="{% url 'dashboard:project_detail' project.slug %}">
                 <div class="project-card-header">
                   <h4 class="project-title">{{ project.title }}</h4>
                   <span class="status-badge">{{ project.status_label }}</span>
@@ -564,8 +530,7 @@
                   <li><strong>Dataset:</strong> {{ project.main_dataset_name }}</li>
                   <li><strong>Visualizaciones:</strong> {{ project.project_visualizations.count }}</li>
                 </ul>
-                <a class="project-open-link" href="{% url 'dashboard:project_detail' project.slug %}">Abrir</a>
-              </article>
+              </a>
             {% endfor %}
 
             {% if highlighted_projects|length == 1 %}

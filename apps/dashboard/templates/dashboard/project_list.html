@@ -4,45 +4,60 @@
 {% block page_title %}Proyectos{% endblock %}
 
 {% block dashboard_content %}
-  <header class="page-header section-head-inline">
-    <div>
-      <h2>Proyectos</h2>
-      <p>Organiza tus análisis por tipo y estado.</p>
-    </div>
-    <div class="project-list-actions">
-      <div class="chips" aria-label="Filtro de estado">
-        {% for value, label in status_options %}
-          <a class="dashboard-pill {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
-        {% endfor %}
-      </div>
-      <a href="{% url 'dashboard:project_create' %}" class="dashboard-button-primary">Nuevo proyecto</a>
-    </div>
-  </header>
+  <section class="dashboard-profile-layout dashboard-profile-grid">
+    <aside class="profile-panel dashboard-profile-sidebar">
+      {% include "dashboard/partials/analyst_profile_card.html" %}
+    </aside>
 
-
-
-  {% for group in grouped_projects %}
-    <section>
-      <h3 class="dashboard-section-title">{{ group.type_name }}</h3>
-      {% if group.cards %}
-        <div class="dashboard-grid dashboard-grid-projects">
-          {% for card in group.cards %}
-            <article class="dashboard-card dashboard-card-dashed">
-              <div class="dashboard-card-header">
-                <h4 class="dashboard-card-title">{{ card.title }}</h4>
-                <span class="dashboard-badge">{{ card.status_label }}</span>
-              </div>
-              <p class="dashboard-card-text">{{ card.question }}</p>
-              <ul class="dashboard-card-meta">
-                <li><strong>Dataset principal:</strong> {{ card.main_dataset_name }}</li>
-              </ul>
-              <a class="dashboard-card-link" href="{% url 'dashboard:project_detail' card.slug %}">Abrir</a>
-            </article>
-          {% endfor %}
+    <div class="main-panel dashboard-profile-main">
+      <header class="page-header section-head-inline dashboard-profile-page-header dashboard-projects-header">
+        <div>
+          <h2>Proyectos</h2>
+          <p>Organiza tus análisis por tipo y estado.</p>
         </div>
-      {% else %}
-        <p class="dashboard-empty-state">Aún no hay proyectos de este tipo.</p>
-      {% endif %}
-    </section>
-  {% endfor %}
+      </header>
+
+      <section class="dashboard-card dashboard-repo-toolbar">
+        <div class="dashboard-repo-toolbar-main">
+          <div class="dashboard-repo-search">
+            <input class="dashboard-repo-search-input" type="search" placeholder="Buscar proyecto..." aria-label="Buscar proyecto">
+          </div>
+
+          <div class="dashboard-repo-status-filters" aria-label="Filtro de estado">
+            {% for value, label in status_options %}
+              <a class="dashboard-pill {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="project-list-actions">
+          <a href="{% url 'dashboard:project_create' %}" class="dashboard-button-primary">Nuevo proyecto</a>
+        </div>
+      </section>
+
+      <section class="dashboard-grid dashboard-repo-list">
+        {% for project in projects %}
+          <a class="dashboard-card dashboard-card-dashed dashboard-repo-item dashboard-repo-link" href="{% url 'dashboard:project_detail' project.slug %}">
+            <div class="dashboard-repo-title-row">
+              <div>
+                <h3 class="dashboard-card-title">{{ project.title }}</h3>
+                <p class="dashboard-repo-question">{{ project.question }}</p>
+              </div>
+              <span class="dashboard-badge">{{ project.status_label }}</span>
+            </div>
+
+            <ul class="dashboard-repo-meta">
+              <li><span class="dashboard-repo-type">{{ project.project_type.name }}</span></li>
+              <li><strong>Dataset principal:</strong> {{ project.main_dataset_name }}</li>
+              <li><strong>Visualizaciones:</strong> {{ project.visualizations_count }}</li>
+              <li><strong>Actualizado:</strong> {{ project.updated_at|date:"d/m/Y" }}</li>
+            </ul>
+          </a>
+        {% empty %}
+          <p class="dashboard-empty-state dashboard-repo-empty">Aún no hay proyectos de este tipo.</p>
+        {% endfor %}
+
+      </section>
+    </div>
+  </section>
 {% endblock %}

@@ -5,7 +5,14 @@ Django monolítico modular, templates server-rendered (sin React/Vue/Angular), P
 
 ## Estado actual
 Fase activa: [actualizar aquí cada fase, ej. "Fase 15 - dashboard interno lectura"].
-Apps existentes: [listar según crezca el proyecto].
+Apps existentes: `platform`, `portfolio_projects`, `data_sources`, `data_visualizations`, `dashboard`.
+Arquitectura general: Django monolítico modular, templates server-rendered, sin React/Vue/Angular.
+Dashboard actual: sidebar global + perfil analítico reutilizable a la izquierda + contenido específico a la derecha.
+Layout vigente: `Mi portafolio` = overview, `Proyectos` = repositorios/listado, `Detalle` = vista de proyecto.
+Partial compartido: `apps/dashboard/templates/dashboard/partials/analyst_profile_card.html`.
+CSS compartido: `static/dashboard/css/dashboard.css`.
+Patrón visual actual: cards blancas, bordes dashed suaves, badges arriba a la derecha, botones limpios, paleta `#3E7C7B`, `#7FB7BE`, `#B7C4C7`, `#E6E8E6`, `#D8A7B1`, `#FFFFFF`.
+Preferencias del dashboard: reutilizar clases y partials, evitar estilos inline o duplicados, y mantener consistencia entre `overview` y `project_list`.
 Modelos core: PortfolioProject, ProjectCategory, ProjectType, DataSource, ProjectVisualization.
 
 ## Reglas de economía (aplican siempre)

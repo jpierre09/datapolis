@@ -1,0 +1,36 @@
+<article class="profile-card dashboard-card dashboard-profile-card">
+  <div class="avatar-shell dashboard-profile-avatar" aria-hidden="true">DP</div>
+  <h3 class="profile-name dashboard-profile-name">Analista Datapolis</h3>
+  <p class="profile-username dashboard-profile-username">@datapolis-portfolio</p>
+  <p class="profile-bio dashboard-profile-bio">Portafolio analítico para proyectos de datos, datasets curados y visualizaciones públicas con foco en claridad editorial.</p>
+
+  <div class="profile-status dashboard-profile-status">
+    <span>●</span>
+    <span>{% if metrics.published_projects > 0 %}Portafolio público activo{% else %}Portafolio público en construcción{% endif %}</span>
+  </div>
+
+  <ul class="profile-meta dashboard-profile-meta">
+    <li><strong>Ubicación:</strong> No configurada</li>
+    <li><strong>Identidad:</strong> Perfil analítico de lectura pública</li>
+  </ul>
+
+  <div class="profile-summary dashboard-profile-summary" aria-label="Resumen del perfil">
+    <div class="summary-row dashboard-profile-summary-row">
+      <span class="summary-label dashboard-profile-summary-label">Total proyectos</span>
+      <span class="summary-value dashboard-profile-summary-value">{{ metrics.total_projects }}</span>
+    </div>
+    <div class="summary-row dashboard-profile-summary-row">
+      <span class="summary-label dashboard-profile-summary-label">Datasets</span>
+      <span class="summary-value dashboard-profile-summary-value">{{ metrics.datasets }}</span>
+    </div>
+    <div class="summary-row dashboard-profile-summary-row">
+      <span class="summary-label dashboard-profile-summary-label">Visualizaciones</span>
+      <span class="summary-value dashboard-profile-summary-value">{{ metrics.visualizations }}</span>
+    </div>
+  </div>
+
+  <div class="profile-actions dashboard-profile-actions">
+    <!-- <a href="#" class="btn-primary dashboard-button-primary" aria-disabled="true" title="Disponible en una fase posterior">Editar perfil público</a> -->
+    <a href="{% url 'portfolio_projects:project_list' %}" class="btn-secondary dashboard-button-secondary">Ver portafolio público</a>
+  </div>
+</article>

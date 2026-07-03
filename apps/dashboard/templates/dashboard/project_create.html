@@ -1,155 +1,128 @@
 {% extends "dashboard/base_dashboard.html" %}
 
-{% block title %}Dashboard | Nuevo proyecto{% endblock %}
-{% block page_title %}Nuevo proyecto{% endblock %}
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
 
 {% block dashboard_content %}
-  <style>
-    .project-create-wrap {
-      max-width: 760px;
-    }
-
-    .project-create-card {
-      background: #FFFFFF;
-      border: 1px solid rgba(183, 196, 199, 0.9);
-      border-radius: 12px;
-      box-shadow: 0 4px 14px rgba(33, 50, 53, 0.08);
-      padding: 20px;
-    }
-
-    .project-form {
-      display: grid;
-      gap: 14px;
-    }
-
-    .field-row {
-      display: grid;
-      gap: 6px;
-    }
-
-    .field-row label {
-      font-weight: 600;
-      color: #2b4043;
-    }
-
-    .field-row input,
-    .field-row textarea,
-    .field-row select {
-      width: 100%;
-      border: 1px solid #B7C4C7;
-      border-radius: 8px;
-      padding: 10px 12px;
-      background: #FFFFFF;
-      color: #1f2a2d;
-      font: inherit;
-    }
-
-    .field-row textarea {
-      resize: vertical;
-    }
-
-    .field-error {
-      margin: 0;
-      font-size: 0.85rem;
-      color: #b24a5a;
-    }
-
-    .form-actions {
-      display: flex;
-      gap: 10px;
-      margin-top: 8px;
-    }
-
-    .btn-primary,
-    .btn-secondary {
-      text-decoration: none;
-      border-radius: 8px;
-      padding: 10px 14px;
-      border: 1px solid transparent;
-      cursor: pointer;
-      font: inherit;
-    }
-
-    .btn-primary {
-      background: #3E7C7B;
-      color: #FFFFFF;
-    }
-
-    .btn-primary:hover {
-      filter: brightness(0.95);
-    }
-
-    .btn-secondary {
-      background: #FFFFFF;
-      color: #33484b;
-      border-color: #B7C4C7;
-    }
-
-    .btn-secondary:hover {
-      background: #E6E8E6;
-    }
-
-    .form-non-field-errors {
-      margin: 0;
-      padding: 10px 12px;
-      border-radius: 8px;
-      background: #fbe9ec;
-      color: #a13d4e;
-      border: 1px solid #e8bcc5;
-    }
-  </style>
-
   <header class="page-header">
-    <h2>Nuevo proyecto</h2>
-    <p>Registra un proyecto para continuar el análisis desde el dashboard interno.</p>
+    <h2>{{ page_heading }}</h2>
+    <p>{{ page_description }}</p>
   </header>
 
-  <div class="project-create-wrap">
-    <section class="project-create-card">
-      <form method="post" class="project-form">
-        {% csrf_token %}
+  <div class="dashboard-form-shell">
+    <form method="post" class="dashboard-form">
+      {% csrf_token %}
 
-        {% if form.non_field_errors %}
-          <div class="form-non-field-errors">{{ form.non_field_errors }}</div>
-        {% endif %}
+      {% if form.non_field_errors %}
+        <div class="dashboard-form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
 
-        <div class="field-row">
-          {{ form.title.label_tag }}
-          {{ form.title }}
-          {% for error in form.title.errors %}
-            <p class="field-error">{{ error }}</p>
-          {% endfor %}
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">1</div>
+          <div>
+            <h3 class="dashboard-section-title">Información general</h3>
+            <p class="dashboard-form-section-copy">Define la base del proyecto y el contexto inicial del análisis.</p>
+          </div>
         </div>
 
-        <div class="field-row">
-          {{ form.analysis_question.label_tag }}
-          {{ form.analysis_question }}
-          {% for error in form.analysis_question.errors %}
-            <p class="field-error">{{ error }}</p>
-          {% endfor %}
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            <p class="dashboard-help-text">{{ form.title.help_text }}</p>
+            {% for error in form.title.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.question.id_for_label }}">{{ form.question.label }}</label>
+            {{ form.question }}
+            <p class="dashboard-help-text">{{ form.question.help_text }}</p>
+            {% for error in form.question.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            <p class="dashboard-help-text">{{ form.description.help_text }}</p>
+            {% for error in form.description.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">2</div>
+          <div>
+            <h3 class="dashboard-section-title">Clasificación</h3>
+            <p class="dashboard-form-section-copy">Organiza el proyecto antes de publicar datasets o visualizaciones.</p>
+          </div>
         </div>
 
-        <div class="field-row">
-          {{ form.project_type.label_tag }}
-          {{ form.project_type }}
-          {% for error in form.project_type.errors %}
-            <p class="field-error">{{ error }}</p>
-          {% endfor %}
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.project_type.id_for_label }}">{{ form.project_type.label }}</label>
+            {{ form.project_type }}
+            {% for error in form.project_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.category.id_for_label }}">{{ form.category.label }}</label>
+            {{ form.category }}
+            {% for error in form.category.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
+            {{ form.status }}
+            <p class="dashboard-help-text">{{ form.status.help_text }}</p>
+            {% for error in form.status.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">3</div>
+          <div>
+            <h3 class="dashboard-section-title">Narrativa inicial</h3>
+            <p class="dashboard-form-section-copy">Captura hallazgos y una conclusión preliminar para dar dirección al proyecto.</p>
+          </div>
         </div>
 
-        <div class="field-row">
-          {{ form.category.label_tag }}
-          {{ form.category }}
-          {% for error in form.category.errors %}
-            <p class="field-error">{{ error }}</p>
-          {% endfor %}
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.findings.id_for_label }}">{{ form.findings.label }}</label>
+            {{ form.findings }}
+            <p class="dashboard-help-text">{{ form.findings.help_text }}</p>
+            {% for error in form.findings.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-form-grid--full">
+            <label class="dashboard-label" for="{{ form.conclusion.id_for_label }}">{{ form.conclusion.label }}</label>
+            {{ form.conclusion }}
+            <p class="dashboard-help-text">{{ form.conclusion.help_text }}</p>
+            {% for error in form.conclusion.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-form-publication">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">4</div>
+          <div>
+            <h3 class="dashboard-section-title">Publicación</h3>
+            <p class="dashboard-form-section-copy">{{ status_note }}</p>
+          </div>
         </div>
 
-        <div class="form-actions">
-          <button type="submit" class="btn-primary">Crear proyecto</button>
-          <a href="{% url 'dashboard:project_list' %}" class="btn-secondary">Cancelar</a>
+        <span class="dashboard-form-status-badge">{{ status_note }}</span>
+
+        <div class="dashboard-form-actions">
+          <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+          <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
         </div>
-      </form>
-    </section>
+      </section>
+    </form>
   </div>
 {% endblock %}
