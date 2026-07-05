@@ -24,11 +24,38 @@ DATA_SOURCE_STATUS_LABELS = {
 }
 
 
+def is_recommendable_column(column, row_count):
+    column_name = str(column.get("name", "")).strip()
+    if not column_name:
+        return False
+
+    if column_name.startswith("Unnamed"):
+        return False
+
+    if column_name in {"Delete", "ID2"}:
+        return False
+
+    null_count = column.get("null_count")
+    if row_count is not None and null_count is not None and null_count == row_count:
+        return False
+
+    column_type = str(column.get("type", "unknown")).strip().lower()
+    sample_values = column.get("sample_values") if isinstance(column.get("sample_values"), list) else []
+    unique_count = column.get("unique_count")
+    has_useful_values = bool(sample_values) or unique_count not in (None, 0)
+
+    if column_type == "unknown" and not has_useful_values:
+        return False
+
+    return True
+
+
 def _build_project_data_source_context(data_source):
     processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
     source_type_label = data_source.get_source_type_display()
     columns_schema = data_source.columns_schema if isinstance(data_source.columns_schema, dict) else {}
     raw_columns = columns_schema.get("columns") if isinstance(columns_schema.get("columns"), list) else []
+    row_count = data_source.row_count if isinstance(data_source.row_count, int) else None
 
     columns = []
     summary = {
@@ -66,17 +93,24 @@ def _build_project_data_source_context(data_source):
         summary["total_columns"] += 1
         if column["type"] == "numeric":
             summary["numeric_columns"] += 1
-            y_axis_columns.append(column)
         if column["type"] == "categorical":
             summary["categorical_columns"] += 1
-            x_axis_columns.append(column)
         if column["type"] == "datetime":
             summary["datetime_columns"] += 1
+        if nullable or (isinstance(null_count, int) and null_count > 0):
+            summary["nullable_columns"] += 1
+
+        if not is_recommendable_column(column, row_count):
+            continue
+
+        if column["type"] == "numeric":
+            y_axis_columns.append(column)
+        if column["type"] == "categorical":
+            x_axis_columns.append(column)
+        if column["type"] == "datetime":
             x_axis_columns.append(column)
         if column["type"] == "text":
             x_axis_columns.append(column)
-        if nullable or (isinstance(null_count, int) and null_count > 0):
-            summary["nullable_columns"] += 1
 
     return {
         "processing_status_label": processing_status_label,
