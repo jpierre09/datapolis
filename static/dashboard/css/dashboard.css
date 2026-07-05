@@ -857,6 +857,12 @@ body {
   gap: 10px;
 }
 
+.dashboard-dataset-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
 .dashboard-dataset-original {
   margin: 4px 0 0;
   color: #5a6b6f;
@@ -875,6 +881,100 @@ body {
   border: 1px solid rgba(216, 167, 177, 0.55);
   color: #7f3d53;
   line-height: 1.45;
+}
+
+.dashboard-dataset-detail-layout {
+  align-items: start;
+}
+
+.dashboard-dataset-detail-sidebar-card {
+  gap: 14px;
+}
+
+.dashboard-dataset-summary-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-dataset-summary-card {
+  display: grid;
+  gap: 6px;
+  padding: 14px;
+}
+
+.dashboard-dataset-summary-value {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #3E7C7B;
+}
+
+.dashboard-dataset-summary-label {
+  color: #5a6b6f;
+  font-size: 0.9rem;
+}
+
+.dashboard-dataset-recommendations-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-dataset-recommendation-card {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-dataset-column-list {
+  margin: 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 8px;
+  color: #46595d;
+}
+
+.dashboard-dataset-column-tag {
+  display: inline-flex;
+  margin-left: 6px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  background: rgba(127, 183, 190, 0.15);
+  color: #2a4548;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.dashboard-dataset-columns-table-wrap {
+  overflow-x: auto;
+}
+
+.dashboard-dataset-columns-table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 760px;
+}
+
+.dashboard-dataset-columns-table th,
+.dashboard-dataset-columns-table td {
+  padding: 11px 10px;
+  border-bottom: 1px solid #E6E8E6;
+  text-align: left;
+  vertical-align: top;
+}
+
+.dashboard-dataset-columns-table th {
+  color: #2b4043;
+  font-size: 0.88rem;
+  font-weight: 700;
+  background: rgba(246, 248, 247, 0.94);
+}
+
+.dashboard-dataset-column-details {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  color: #46595d;
+  font-size: 0.88rem;
 }
 
 @media (max-width: 920px) {

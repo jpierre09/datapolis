@@ -1,0 +1,147 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}Dashboard | {{ data_source.name }}{% endblock %}
+{% block page_title %}Detalle de dataset{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-project-detail-layout dashboard-profile-layout dashboard-dataset-detail-layout">
+    <aside class="profile-panel dashboard-profile-sidebar">
+      <article class="dashboard-card dashboard-profile-card dashboard-project-detail-sidebar-card dashboard-dataset-detail-sidebar-card">
+        <div class="dashboard-project-detail-meta">
+          <span class="dashboard-badge">{{ processing_status_label }}</span>
+          <h3 class="dashboard-card-title">{{ data_source.name }}</h3>
+          <ul class="dashboard-project-detail-meta-list">
+            <li><strong>Archivo original:</strong> {{ data_source.original_filename|default:"Sin archivo original" }}</li>
+            <li><strong>Tipo:</strong> {{ source_type_label }}</li>
+            <li><strong>Filas:</strong> {% if data_source.row_count is not None %}{{ data_source.row_count }}{% else %}Sin procesar{% endif %}</li>
+            <li><strong>Proyecto:</strong> {{ project.title }}</li>
+          </ul>
+        </div>
+
+        <div class="dashboard-form-actions dashboard-project-detail-sidebar-actions">
+          <a href="{% url 'dashboard:project_detail' project.slug %}" class="dashboard-button-secondary">Volver al proyecto</a>
+        </div>
+      </article>
+    </aside>
+
+    <div class="main-panel dashboard-profile-main dashboard-project-detail-stack">
+      <header class="page-header section-head-inline dashboard-profile-page-header dashboard-project-detail-header">
+        <div class="dashboard-project-detail-title">
+          <div>
+            <h2>{{ data_source.name }}</h2>
+            <p>{{ project.title }}</p>
+          </div>
+        </div>
+      </header>
+
+      {% if data_source.processing_status == "failed" and data_source.processing_error %}
+        <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+          <h3 class="dashboard-section-title">Error de procesamiento</h3>
+          <p class="dashboard-dataset-error">{{ data_source.processing_error }}</p>
+        </section>
+      {% endif %}
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Resumen de metadata</h3>
+        <div class="dashboard-dataset-summary-grid">
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-summary-card">
+            <span class="dashboard-dataset-summary-value">{{ summary.total_columns }}</span>
+            <span class="dashboard-dataset-summary-label">Columnas detectadas</span>
+          </article>
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-summary-card">
+            <span class="dashboard-dataset-summary-value">{{ summary.numeric_columns }}</span>
+            <span class="dashboard-dataset-summary-label">Numéricas</span>
+          </article>
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-summary-card">
+            <span class="dashboard-dataset-summary-value">{{ summary.categorical_columns }}</span>
+            <span class="dashboard-dataset-summary-label">Categóricas</span>
+          </article>
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-summary-card">
+            <span class="dashboard-dataset-summary-value">{{ summary.datetime_columns }}</span>
+            <span class="dashboard-dataset-summary-label">Datetime</span>
+          </article>
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-summary-card">
+            <span class="dashboard-dataset-summary-value">{{ summary.nullable_columns }}</span>
+            <span class="dashboard-dataset-summary-label">Con nulos</span>
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Columnas recomendadas para visualizaciones</h3>
+
+        <div class="dashboard-dataset-recommendations-grid">
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-recommendation-card">
+            <h4 class="dashboard-card-title">Eje X</h4>
+            {% if x_axis_columns %}
+              <ul class="dashboard-dataset-column-list">
+                {% for column in x_axis_columns %}
+                  <li>{{ column.name }} <span class="dashboard-dataset-column-tag">{{ column.type }}</span></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="dashboard-empty-state">No hay columnas recomendadas para eje X.</p>
+            {% endif %}
+          </article>
+
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-recommendation-card">
+            <h4 class="dashboard-card-title">Eje Y</h4>
+            {% if y_axis_columns %}
+              <ul class="dashboard-dataset-column-list">
+                {% for column in y_axis_columns %}
+                  <li>{{ column.name }} <span class="dashboard-dataset-column-tag">{{ column.type }}</span></li>
+                {% endfor %}
+              </ul>
+            {% else %}
+              <p class="dashboard-empty-state">No hay columnas numéricas recomendadas para eje Y.</p>
+            {% endif %}
+          </article>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <h3 class="dashboard-section-title">Columnas detectadas</h3>
+
+        {% if columns %}
+          <div class="dashboard-dataset-columns-table-wrap">
+            <table class="dashboard-dataset-columns-table">
+              <thead>
+                <tr>
+                  <th>Columna</th>
+                  <th>Tipo inferido</th>
+                  <th>Tipo original</th>
+                  <th>Nullable</th>
+                  <th>Nulos</th>
+                  <th>Detalles</th>
+                </tr>
+              </thead>
+              <tbody>
+                {% for column in columns %}
+                  <tr>
+                    <td>
+                      <strong>{{ column.name }}</strong>
+                    </td>
+                    <td>{{ column.type }}</td>
+                    <td>{{ column.original_dtype }}</td>
+                    <td>{% if column.nullable %}Sí{% else %}No{% endif %}</td>
+                    <td>{{ column.null_count }}</td>
+                    <td>
+                      <div class="dashboard-dataset-column-details">
+                        {% if column.unique_count is not None %}<span>Únicos: {{ column.unique_count }}</span>{% endif %}
+                        {% if column.min is not None %}<span>Mín: {{ column.min }}</span>{% endif %}
+                        {% if column.max is not None %}<span>Máx: {{ column.max }}</span>{% endif %}
+                        {% if column.sample_values %}<span>Muestras: {{ column.sample_values|join:", " }}</span>{% endif %}
+                      </div>
+                    </td>
+                  </tr>
+                {% endfor %}
+              </tbody>
+            </table>
+          </div>
+        {% else %}
+          <p class="dashboard-empty-state">Este dataset aún no tiene metadata de columnas disponible.</p>
+        {% endif %}
+      </section>
+    </div>
+  </section>
+{% endblock %}

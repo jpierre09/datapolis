@@ -24,6 +24,71 @@ DATA_SOURCE_STATUS_LABELS = {
 }
 
 
+def _build_project_data_source_context(data_source):
+    processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
+    source_type_label = data_source.get_source_type_display()
+    columns_schema = data_source.columns_schema if isinstance(data_source.columns_schema, dict) else {}
+    raw_columns = columns_schema.get("columns") if isinstance(columns_schema.get("columns"), list) else []
+
+    columns = []
+    summary = {
+        "total_columns": 0,
+        "numeric_columns": 0,
+        "categorical_columns": 0,
+        "datetime_columns": 0,
+        "nullable_columns": 0,
+    }
+    x_axis_columns = []
+    y_axis_columns = []
+
+    for raw_column in raw_columns:
+        if not isinstance(raw_column, dict):
+            continue
+
+        column_type = str(raw_column.get("type", "unknown")).strip().lower()
+        column_name = raw_column.get("name") or "Sin nombre"
+        nullable = bool(raw_column.get("nullable"))
+        null_count = raw_column.get("null_count")
+
+        column = {
+            "name": column_name,
+            "type": column_type,
+            "original_dtype": raw_column.get("original_dtype", "Desconocido"),
+            "nullable": nullable,
+            "null_count": null_count if null_count is not None else 0,
+            "unique_count": raw_column.get("unique_count"),
+            "min": raw_column.get("min"),
+            "max": raw_column.get("max"),
+            "sample_values": raw_column.get("sample_values") if isinstance(raw_column.get("sample_values"), list) else [],
+        }
+        columns.append(column)
+
+        summary["total_columns"] += 1
+        if column["type"] == "numeric":
+            summary["numeric_columns"] += 1
+            y_axis_columns.append(column)
+        if column["type"] == "categorical":
+            summary["categorical_columns"] += 1
+            x_axis_columns.append(column)
+        if column["type"] == "datetime":
+            summary["datetime_columns"] += 1
+            x_axis_columns.append(column)
+        if column["type"] == "text":
+            x_axis_columns.append(column)
+        if nullable or (isinstance(null_count, int) and null_count > 0):
+            summary["nullable_columns"] += 1
+
+    return {
+        "processing_status_label": processing_status_label,
+        "source_type_label": source_type_label,
+        "columns_schema": columns_schema,
+        "columns": columns,
+        "summary": summary,
+        "x_axis_columns": x_axis_columns,
+        "y_axis_columns": y_axis_columns,
+    }
+
+
 def _project_form_page_context(*, form, page_title, page_heading, page_description, submit_label, cancel_url, status_note):
     return {
         "dashboard_section": "projects",
@@ -274,6 +339,29 @@ def project_add_dataset(request, slug):
             "page_description": "Sube un CSV o Excel para asociarlo al proyecto y procesar su metadata.",
             "submit_label": "Guardar dataset",
             "cancel_url": reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
+        },
+    )
+
+
+def dataset_detail(request, project_slug, dataset_id):
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    data_source = get_object_or_404(
+        DataSource.objects.select_related("project"),
+        pk=dataset_id,
+        project=project,
+    )
+
+    data_source_context = _build_project_data_source_context(data_source)
+
+    return render(
+        request,
+        "dashboard/dataset_detail.html",
+        {
+            "dashboard_section": "projects",
+            "project": project,
+            "data_source": data_source,
+            "status_label": STATUS_LABELS.get(project.status, project.status),
+            **data_source_context,
         },
     )
 

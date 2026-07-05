@@ -60,6 +60,10 @@
                   <li><strong>Estado:</strong> {{ data_source.processing_status_label }}</li>
                 </ul>
 
+                <div class="dashboard-dataset-actions">
+                  <a href="{% url 'dashboard:dataset_detail' project.slug data_source.id %}" class="dashboard-button-secondary">Ver dataset</a>
+                </div>
+
                 {% if data_source.processing_error %}
                   <p class="dashboard-dataset-error">{{ data_source.processing_error }}</p>
                 {% endif %}
