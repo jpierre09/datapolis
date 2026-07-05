@@ -37,6 +37,41 @@
       </header>
 
       <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
+        <div class="section-head-inline">
+          <h3 class="dashboard-section-title">Datasets del proyecto</h3>
+          <a href="{% url 'dashboard:project_add_dataset' project.slug %}" class="dashboard-button-primary">Agregar dataset</a>
+        </div>
+
+        {% if project.project_data_sources %}
+          <div class="dashboard-dataset-grid">
+            {% for data_source in project.project_data_sources %}
+              <article class="dashboard-card dashboard-card-dashed dashboard-dataset-card">
+                <div class="dashboard-card-header">
+                  <div>
+                    <h4 class="dashboard-card-title">{{ data_source.name }}</h4>
+                    <p class="dashboard-dataset-original">{{ data_source.original_filename|default:"Sin nombre original" }}</p>
+                  </div>
+                  <span class="dashboard-badge">{{ data_source.processing_status_label }}</span>
+                </div>
+
+                <ul class="dashboard-card-meta dashboard-dataset-meta">
+                  <li><strong>Tipo:</strong> {{ data_source.source_type_label }}</li>
+                  <li><strong>Filas:</strong> {% if data_source.row_count is not None %}{{ data_source.row_count }}{% else %}Sin procesar{% endif %}</li>
+                  <li><strong>Estado:</strong> {{ data_source.processing_status_label }}</li>
+                </ul>
+
+                {% if data_source.processing_error %}
+                  <p class="dashboard-dataset-error">{{ data_source.processing_error }}</p>
+                {% endif %}
+              </article>
+            {% endfor %}
+          </div>
+        {% else %}
+          <p class="dashboard-empty-state">Todavía no hay datasets asociados a este proyecto.</p>
+        {% endif %}
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
         <h3 class="dashboard-section-title">Descripción</h3>
         <p class="dashboard-project-detail-copy">{{ project.description|default:"Sin descripción." }}</p>
       </section>

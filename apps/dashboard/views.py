@@ -5,10 +5,11 @@ from django.utils.text import slugify
 from django.urls import reverse
 
 from apps.data_sources.models import DataSource
+from apps.data_sources.services import extract_metadata
 from apps.data_visualizations.models import ProjectVisualization
 from apps.portfolio_projects.models import PortfolioProject
 
-from .forms import ProjectCreateForm
+from .forms import DataSourceUploadForm, ProjectCreateForm
 
 STATUS_LABELS = {
     PortfolioProject.Status.DRAFT: "Borrador",
@@ -16,6 +17,11 @@ STATUS_LABELS = {
     PortfolioProject.Status.ARCHIVED: "Archivado",
 }
 STATUS_FILTERS = {"all", PortfolioProject.Status.DRAFT, PortfolioProject.Status.PUBLISHED, PortfolioProject.Status.ARCHIVED}
+DATA_SOURCE_STATUS_LABELS = {
+    DataSource.ProcessingStatus.PENDING: "Pendiente",
+    DataSource.ProcessingStatus.PROCESSED: "Procesado",
+    DataSource.ProcessingStatus.FAILED: "Fallido",
+}
 
 
 def _project_form_page_context(*, form, page_title, page_heading, page_description, submit_label, cancel_url, status_note):
@@ -122,10 +128,10 @@ def project_list(request):
 
 
 def project_detail(request, slug):
-    active_data_sources_prefetch = Prefetch(
+    data_sources_prefetch = Prefetch(
         "data_sources",
-        queryset=DataSource.objects.filter(is_active=True).order_by("-uploaded_at"),
-        to_attr="active_data_sources",
+        queryset=DataSource.objects.order_by("-uploaded_at"),
+        to_attr="project_data_sources",
     )
     active_visualizations_prefetch = Prefetch(
         "project_visualizations",
@@ -135,11 +141,15 @@ def project_detail(request, slug):
 
     project = get_object_or_404(
         PortfolioProject.objects.select_related("category", "project_type")
-        .prefetch_related(active_data_sources_prefetch, active_visualizations_prefetch),
+        .prefetch_related(data_sources_prefetch, active_visualizations_prefetch),
         slug=slug,
     )
 
-    main_dataset = project.active_data_sources[0] if project.active_data_sources else None
+    main_dataset = project.project_data_sources[0] if project.project_data_sources else None
+
+    for data_source in project.project_data_sources:
+        data_source.processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
+        data_source.source_type_label = data_source.get_source_type_display()
 
     return render(
         request,
@@ -149,7 +159,7 @@ def project_detail(request, slug):
             "project": project,
             "status_label": STATUS_LABELS.get(project.status, project.status),
             "main_dataset": main_dataset,
-            "datasets_count": len(project.active_data_sources),
+            "datasets_count": len(project.project_data_sources),
             "visualizations_count": len(project.active_visualizations),
         },
     )
@@ -209,6 +219,62 @@ def project_edit(request, slug):
             cancel_url=reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
             status_note=f"Estado actual: {STATUS_LABELS.get(project.status, project.status)}",
         ),
+    )
+
+
+def project_add_dataset(request, slug):
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=slug)
+
+    if request.method == "POST":
+        form = DataSourceUploadForm(request.POST, request.FILES)
+        if form.is_valid():
+            data_source = form.save(commit=False)
+            data_source.project = project
+            uploaded_file = form.cleaned_data["file"]
+            data_source.original_filename = uploaded_file.name.rsplit("/", 1)[-1]
+            data_source.processing_status = DataSource.ProcessingStatus.PENDING
+            data_source.processing_error = ""
+            data_source.save()
+
+            try:
+                columns_schema = extract_metadata(data_source)
+                data_source.columns_schema = columns_schema
+                data_source.row_count = columns_schema.get("row_count")
+                data_source.processing_status = DataSource.ProcessingStatus.PROCESSED
+                data_source.processing_error = ""
+            except Exception as exc:
+                data_source.columns_schema = {}
+                data_source.row_count = None
+                data_source.processing_status = DataSource.ProcessingStatus.FAILED
+                data_source.processing_error = f"La extracción de metadata falló: {exc}"
+
+            data_source.save(
+                update_fields=[
+                    "original_filename",
+                    "columns_schema",
+                    "row_count",
+                    "processing_status",
+                    "processing_error",
+                    "updated_at",
+                ]
+            )
+            return redirect("dashboard:project_detail", slug=project.slug)
+    else:
+        form = DataSourceUploadForm()
+
+    return render(
+        request,
+        "dashboard/dataset_create.html",
+        {
+            "dashboard_section": "projects",
+            "project": project,
+            "form": form,
+            "page_title": f"Dashboard | Agregar dataset a {project.title}",
+            "page_heading": "Agregar dataset",
+            "page_description": "Sube un CSV o Excel para asociarlo al proyecto y procesar su metadata.",
+            "submit_label": "Guardar dataset",
+            "cancel_url": reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
+        },
     )
 
 

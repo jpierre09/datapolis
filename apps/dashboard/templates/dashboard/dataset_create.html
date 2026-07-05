@@ -1,0 +1,69 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+
+{% block dashboard_content %}
+  <header class="page-header">
+    <h2>{{ page_heading }}</h2>
+    <p>{{ page_description }}</p>
+  </header>
+
+  <div class="dashboard-form-shell">
+    <form method="post" enctype="multipart/form-data" class="dashboard-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="dashboard-form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">1</div>
+          <div>
+            <h3 class="dashboard-section-title">Información del dataset</h3>
+            <p class="dashboard-form-section-copy">El dataset se asociará automáticamente a {{ project.title }}.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.name.id_for_label }}">{{ form.name.label }}</label>
+            {{ form.name }}
+            <p class="dashboard-help-text">{{ form.name.help_text }}</p>
+            {% for error in form.name.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.source_type.id_for_label }}">{{ form.source_type.label }}</label>
+            {{ form.source_type }}
+            <p class="dashboard-help-text">{{ form.source_type.help_text }}</p>
+            {% for error in form.source_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
+            {{ form.file }}
+            <p class="dashboard-help-text">{{ form.file.help_text }}</p>
+            {% for error in form.file.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-form-publication">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">2</div>
+          <div>
+            <h3 class="dashboard-section-title">Procesamiento</h3>
+            <p class="dashboard-form-section-copy">Se extraerá la metadata del archivo y se guardará el resultado en el dataset.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-actions">
+          <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+          <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
+        </div>
+      </section>
+    </form>
+  </div>
+{% endblock %}

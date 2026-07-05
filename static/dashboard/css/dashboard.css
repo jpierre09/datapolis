@@ -846,6 +846,37 @@ body {
   gap: 10px;
 }
 
+.dashboard-dataset-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.dashboard-dataset-card {
+  display: grid;
+  gap: 10px;
+}
+
+.dashboard-dataset-original {
+  margin: 4px 0 0;
+  color: #5a6b6f;
+  font-size: 0.88rem;
+}
+
+.dashboard-dataset-meta {
+  gap: 8px;
+}
+
+.dashboard-dataset-error {
+  margin: 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(216, 167, 177, 0.14);
+  border: 1px solid rgba(216, 167, 177, 0.55);
+  color: #7f3d53;
+  line-height: 1.45;
+}
+
 @media (max-width: 920px) {
   .dashboard-project-detail-layout {
     grid-template-columns: 1fr;

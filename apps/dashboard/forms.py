@@ -1,5 +1,6 @@
 from django import forms
 
+from apps.data_sources.models import DataSource
 from apps.portfolio_projects.models import PortfolioProject
 
 
@@ -63,6 +64,38 @@ class ProjectCreateForm(forms.ModelForm):
                 widget_class = "dashboard-input dashboard-select"
             elif isinstance(field.widget, forms.Textarea):
                 widget_class = "dashboard-input dashboard-textarea"
+
+            existing_classes = field.widget.attrs.get("class", "")
+            field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+
+class DataSourceUploadForm(forms.ModelForm):
+    class Meta:
+        model = DataSource
+        fields = ["name", "source_type", "file"]
+        labels = {
+            "name": "Nombre del dataset",
+            "source_type": "Tipo de archivo",
+            "file": "Archivo",
+        }
+        help_texts = {
+            "name": "Usa un nombre claro para identificar el dataset dentro del proyecto.",
+            "source_type": "Elige CSV o Excel según el archivo que vas a subir.",
+            "file": "Sube un archivo .csv, .xlsx o .xls.",
+        }
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "Ej. Ventas regionales 2026"}),
+            "source_type": forms.Select(),
+            "file": forms.ClearableFileInput(attrs={"accept": ".csv,.xlsx,.xls"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            widget_class = "dashboard-input"
+            if isinstance(field.widget, forms.Select):
+                widget_class = "dashboard-input dashboard-select"
 
             existing_classes = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
