@@ -324,21 +324,28 @@ def visualization_create(request, project_slug, dataset_id):
     )
 
     column_context = analyze_data_source_columns(data_source)
+    preview_payload = None
+    preview_error = ""
 
     if request.method == "POST":
         form = VisualizationCreateForm(request.POST, data_source=data_source)
+        action = request.POST.get("action", "create")
         if form.is_valid():
             visualization = form.save(commit=False)
             visualization.portfolio_project = project
             visualization.source_dataset = data_source
 
             try:
-                build_visualization_payload(visualization)
+                preview_payload = build_visualization_payload(visualization)
             except VisualizationEngineError as exc:
-                form.add_error(None, str(exc))
+                preview_error = str(exc)
+                form.add_error(None, preview_error)
             else:
-                visualization.save()
-                return redirect("dashboard:project_detail", slug=project.slug)
+                if action == "preview":
+                    pass
+                else:
+                    visualization.save()
+                    return redirect("dashboard:project_detail", slug=project.slug)
     else:
         form = VisualizationCreateForm(
             data_source=data_source,
@@ -364,6 +371,8 @@ def visualization_create(request, project_slug, dataset_id):
             "status_label": STATUS_LABELS.get(project.status, project.status),
             "processing_status_label": DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status),
             "source_type_label": data_source.get_source_type_display(),
+            "preview_payload": preview_payload,
+            "preview_error": preview_error,
             **column_context,
         },
     )

@@ -4,7 +4,7 @@
 {% block page_title %}{{ page_heading }}{% endblock %}
 
 {% block dashboard_content %}
-  <header class="page-header">
+  <header class="page-header dashboard-visualization-page-header">
     <h2>Crear visualización</h2>
     <p>Elige cómo quieres mostrar los datos. Datapolis ya seleccionó una configuración inicial para ayudarte.</p>
   </header>
@@ -22,130 +22,363 @@
   </section>
 
   <div class="dashboard-form-shell">
-    <form method="post" class="dashboard-form dashboard-visualization-form">
+    <form method="post" class="dashboard-form dashboard-visualization-form" id="visualization-form">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
         <div class="dashboard-form-errors">{{ form.non_field_errors }}</div>
       {% endif %}
+      {% if preview_error %}
+        <div class="dashboard-form-errors">{{ preview_error }}</div>
+      {% endif %}
 
-      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
-        <div class="dashboard-form-section-header">
-          <div>
-            <h3 class="dashboard-section-title">Información general</h3>
-            <p class="dashboard-form-section-copy">Define el título y la intención de la gráfica.</p>
-          </div>
-        </div>
-
-        <div class="dashboard-form-grid">
-          <div class="dashboard-field dashboard-field--full">
-            <label class="dashboard-label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
-            {{ form.title }}
-            <p class="dashboard-help-text">{{ form.title.help_text }}</p>
-            {% for error in form.title.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+      <section class="dashboard-card dashboard-card-dashed dashboard-visualization-form-card">
+        <div class="dashboard-visualization-block">
+          <div class="dashboard-form-section-header dashboard-visualization-block-header">
+            <div>
+              <h3 class="dashboard-section-title">Información general</h3>
+              <p class="dashboard-form-section-copy">Define el título y la intención de la gráfica.</p>
+            </div>
           </div>
 
-          <div class="dashboard-field dashboard-field--full">
-            <label class="dashboard-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
-            {{ form.description }}
-            <p class="dashboard-help-text">{{ form.description.help_text }}</p>
-            {% for error in form.description.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-        </div>
-      </section>
+          <div class="dashboard-form-grid">
+            <div class="dashboard-field dashboard-field--full">
+              <label class="dashboard-label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+              {{ form.title }}
+              <p class="dashboard-help-text">{{ form.title.help_text }}</p>
+              {% for error in form.title.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
 
-      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-visualization-section-tight">
-        <div class="dashboard-form-section-header">
-          <div>
-            <h3 class="dashboard-section-title">Tipo de visualización</h3>
-            <p class="dashboard-form-section-copy">Datapolis propone un tipo inicial, pero puedes cambiarlo si lo necesitas.</p>
-          </div>
-        </div>
-
-        <div class="dashboard-form-grid">
-          <div class="dashboard-field">
-            <label class="dashboard-label" for="{{ form.visualization_type.id_for_label }}">{{ form.visualization_type.label }}</label>
-            {{ form.visualization_type }}
-            <p class="dashboard-help-text">{{ form.visualization_type.help_text }}</p>
-            {% for error in form.visualization_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-
-          <div class="dashboard-field">
-            <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
-            {{ form.aggregation_method }}
-            <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
-            {% for error in form.aggregation_method.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-        </div>
-      </section>
-
-      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-visualization-section-tight">
-        <div class="dashboard-form-section-header">
-          <div>
-            <h3 class="dashboard-section-title">Configuración de datos</h3>
-            <p class="dashboard-form-section-copy">Puedes cambiar estas columnas si quieres ajustar la gráfica.</p>
-          </div>
-        </div>
-
-        <div class="dashboard-form-grid dashboard-visualization-data-grid">
-          <div class="dashboard-field">
-            <label class="dashboard-label" for="{{ form.x_axis_column.id_for_label }}">{{ form.x_axis_column.label }}</label>
-            {{ form.x_axis_column }}
-            <p class="dashboard-help-text">{{ form.x_axis_column.help_text }}</p>
-            {% for error in form.x_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-
-          <div class="dashboard-field">
-            <label class="dashboard-label" for="{{ form.y_axis_column.id_for_label }}">{{ form.y_axis_column.label }}</label>
-            {{ form.y_axis_column }}
-            <p class="dashboard-help-text">{{ form.y_axis_column.help_text }}</p>
-            {% for error in form.y_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-
-          <div class="dashboard-field dashboard-field--full dashboard-visualization-aggregation-field">
-            <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
-            {{ form.aggregation_method }}
-            <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
-            {% for error in form.aggregation_method.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
-
-          <div class="dashboard-field dashboard-field--full dashboard-visualization-options">
-            <h4 class="dashboard-visualization-options-title">Opciones</h4>
-
-            <div class="dashboard-form-grid dashboard-form-grid--full">
-              <div class="dashboard-field">
-                <label class="dashboard-label" for="{{ form.display_order.id_for_label }}">{{ form.display_order.label }}</label>
-                {{ form.display_order }}
-                <p class="dashboard-help-text">{{ form.display_order.help_text }}</p>
-                {% for error in form.display_order.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-              </div>
-
-              <div class="dashboard-field dashboard-checkbox-row">
-                <label class="dashboard-checkbox-label" for="{{ form.is_active.id_for_label }}">
-                  {{ form.is_active }}
-                  <span>{{ form.is_active.label }}</span>
-                </label>
-                <p class="dashboard-help-text">{{ form.is_active.help_text }}</p>
-                {% for error in form.is_active.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-              </div>
+            <div class="dashboard-field dashboard-field--full">
+              <label class="dashboard-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+              {{ form.description }}
+              <p class="dashboard-help-text">{{ form.description.help_text }}</p>
+              {% for error in form.description.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
             </div>
           </div>
         </div>
-      </section>
 
-      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-form-publication dashboard-visualization-actions-card">
-        <div class="dashboard-form-section-header">
-          <div>
-            <h3 class="dashboard-section-title">Publicación</h3>
-            <p class="dashboard-form-section-copy">La visualización se validará con el engine antes de guardarse.</p>
+        <div class="dashboard-visualization-block dashboard-visualization-block-tight">
+          <div class="dashboard-form-section-header dashboard-visualization-block-header">
+            <div>
+              <h3 class="dashboard-section-title">Tipo de visualización</h3>
+              <p class="dashboard-form-section-copy">Datapolis propone un tipo inicial, pero puedes cambiarlo si lo necesitas.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-form-grid dashboard-visualization-type-grid">
+            <div class="dashboard-field">
+              <label class="dashboard-label" for="{{ form.visualization_type.id_for_label }}">{{ form.visualization_type.label }}</label>
+              {{ form.visualization_type }}
+              <p class="dashboard-help-text">{{ form.visualization_type.help_text }}</p>
+              {% for error in form.visualization_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="dashboard-field">
+              <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
+              {{ form.aggregation_method }}
+              <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
+              {% for error in form.aggregation_method.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
           </div>
         </div>
 
-        <div class="dashboard-form-actions">
-          <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+        <div class="dashboard-visualization-block dashboard-visualization-block-tight">
+          <div class="dashboard-form-section-header dashboard-visualization-block-header">
+            <div>
+              <h3 class="dashboard-section-title">Configuración de datos</h3>
+              <p class="dashboard-form-section-copy">Puedes cambiar estas columnas si quieres ajustar la gráfica.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-form-grid dashboard-visualization-data-grid">
+            <div class="dashboard-field">
+              <label class="dashboard-label" for="{{ form.x_axis_column.id_for_label }}">{{ form.x_axis_column.label }}</label>
+              {{ form.x_axis_column }}
+              <p class="dashboard-help-text">{{ form.x_axis_column.help_text }}</p>
+              {% for error in form.x_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="dashboard-field">
+              <label class="dashboard-label" for="{{ form.y_axis_column.id_for_label }}">{{ form.y_axis_column.label }}</label>
+              {{ form.y_axis_column }}
+              <p class="dashboard-help-text">{{ form.y_axis_column.help_text }}</p>
+              {% for error in form.y_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="dashboard-field dashboard-field--full dashboard-visualization-aggregation-hint">
+              <p class="dashboard-help-text">Datapolis ya seleccionó una configuración inicial para ayudarte.</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-visualization-block dashboard-visualization-block-tight dashboard-visualization-options">
+          <div class="dashboard-form-section-header dashboard-visualization-block-header">
+            <div>
+              <h3 class="dashboard-section-title">Opciones</h3>
+              <p class="dashboard-form-section-copy">Estas opciones son opcionales y no deben frenarte a la hora de crear la gráfica.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-form-grid dashboard-form-grid--full">
+            <div class="dashboard-field">
+              <label class="dashboard-label" for="{{ form.display_order.id_for_label }}">{{ form.display_order.label }}</label>
+              {{ form.display_order }}
+              <p class="dashboard-help-text">{{ form.display_order.help_text }}</p>
+              {% for error in form.display_order.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+
+            <div class="dashboard-field dashboard-checkbox-row">
+              <label class="dashboard-checkbox-label" for="{{ form.is_active.id_for_label }}">
+                {{ form.is_active }}
+                <span>{{ form.is_active.label }}</span>
+              </label>
+              <p class="dashboard-help-text">{{ form.is_active.help_text }}</p>
+              {% for error in form.is_active.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-form-actions dashboard-visualization-actions-row">
+          <button type="submit" name="action" value="create" class="dashboard-button-primary">Crear visualización</button>
+          <button type="submit" name="action" value="preview" class="dashboard-button-secondary">Previsualizar</button>
           <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
         </div>
       </section>
     </form>
   </div>
+
+  {% if preview_payload %}
+    <div class="dashboard-preview-modal-overlay dashboard-preview-modal-overlay--open" data-preview-modal-overlay>
+      <section class="dashboard-preview-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-preview-modal-title">
+        <header class="dashboard-preview-modal-header">
+          <div>
+            <h3 id="dashboard-preview-modal-title" class="dashboard-section-title">Previsualización</h3>
+            <p class="dashboard-form-section-copy">Así se verá la visualización con la configuración actual.</p>
+          </div>
+          <button type="button" class="dashboard-button-secondary dashboard-preview-modal-close" data-preview-modal-close>Cerrar</button>
+        </header>
+
+        <div class="dashboard-preview-modal-body">
+          {% if preview_payload.visualization.type == "bar_chart" or preview_payload.visualization.type == "line_chart" or preview_payload.visualization.type == "scatter_plot" or preview_payload.visualization.type == "pie_chart" %}
+            <div id="dashboard-visualization-preview-chart" class="dashboard-visualization-preview-chart"></div>
+          {% elif preview_payload.visualization.type == "data_table" %}
+            <div class="dashboard-dataset-columns-table-wrap dashboard-visualization-preview-table-wrap">
+              <table class="dashboard-dataset-columns-table dashboard-visualization-preview-table">
+                <thead>
+                  <tr>
+                    <th id="preview-table-x-header">X</th>
+                    <th id="preview-table-y-header">Y</th>
+                  </tr>
+                </thead>
+                <tbody id="preview-table-body"></tbody>
+              </table>
+            </div>
+          {% elif preview_payload.visualization.type == "kpi_card" %}
+            <article class="dashboard-card dashboard-card-dashed dashboard-visualization-preview-kpi">
+              <p class="dashboard-visualization-preview-kpi-title">{{ preview_payload.visualization.title }}</p>
+              <p id="preview-kpi-value" class="dashboard-visualization-preview-kpi-value"></p>
+              <p id="preview-kpi-label" class="dashboard-visualization-preview-kpi-label"></p>
+            </article>
+          {% else %}
+            <p class="dashboard-empty-state">Este tipo de visualización aún no tiene previsualización disponible.</p>
+          {% endif %}
+        </div>
+
+        <div class="dashboard-form-actions dashboard-preview-modal-actions">
+          <button type="button" class="dashboard-button-secondary" data-preview-modal-close>Cerrar</button>
+          <button type="submit" form="visualization-form" name="action" value="create" class="dashboard-button-primary">Crear visualización</button>
+        </div>
+      </section>
+      {{ preview_payload|json_script:"preview-payload" }}
+    </div>
+
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+    <script>
+      function getPlotSeries(rows) {
+        return {
+          x: rows.map(function (row) { return row.x; }),
+          y: rows.map(function (row) { return row.y; })
+        };
+      }
+
+      function getPlotlyTrace(visualizationType, series) {
+        if (visualizationType === 'bar_chart') {
+          return { type: 'bar', x: series.x, y: series.y };
+        }
+
+        if (visualizationType === 'line_chart') {
+          return { type: 'scatter', mode: 'lines+markers', x: series.x, y: series.y };
+        }
+
+        if (visualizationType === 'scatter_plot') {
+          return { type: 'scatter', mode: 'markers', x: series.x, y: series.y };
+        }
+
+        if (visualizationType === 'pie_chart') {
+          return { type: 'pie', labels: series.x, values: series.y };
+        }
+
+        return null;
+      }
+
+      function getVisualizationConfig(payload) {
+        const config = payload && payload.visualization && payload.visualization.config;
+        return config && typeof config === 'object' ? config : {};
+      }
+
+      function getChartLayout(payload) {
+        const config = getVisualizationConfig(payload);
+        const chartHeight = typeof config.chart_height === 'number' ? config.chart_height : 420;
+        const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+        const defaultShowLegend = visualizationType === 'pie_chart';
+        const showLegend = typeof config.show_legend === 'boolean' ? config.show_legend : defaultShowLegend;
+        const xAxisTitle = typeof config.x_axis_title === 'string' && config.x_axis_title.trim()
+          ? config.x_axis_title
+          : payload.encoding.x;
+        const yAxisTitle = typeof config.y_axis_title === 'string' && config.y_axis_title.trim()
+          ? config.y_axis_title
+          : payload.encoding.y;
+
+        return {
+          title: payload.visualization.title,
+          height: chartHeight,
+          showlegend: showLegend,
+          margin: { t: 50, r: 20, b: 60, l: 50 },
+          xaxis: { title: { text: xAxisTitle } },
+          yaxis: { title: { text: yAxisTitle } }
+        };
+      }
+
+      function getMaxRows(payload) {
+        const config = getVisualizationConfig(payload);
+        const maxRows = Number(config.max_rows);
+        if (Number.isFinite(maxRows) && maxRows > 0) {
+          return Math.floor(maxRows);
+        }
+        return 20;
+      }
+
+      function getKpiMetricLabel(payload) {
+        const config = getVisualizationConfig(payload);
+        if (typeof config.metric_label === 'string' && config.metric_label.trim()) {
+          return config.metric_label;
+        }
+        return payload.encoding && payload.encoding.y ? payload.encoding.y : '';
+      }
+
+      function getKpiValueText(payload) {
+        const config = getVisualizationConfig(payload);
+        const firstRow = Array.isArray(payload.data) && payload.data.length ? payload.data[0] : null;
+        const value = firstRow ? firstRow.y : '';
+        const valuePrefix = typeof config.value_prefix === 'string' ? config.value_prefix : '';
+        const valueSuffix = typeof config.value_suffix === 'string' ? config.value_suffix : '';
+        return '' + valuePrefix + value + valueSuffix;
+      }
+
+      function renderDataTable(payload) {
+        const bodyNode = document.getElementById('preview-table-body');
+        const xHeaderNode = document.getElementById('preview-table-x-header');
+        const yHeaderNode = document.getElementById('preview-table-y-header');
+        if (!bodyNode || !xHeaderNode || !yHeaderNode) {
+          return;
+        }
+
+        xHeaderNode.textContent = payload.encoding && payload.encoding.x ? payload.encoding.x : 'X';
+        yHeaderNode.textContent = payload.encoding && payload.encoding.y ? payload.encoding.y : 'Y';
+
+        const maxRows = getMaxRows(payload);
+        const rows = (payload.data || []).slice(0, maxRows);
+        rows.forEach(function (row) {
+          const tr = document.createElement('tr');
+
+          const xCell = document.createElement('td');
+          xCell.textContent = row.x;
+          tr.appendChild(xCell);
+
+          const yCell = document.createElement('td');
+          yCell.textContent = row.y;
+          tr.appendChild(yCell);
+
+          bodyNode.appendChild(tr);
+        });
+      }
+
+      function renderKpiCard(payload) {
+        const valueNode = document.getElementById('preview-kpi-value');
+        const labelNode = document.getElementById('preview-kpi-label');
+        if (!valueNode || !labelNode) {
+          return;
+        }
+
+        valueNode.textContent = getKpiValueText(payload);
+        labelNode.textContent = getKpiMetricLabel(payload);
+      }
+
+      (function () {
+        const payloadNode = document.getElementById('preview-payload');
+        const overlayNode = document.querySelector('[data-preview-modal-overlay]');
+        const closeButtons = document.querySelectorAll('[data-preview-modal-close]');
+
+        function closeModal() {
+          if (!overlayNode) {
+            return;
+          }
+          overlayNode.classList.remove('dashboard-preview-modal-overlay--open');
+          document.body.classList.remove('dashboard-preview-modal-open');
+        }
+
+        closeButtons.forEach(function (button) {
+          button.addEventListener('click', closeModal);
+        });
+
+        if (!overlayNode || !payloadNode) {
+          return;
+        }
+
+        overlayNode.classList.add('dashboard-preview-modal-overlay--open');
+        document.body.classList.add('dashboard-preview-modal-open');
+
+        overlayNode.addEventListener('click', function (event) {
+          if (event.target === overlayNode) {
+            closeModal();
+          }
+        });
+
+        const payload = JSON.parse(payloadNode.textContent || '{}');
+        const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+        const rows = payload.data || [];
+        if (!rows.length && visualizationType !== 'kpi_card') {
+          return;
+        }
+
+        if (visualizationType === 'data_table') {
+          renderDataTable(payload);
+          return;
+        }
+
+        if (visualizationType === 'kpi_card') {
+          renderKpiCard(payload);
+          return;
+        }
+
+        const series = getPlotSeries(rows);
+        const trace = getPlotlyTrace(visualizationType, series);
+        if (!trace) {
+          return;
+        }
+
+        const layout = getChartLayout(payload);
+
+        Plotly.newPlot(
+          'dashboard-visualization-preview-chart',
+          [trace],
+          layout,
+          { responsive: true }
+        );
+      })();
+    </script>
+  {% else %}
+    <p class="dashboard-empty-state dashboard-visualization-preview-placeholder">Configura los campos y usa Previsualizar para ver el resultado.</p>
+  {% endif %}
 {% endblock %}
