@@ -11,5 +11,10 @@ urlpatterns = [
     path("projects/<slug:slug>/edit/", views.project_edit, name="project_edit"),
     path("projects/<slug:slug>/datasets/new/", views.project_add_dataset, name="project_add_dataset"),
     path("projects/<slug:project_slug>/datasets/<int:dataset_id>/", views.dataset_detail, name="dataset_detail"),
+    path(
+        "projects/<slug:project_slug>/datasets/<int:dataset_id>/visualizations/new/",
+        views.visualization_create,
+        name="visualization_create",
+    ),
     path("projects/<slug:slug>/", views.project_detail, name="project_detail"),
 ]

@@ -883,6 +883,92 @@ body {
   line-height: 1.45;
 }
 
+.dashboard-visualization-context-card {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-visualization-quick-context {
+  display: grid;
+  gap: 8px;
+  margin: 0 0 14px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.82);
+  border: 1px solid rgba(183, 196, 199, 0.72);
+}
+
+.dashboard-visualization-quick-context-line {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  color: #314548;
+}
+
+.dashboard-visualization-quick-context-label {
+  color: #5a6b6f;
+  font-size: 0.88rem;
+}
+
+.dashboard-visualization-quick-badge {
+  margin-left: 4px;
+}
+
+.dashboard-visualization-form {
+  gap: 12px;
+}
+
+.dashboard-visualization-section-tight {
+  gap: 10px;
+}
+
+.dashboard-visualization-data-grid {
+  align-items: start;
+}
+
+.dashboard-visualization-options {
+  padding-top: 4px;
+}
+
+.dashboard-visualization-options-title {
+  margin: 0 0 4px;
+  color: #3E7C7B;
+  font-size: 0.92rem;
+  font-weight: 700;
+}
+
+.dashboard-visualization-aggregation-field {
+  margin-top: 2px;
+}
+
+.dashboard-visualization-actions-card {
+  gap: 12px;
+}
+
+.dashboard-visualization-context-meta {
+  gap: 8px;
+}
+
+.dashboard-checkbox-row {
+  display: grid;
+  gap: 8px;
+}
+
+.dashboard-checkbox-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  color: #2b4043;
+  font-weight: 700;
+}
+
+.dashboard-checkbox-label input {
+  width: 16px;
+  height: 16px;
+  accent-color: #3E7C7B;
+}
+
 .dashboard-dataset-detail-layout {
   align-items: start;
 }

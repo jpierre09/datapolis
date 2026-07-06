@@ -62,6 +62,7 @@
 
                 <div class="dashboard-dataset-actions">
                   <a href="{% url 'dashboard:dataset_detail' project.slug data_source.id %}" class="dashboard-button-secondary">Ver dataset</a>
+                  <a href="{% url 'dashboard:visualization_create' project.slug data_source.id %}" class="dashboard-button-primary">Crear visualización</a>
                 </div>
 
                 {% if data_source.processing_error %}

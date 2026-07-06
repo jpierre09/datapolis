@@ -1,0 +1,151 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+{% block page_title %}{{ page_heading }}{% endblock %}
+
+{% block dashboard_content %}
+  <header class="page-header">
+    <h2>Crear visualización</h2>
+    <p>Elige cómo quieres mostrar los datos. Datapolis ya seleccionó una configuración inicial para ayudarte.</p>
+  </header>
+
+  <section class="dashboard-visualization-quick-context">
+    <div class="dashboard-visualization-quick-context-line">
+      <span class="dashboard-visualization-quick-context-label">Nueva visualización para:</span>
+      <strong>{{ project.title }}</strong>
+    </div>
+    <div class="dashboard-visualization-quick-context-line">
+      <span class="dashboard-visualization-quick-context-label">Dataset:</span>
+      <strong>{{ data_source.name }}</strong>
+      <span class="dashboard-badge dashboard-visualization-quick-badge">{{ processing_status_label }}</span>
+    </div>
+  </section>
+
+  <div class="dashboard-form-shell">
+    <form method="post" class="dashboard-form dashboard-visualization-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="dashboard-form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div>
+            <h3 class="dashboard-section-title">Información general</h3>
+            <p class="dashboard-form-section-copy">Define el título y la intención de la gráfica.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+            {{ form.title }}
+            <p class="dashboard-help-text">{{ form.title.help_text }}</p>
+            {% for error in form.title.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.description.id_for_label }}">{{ form.description.label }}</label>
+            {{ form.description }}
+            <p class="dashboard-help-text">{{ form.description.help_text }}</p>
+            {% for error in form.description.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-visualization-section-tight">
+        <div class="dashboard-form-section-header">
+          <div>
+            <h3 class="dashboard-section-title">Tipo de visualización</h3>
+            <p class="dashboard-form-section-copy">Datapolis propone un tipo inicial, pero puedes cambiarlo si lo necesitas.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.visualization_type.id_for_label }}">{{ form.visualization_type.label }}</label>
+            {{ form.visualization_type }}
+            <p class="dashboard-help-text">{{ form.visualization_type.help_text }}</p>
+            {% for error in form.visualization_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
+            {{ form.aggregation_method }}
+            <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
+            {% for error in form.aggregation_method.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-visualization-section-tight">
+        <div class="dashboard-form-section-header">
+          <div>
+            <h3 class="dashboard-section-title">Configuración de datos</h3>
+            <p class="dashboard-form-section-copy">Puedes cambiar estas columnas si quieres ajustar la gráfica.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-grid dashboard-visualization-data-grid">
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.x_axis_column.id_for_label }}">{{ form.x_axis_column.label }}</label>
+            {{ form.x_axis_column }}
+            <p class="dashboard-help-text">{{ form.x_axis_column.help_text }}</p>
+            {% for error in form.x_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.y_axis_column.id_for_label }}">{{ form.y_axis_column.label }}</label>
+            {{ form.y_axis_column }}
+            <p class="dashboard-help-text">{{ form.y_axis_column.help_text }}</p>
+            {% for error in form.y_axis_column.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full dashboard-visualization-aggregation-field">
+            <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
+            {{ form.aggregation_method }}
+            <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
+            {% for error in form.aggregation_method.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full dashboard-visualization-options">
+            <h4 class="dashboard-visualization-options-title">Opciones</h4>
+
+            <div class="dashboard-form-grid dashboard-form-grid--full">
+              <div class="dashboard-field">
+                <label class="dashboard-label" for="{{ form.display_order.id_for_label }}">{{ form.display_order.label }}</label>
+                {{ form.display_order }}
+                <p class="dashboard-help-text">{{ form.display_order.help_text }}</p>
+                {% for error in form.display_order.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+              </div>
+
+              <div class="dashboard-field dashboard-checkbox-row">
+                <label class="dashboard-checkbox-label" for="{{ form.is_active.id_for_label }}">
+                  {{ form.is_active }}
+                  <span>{{ form.is_active.label }}</span>
+                </label>
+                <p class="dashboard-help-text">{{ form.is_active.help_text }}</p>
+                {% for error in form.is_active.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="dashboard-card dashboard-card-dashed dashboard-form-section dashboard-form-publication dashboard-visualization-actions-card">
+        <div class="dashboard-form-section-header">
+          <div>
+            <h3 class="dashboard-section-title">Publicación</h3>
+            <p class="dashboard-form-section-copy">La visualización se validará con el engine antes de guardarse.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-actions">
+          <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+          <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
+        </div>
+      </section>
+    </form>
+  </div>
+{% endblock %}

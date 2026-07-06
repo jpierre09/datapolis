@@ -19,6 +19,7 @@
         </div>
 
         <div class="dashboard-form-actions dashboard-project-detail-sidebar-actions">
+          <a href="{% url 'dashboard:visualization_create' project.slug data_source.id %}" class="dashboard-button-primary">Crear visualización</a>
           <a href="{% url 'dashboard:project_detail' project.slug %}" class="dashboard-button-secondary">Volver al proyecto</a>
         </div>
       </article>

@@ -6,10 +6,12 @@ from django.urls import reverse
 
 from apps.data_sources.models import DataSource
 from apps.data_sources.services import extract_metadata
+from apps.data_visualizations.engine import VisualizationEngineError, build_visualization_payload
 from apps.data_visualizations.models import ProjectVisualization
 from apps.portfolio_projects.models import PortfolioProject
 
-from .forms import DataSourceUploadForm, ProjectCreateForm
+from .dataset_columns import analyze_data_source_columns
+from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm
 
 STATUS_LABELS = {
     PortfolioProject.Status.DRAFT: "Borrador",
@@ -24,102 +26,15 @@ DATA_SOURCE_STATUS_LABELS = {
 }
 
 
-def is_recommendable_column(column, row_count):
-    column_name = str(column.get("name", "")).strip()
-    if not column_name:
-        return False
-
-    if column_name.startswith("Unnamed"):
-        return False
-
-    if column_name in {"Delete", "ID2"}:
-        return False
-
-    null_count = column.get("null_count")
-    if row_count is not None and null_count is not None and null_count == row_count:
-        return False
-
-    column_type = str(column.get("type", "unknown")).strip().lower()
-    sample_values = column.get("sample_values") if isinstance(column.get("sample_values"), list) else []
-    unique_count = column.get("unique_count")
-    has_useful_values = bool(sample_values) or unique_count not in (None, 0)
-
-    if column_type == "unknown" and not has_useful_values:
-        return False
-
-    return True
-
-
 def _build_project_data_source_context(data_source):
     processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
     source_type_label = data_source.get_source_type_display()
-    columns_schema = data_source.columns_schema if isinstance(data_source.columns_schema, dict) else {}
-    raw_columns = columns_schema.get("columns") if isinstance(columns_schema.get("columns"), list) else []
-    row_count = data_source.row_count if isinstance(data_source.row_count, int) else None
-
-    columns = []
-    summary = {
-        "total_columns": 0,
-        "numeric_columns": 0,
-        "categorical_columns": 0,
-        "datetime_columns": 0,
-        "nullable_columns": 0,
-    }
-    x_axis_columns = []
-    y_axis_columns = []
-
-    for raw_column in raw_columns:
-        if not isinstance(raw_column, dict):
-            continue
-
-        column_type = str(raw_column.get("type", "unknown")).strip().lower()
-        column_name = raw_column.get("name") or "Sin nombre"
-        nullable = bool(raw_column.get("nullable"))
-        null_count = raw_column.get("null_count")
-
-        column = {
-            "name": column_name,
-            "type": column_type,
-            "original_dtype": raw_column.get("original_dtype", "Desconocido"),
-            "nullable": nullable,
-            "null_count": null_count if null_count is not None else 0,
-            "unique_count": raw_column.get("unique_count"),
-            "min": raw_column.get("min"),
-            "max": raw_column.get("max"),
-            "sample_values": raw_column.get("sample_values") if isinstance(raw_column.get("sample_values"), list) else [],
-        }
-        columns.append(column)
-
-        summary["total_columns"] += 1
-        if column["type"] == "numeric":
-            summary["numeric_columns"] += 1
-        if column["type"] == "categorical":
-            summary["categorical_columns"] += 1
-        if column["type"] == "datetime":
-            summary["datetime_columns"] += 1
-        if nullable or (isinstance(null_count, int) and null_count > 0):
-            summary["nullable_columns"] += 1
-
-        if not is_recommendable_column(column, row_count):
-            continue
-
-        if column["type"] == "numeric":
-            y_axis_columns.append(column)
-        if column["type"] == "categorical":
-            x_axis_columns.append(column)
-        if column["type"] == "datetime":
-            x_axis_columns.append(column)
-        if column["type"] == "text":
-            x_axis_columns.append(column)
+    column_context = analyze_data_source_columns(data_source)
 
     return {
         "processing_status_label": processing_status_label,
         "source_type_label": source_type_label,
-        "columns_schema": columns_schema,
-        "columns": columns,
-        "summary": summary,
-        "x_axis_columns": x_axis_columns,
-        "y_axis_columns": y_axis_columns,
+        **column_context,
     }
 
 
@@ -396,6 +311,60 @@ def dataset_detail(request, project_slug, dataset_id):
             "data_source": data_source,
             "status_label": STATUS_LABELS.get(project.status, project.status),
             **data_source_context,
+        },
+    )
+
+
+def visualization_create(request, project_slug, dataset_id):
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    data_source = get_object_or_404(
+        DataSource.objects.select_related("project"),
+        pk=dataset_id,
+        project=project,
+    )
+
+    column_context = analyze_data_source_columns(data_source)
+
+    if request.method == "POST":
+        form = VisualizationCreateForm(request.POST, data_source=data_source)
+        if form.is_valid():
+            visualization = form.save(commit=False)
+            visualization.portfolio_project = project
+            visualization.source_dataset = data_source
+
+            try:
+                build_visualization_payload(visualization)
+            except VisualizationEngineError as exc:
+                form.add_error(None, str(exc))
+            else:
+                visualization.save()
+                return redirect("dashboard:project_detail", slug=project.slug)
+    else:
+        form = VisualizationCreateForm(
+            data_source=data_source,
+            initial={
+                "display_order": project.project_visualizations.count() + 1,
+                "is_active": True,
+            },
+        )
+
+    return render(
+        request,
+        "dashboard/visualization_create.html",
+        {
+            "dashboard_section": "projects",
+            "project": project,
+            "data_source": data_source,
+            "form": form,
+            "page_title": f"Dashboard | Nueva visualización para {data_source.name}",
+            "page_heading": "Nueva visualización",
+            "page_description": "Crea una visualización a partir de las columnas detectadas en este dataset.",
+            "submit_label": "Crear visualización",
+            "cancel_url": reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}),
+            "status_label": STATUS_LABELS.get(project.status, project.status),
+            "processing_status_label": DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status),
+            "source_type_label": data_source.get_source_type_display(),
+            **column_context,
         },
     )
 
