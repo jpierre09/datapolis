@@ -1,6 +1,11 @@
+{% load static %}
+
 <aside class="sidebar">
   <div class="sidebar-header">
-    <h1>Datapolis</h1>
+    <div class="dashboard-brand">
+      <img class="dashboard-brand-logo" src="{% static 'images/brand/datapolis-logo.png' %}" alt="Datapolis">
+      <span class="dashboard-brand-text dashboard-brand-text--sr-only">Datapolis</span>
+    </div>
   </div>
   <nav>
     <a href="{% url 'dashboard:overview' %}" class="{% if dashboard_section == 'overview' %}active{% endif %}">
