@@ -371,33 +371,26 @@
       display: none;
     }
 
+    .activity-card {
+      display: grid;
+      gap: 14px;
+      padding: 16px;
+    }
+
+    .overview-activity-chart {
+      width: 100%;
+      height: 280px;
+    }
+
     .activity-layout {
       display: grid;
       grid-template-columns: minmax(0, 1.3fr) minmax(280px, 0.9fr);
       gap: 14px;
+      align-items: start;
     }
-
-    .activity-graph {
-      display: grid;
-      grid-template-columns: repeat(7, minmax(16px, 1fr));
-      gap: 6px;
-      margin-top: 10px;
-    }
-
-    .activity-block {
-      aspect-ratio: 1;
-      border-radius: 4px;
-      background: rgba(183, 196, 199, 0.35);
-      border: 1px solid rgba(183, 196, 199, 0.65);
-    }
-
-    .activity-block.level-1 { background: rgba(127, 183, 190, 0.18); }
-    .activity-block.level-2 { background: rgba(127, 183, 190, 0.32); }
-    .activity-block.level-3 { background: rgba(127, 183, 190, 0.5); }
-    .activity-block.level-4 { background: rgba(62, 124, 123, 0.62); }
 
     .activity-caption {
-      margin: 10px 0 0;
+      margin: 0;
       color: #5a6b6f;
       font-size: 0.88rem;
       line-height: 1.4;
@@ -431,6 +424,31 @@
       background: #D8A7B1;
       margin-top: 5px;
       flex-shrink: 0;
+    }
+
+    .recent-dot--project {
+      background: #3E7C7B;
+    }
+
+    .recent-dot--dataset {
+      background: #7FB7BE;
+    }
+
+    .recent-dot--visualization {
+      background: #D8A7B1;
+    }
+
+    .recent-feed-meta {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 2px;
+    }
+
+    .recent-feed-date {
+      color: #5a6b6f;
+      font-size: 0.82rem;
     }
 
     .recent-feed-title {
@@ -485,12 +503,12 @@
         grid-template-columns: 1fr;
       }
 
-      .activity-layout {
-        grid-template-columns: 1fr;
+      .overview-activity-chart {
+        height: 240px;
       }
 
-      .activity-graph {
-        grid-template-columns: repeat(7, minmax(12px, 1fr));
+      .activity-layout {
+        grid-template-columns: 1fr;
       }
     }
   </style>
@@ -568,81 +586,132 @@
           <div class="section-header">
             <div>
               <h3 class="section-title">Actividad del portafolio</h3>
-              <p class="section-subtitle">Una lectura visual de la evolución reciente del trabajo.</p>
+              <p class="section-subtitle">Actividad de las últimas 12 semanas.</p>
             </div>
           </div>
 
-          <div class="activity-graph" aria-hidden="true">
-            <div class="activity-block level-1"></div>
-            <div class="activity-block level-2"></div>
-            <div class="activity-block level-1"></div>
-            <div class="activity-block"></div>
-            <div class="activity-block level-3"></div>
-            <div class="activity-block level-2"></div>
-            <div class="activity-block level-4"></div>
-            <div class="activity-block"></div>
-            <div class="activity-block level-1"></div>
-            <div class="activity-block level-2"></div>
-            <div class="activity-block level-3"></div>
-            <div class="activity-block level-1"></div>
-            <div class="activity-block"></div>
-            <div class="activity-block level-2"></div>
-            <div class="activity-block level-1"></div>
-            <div class="activity-block level-4"></div>
-            <div class="activity-block level-2"></div>
-            <div class="activity-block"></div>
-            <div class="activity-block level-3"></div>
-            <div class="activity-block level-1"></div>
-            <div class="activity-block level-2"></div>
-          </div>
+          {% if has_activity %}
+            <div id="dashboard-overview-activity-chart" class="overview-activity-chart" aria-label="Gráfico de actividad de las últimas 12 semanas"></div>
 
-          <p class="activity-caption">Los bloques representan una evolución visual del portafolio. En una fase posterior podrán conectarse a actividad real.</p>
+          {% else %}
+            <p class="dashboard-empty-state">Sin actividad reciente todavía. Cuando empieces a crear proyectos, datasets o visualizaciones, aparecerá aquí.</p>
+          {% endif %}
         </section>
 
         <section class="recent-activity-card">
           <div class="section-header">
             <div>
               <h3 class="section-title">Actividad reciente</h3>
-              <p class="section-subtitle">Eventos simples que resumen el estado actual del portafolio.</p>
+              <p class="section-subtitle">Eventos reales ordenados por fecha.</p>
             </div>
           </div>
 
-          {% if metrics.published_projects or metrics.datasets or metrics.visualizations %}
-            <ul class="recent-feed">
-              {% if metrics.published_projects %}
+          {% if recent_activity_events %}
+            <ul class="recent-feed" aria-label="Eventos recientes del portafolio">
+              {% for event in recent_activity_events %}
                 <li class="recent-feed-item">
-                  <span class="recent-dot"></span>
+                  <span class="recent-dot recent-dot--{{ event.kind }}"></span>
                   <div>
-                    <p class="recent-feed-title">Proyecto publicado</p>
-                    <p class="recent-feed-text">{{ metrics.published_projects }} proyecto{{ metrics.published_projects|pluralize }} publicados.</p>
+                    <div class="recent-feed-meta">
+                      <span class="status-badge">{{ event.badge }}</span>
+                      <span class="recent-feed-date">{{ event.date_label }}</span>
+                    </div>
+                    <p class="recent-feed-title">{{ event.title }}</p>
+                    <p class="recent-feed-text">{{ event.text }}</p>
                   </div>
                 </li>
-              {% endif %}
-              {% if metrics.datasets %}
-                <li class="recent-feed-item">
-                  <span class="recent-dot"></span>
-                  <div>
-                    <p class="recent-feed-title">Dataset agregado</p>
-                    <p class="recent-feed-text">{{ metrics.datasets }} dataset{{ metrics.datasets|pluralize }} activos en el portafolio.</p>
-                  </div>
-                </li>
-              {% endif %}
-              {% if metrics.visualizations %}
-                <li class="recent-feed-item">
-                  <span class="recent-dot"></span>
-                  <div>
-                    <p class="recent-feed-title">Visualización creada</p>
-                    <p class="recent-feed-text">{{ metrics.visualizations }} visualización{{ metrics.visualizations|pluralize }} activas listas para lectura pública.</p>
-                  </div>
-                </li>
-              {% endif %}
+              {% endfor %}
             </ul>
           {% else %}
-            <p class="empty-state">Sin actividad reciente todavía. Cuando empieces a publicar proyectos, datasets o visualizaciones, aparecerán aquí.</p>
+            <p class="dashboard-empty-state">No hay eventos recientes para mostrar.</p>
           {% endif %}
         </section>
       </div>
 
     </div>
   </section>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  {% if has_activity %}
+    {{ activity_weeks|json_script:"dashboard-overview-activity-data" }}
+    <script>
+      (function () {
+        const dataNode = document.getElementById('dashboard-overview-activity-data');
+        const chartNode = document.getElementById('dashboard-overview-activity-chart');
+
+        if (!dataNode || !chartNode || typeof Plotly === 'undefined') {
+          return;
+        }
+
+        let rows = [];
+        try {
+          rows = JSON.parse(dataNode.textContent || '[]');
+        } catch (error) {
+          return;
+        }
+
+        if (!Array.isArray(rows) || !rows.length) {
+          return;
+        }
+
+        const labels = rows.map(function (row) {
+          return row.week_label;
+        });
+
+        const layout = {
+          barmode: 'group',
+          height: 280,
+          margin: { t: 18, r: 10, b: 48, l: 38 },
+          showlegend: true,
+          legend: { orientation: 'h', x: 0, y: 1.14 },
+          paper_bgcolor: 'rgba(0,0,0,0)',
+          plot_bgcolor: 'rgba(0,0,0,0)',
+          hovermode: 'x unified',
+          xaxis: {
+            title: { text: 'Semana' },
+            tickmode: 'array',
+            tickvals: labels,
+            ticktext: labels,
+            automargin: true,
+            gridcolor: 'rgba(183, 196, 199, 0.22)'
+          },
+          yaxis: {
+            title: { text: 'Cantidad' },
+            automargin: true,
+            gridcolor: 'rgba(183, 196, 199, 0.22)',
+            rangemode: 'tozero'
+          }
+        };
+
+        const traces = [
+          {
+            type: 'bar',
+            name: 'Proyectos creados',
+            x: labels,
+            y: rows.map(function (row) { return row.proyectos_creados; }),
+            marker: { color: '#3E7C7B' }
+          },
+          {
+            type: 'bar',
+            name: 'Datasets subidos',
+            x: labels,
+            y: rows.map(function (row) { return row.datasets_subidos; }),
+            marker: { color: '#7FB7BE' }
+          },
+          {
+            type: 'bar',
+            name: 'Visualizaciones creadas',
+            x: labels,
+            y: rows.map(function (row) { return row.visualizaciones_creadas; }),
+            marker: { color: '#D8A7B1' }
+          }
+        ];
+
+        Plotly.newPlot(chartNode, traces, layout, {
+          responsive: true,
+          displayModeBar: false
+        });
+      })();
+    </script>
+  {% endif %}
 {% endblock %}

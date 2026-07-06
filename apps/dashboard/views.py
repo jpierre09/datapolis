@@ -12,6 +12,7 @@ from apps.portfolio_projects.models import PortfolioProject
 
 from .dataset_columns import analyze_data_source_columns
 from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm
+from .services import build_overview_activity
 
 STATUS_LABELS = {
     PortfolioProject.Status.DRAFT: "Borrador",
@@ -61,7 +62,27 @@ def _build_dashboard_metrics():
     }
 
 
+def _build_visualization_preview_context(visualization):
+    preview_payload = None
+    preview_error = ""
+
+    try:
+        preview_payload = build_visualization_payload(visualization)
+    except VisualizationEngineError:
+        preview_error = "No se pudo generar la vista previa"
+    except Exception:
+        preview_error = "No se pudo generar la vista previa"
+
+    return preview_payload, preview_error
+
+
+def _get_dashboard_owner():
+    user = get_user_model().objects.order_by("id").first()
+    return user
+
+
 def overview(request):
+    owner = request.user if request.user.is_authenticated else _get_dashboard_owner()
     active_data_sources_prefetch = Prefetch(
         "data_sources",
         queryset=DataSource.objects.filter(is_active=True).order_by("-uploaded_at"),
@@ -79,6 +100,7 @@ def overview(request):
         project.main_dataset_name = main_dataset.name if main_dataset else "Sin dataset"
 
     metrics = _build_dashboard_metrics()
+    activity_context = build_overview_activity(owner, recent_limit=3)
 
     return render(
         request,
@@ -87,6 +109,7 @@ def overview(request):
             "dashboard_section": "overview",
             "metrics": metrics,
             "recent_projects": recent_projects,
+            **activity_context,
         },
     )
 
@@ -149,7 +172,9 @@ def project_detail(request, slug):
     )
     active_visualizations_prefetch = Prefetch(
         "project_visualizations",
-        queryset=ProjectVisualization.objects.filter(is_active=True).order_by("display_order", "id"),
+        queryset=ProjectVisualization.objects.filter(is_active=True)
+        .select_related("source_dataset")
+        .order_by("display_order", "id"),
         to_attr="active_visualizations",
     )
 
@@ -164,6 +189,11 @@ def project_detail(request, slug):
     for data_source in project.project_data_sources:
         data_source.processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
         data_source.source_type_label = data_source.get_source_type_display()
+
+    for visualization in project.active_visualizations:
+        visualization.preview_payload_script_id = f"project-visualization-preview-payload-{visualization.id}"
+        visualization.preview_payload, visualization.preview_error = _build_visualization_preview_context(visualization)
+        visualization.preview_has_error = bool(visualization.preview_error)
 
     return render(
         request,

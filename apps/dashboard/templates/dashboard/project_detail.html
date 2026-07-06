@@ -89,11 +89,61 @@
         {% if project.active_visualizations %}
           <div class="dashboard-visualization-grid">
             {% for visualization in project.active_visualizations %}
-              <article class="dashboard-card dashboard-card-dashed dashboard-visualization-card">
+              <article class="dashboard-card dashboard-card-dashed dashboard-visualization-card" data-visualization-preview-card data-visualization-id="{{ visualization.id }}">
                 <div class="dashboard-card-header">
                   <h4 class="dashboard-card-title">{{ visualization.title }}</h4>
                   <span class="dashboard-badge">{{ visualization.get_visualization_type_display }}</span>
                 </div>
+
+                <div class="dashboard-visualization-mini-preview" data-visualization-mini-preview>
+                  {% if visualization.preview_has_error %}
+                    <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
+                  {% elif visualization.preview_payload %}
+                    {% with vtype=visualization.preview_payload.visualization.type %}
+                      {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
+                        <div id="dashboard-visualization-mini-chart-{{ visualization.id }}" class="dashboard-visualization-mini-preview-chart" data-visualization-mini-chart></div>
+                      {% elif vtype == "data_table" %}
+                        <div class="dashboard-dataset-columns-table-wrap dashboard-visualization-mini-preview-table-wrap">
+                          <table class="dashboard-dataset-columns-table dashboard-visualization-mini-preview-table">
+                            <thead>
+                              <tr>
+                                <th id="dashboard-visualization-mini-table-x-header-{{ visualization.id }}">X</th>
+                                <th id="dashboard-visualization-mini-table-y-header-{{ visualization.id }}">Y</th>
+                              </tr>
+                            </thead>
+                            <tbody id="dashboard-visualization-mini-table-body-{{ visualization.id }}" data-visualization-mini-table-body></tbody>
+                          </table>
+                        </div>
+                      {% elif vtype == "kpi_card" %}
+                        <article class="dashboard-card dashboard-card-dashed dashboard-visualization-mini-preview-kpi">
+                          <p class="dashboard-visualization-preview-kpi-title">{{ visualization.preview_payload.visualization.title }}</p>
+                          <p id="dashboard-visualization-mini-kpi-value-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-value" data-visualization-mini-kpi-value></p>
+                          <p id="dashboard-visualization-mini-kpi-label-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-label" data-visualization-mini-kpi-label></p>
+                        </article>
+                      {% else %}
+                        <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">Este tipo de visualización aún no tiene vista previa disponible.</p>
+                      {% endif %}
+                    {% endwith %}
+                    {{ visualization.preview_payload|json_script:visualization.preview_payload_script_id }}
+                  {% else %}
+                    <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
+                  {% endif %}
+                </div>
+
+                {% if visualization.preview_payload %}
+                  <div class="dashboard-visualization-card-actions">
+                    <button
+                      type="button"
+                      class="dashboard-button-secondary dashboard-visualization-expand-button"
+                      data-visualization-preview-trigger
+                      data-visualization-preview-target="{{ visualization.preview_payload_script_id }}"
+                      data-visualization-preview-title="{{ visualization.title|escape }}"
+                    >
+                      Ampliar
+                    </button>
+                  </div>
+                {% endif %}
+
                 <p class="dashboard-visualization-type"><strong>Tipo:</strong> {{ visualization.get_visualization_type_display }}</p>
                 <p class="dashboard-project-detail-copy">{{ visualization.description|default:"Sin descripción." }}</p>
               </article>
@@ -115,4 +165,356 @@
       </section>
     </div>
   </section>
+
+  <div class="dashboard-preview-modal-overlay" data-visualization-preview-overlay>
+    <section class="dashboard-preview-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-preview-modal-title">
+      <header class="dashboard-preview-modal-header">
+        <div>
+          <h3 id="dashboard-preview-modal-title" class="dashboard-section-title">Previsualización</h3>
+          <p id="dashboard-preview-modal-copy" class="dashboard-form-section-copy">Así se verá la visualización con su configuración guardada.</p>
+        </div>
+        <button type="button" class="dashboard-button-secondary dashboard-preview-modal-close" data-visualization-preview-close>Cerrar</button>
+      </header>
+
+      <div class="dashboard-preview-modal-body">
+        <div id="dashboard-project-visualization-preview-chart" class="dashboard-visualization-preview-chart dashboard-visualization-preview-chart--modal" hidden></div>
+
+        <div class="dashboard-dataset-columns-table-wrap dashboard-visualization-preview-table-wrap" hidden id="dashboard-project-visualization-preview-table-wrap">
+          <table class="dashboard-dataset-columns-table dashboard-visualization-preview-table">
+            <thead>
+              <tr>
+                <th id="dashboard-project-visualization-preview-table-x-header">X</th>
+                <th id="dashboard-project-visualization-preview-table-y-header">Y</th>
+              </tr>
+            </thead>
+            <tbody id="dashboard-project-visualization-preview-table-body"></tbody>
+          </table>
+        </div>
+
+        <article class="dashboard-card dashboard-card-dashed dashboard-visualization-preview-kpi" hidden id="dashboard-project-visualization-preview-kpi-card">
+          <p id="dashboard-project-visualization-preview-kpi-title" class="dashboard-visualization-preview-kpi-title"></p>
+          <p id="dashboard-project-visualization-preview-kpi-value" class="dashboard-visualization-preview-kpi-value"></p>
+          <p id="dashboard-project-visualization-preview-kpi-label" class="dashboard-visualization-preview-kpi-label"></p>
+        </article>
+
+        <p id="dashboard-project-visualization-preview-empty" class="dashboard-empty-state" hidden>Este tipo de visualización aún no tiene previsualización disponible.</p>
+      </div>
+
+      <div class="dashboard-form-actions dashboard-preview-modal-actions">
+        <button type="button" class="dashboard-button-secondary" data-visualization-preview-close>Cerrar</button>
+      </div>
+    </section>
+  </div>
+
+  <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
+  <script>
+    function getPlotSeries(rows) {
+      return {
+        x: rows.map(function (row) { return row.x; }),
+        y: rows.map(function (row) { return row.y; })
+      };
+    }
+
+    function getPlotlyTrace(visualizationType, series) {
+      if (visualizationType === 'bar_chart') {
+        return { type: 'bar', x: series.x, y: series.y };
+      }
+
+      if (visualizationType === 'line_chart') {
+        return { type: 'scatter', mode: 'lines+markers', x: series.x, y: series.y };
+      }
+
+      if (visualizationType === 'scatter_plot') {
+        return { type: 'scatter', mode: 'markers', x: series.x, y: series.y };
+      }
+
+      if (visualizationType === 'pie_chart') {
+        return { type: 'pie', labels: series.x, values: series.y };
+      }
+
+      return null;
+    }
+
+    function getVisualizationConfig(payload) {
+      const config = payload && payload.visualization && payload.visualization.config;
+      return config && typeof config === 'object' ? config : {};
+    }
+
+    function getChartLayout(payload, isMiniPreview) {
+      const config = getVisualizationConfig(payload);
+      const chartHeight = isMiniPreview ? 160 : (typeof config.chart_height === 'number' ? config.chart_height : 420);
+      const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+      const defaultShowLegend = visualizationType === 'pie_chart';
+      const showLegend = typeof config.show_legend === 'boolean' ? config.show_legend : defaultShowLegend;
+      const xAxisTitle = typeof config.x_axis_title === 'string' && config.x_axis_title.trim()
+        ? config.x_axis_title
+        : payload.encoding.x;
+      const yAxisTitle = typeof config.y_axis_title === 'string' && config.y_axis_title.trim()
+        ? config.y_axis_title
+        : payload.encoding.y;
+
+      return {
+        title: isMiniPreview ? undefined : payload.visualization.title,
+        height: chartHeight,
+        showlegend: showLegend,
+        margin: isMiniPreview ? { t: 8, r: 8, b: 28, l: 32 } : { t: 50, r: 20, b: 60, l: 50 },
+        xaxis: { title: { text: xAxisTitle } },
+        yaxis: { title: { text: yAxisTitle } }
+      };
+    }
+
+    function getMaxRows(payload) {
+      const config = getVisualizationConfig(payload);
+      const maxRows = Number(config.max_rows);
+      if (Number.isFinite(maxRows) && maxRows > 0) {
+        return Math.floor(maxRows);
+      }
+
+      return 20;
+    }
+
+    function getKpiMetricLabel(payload) {
+      const config = getVisualizationConfig(payload);
+      if (typeof config.metric_label === 'string' && config.metric_label.trim()) {
+        return config.metric_label;
+      }
+
+      return payload.encoding && payload.encoding.y ? payload.encoding.y : '';
+    }
+
+    function getKpiValueText(payload) {
+      const config = getVisualizationConfig(payload);
+      const firstRow = Array.isArray(payload.data) && payload.data.length ? payload.data[0] : null;
+      const value = firstRow ? firstRow.y : '';
+      const valuePrefix = typeof config.value_prefix === 'string' ? config.value_prefix : '';
+      const valueSuffix = typeof config.value_suffix === 'string' ? config.value_suffix : '';
+      return '' + valuePrefix + value + valueSuffix;
+    }
+
+    function renderDataTable(payload, bodyNode, xHeaderNode, yHeaderNode) {
+      if (!bodyNode || !xHeaderNode || !yHeaderNode) {
+        return;
+      }
+
+      xHeaderNode.textContent = payload.encoding && payload.encoding.x ? payload.encoding.x : 'X';
+      yHeaderNode.textContent = payload.encoding && payload.encoding.y ? payload.encoding.y : 'Y';
+
+      const maxRows = getMaxRows(payload);
+      const rows = (payload.data || []).slice(0, maxRows);
+      rows.forEach(function (row) {
+        const tr = document.createElement('tr');
+
+        const xCell = document.createElement('td');
+        xCell.textContent = row.x;
+        tr.appendChild(xCell);
+
+        const yCell = document.createElement('td');
+        yCell.textContent = row.y;
+        tr.appendChild(yCell);
+
+        bodyNode.appendChild(tr);
+      });
+    }
+
+    function renderKpiCard(payload, valueNode, labelNode, titleNode) {
+      if (!valueNode || !labelNode || !titleNode) {
+        return;
+      }
+
+      valueNode.textContent = getKpiValueText(payload);
+      labelNode.textContent = getKpiMetricLabel(payload);
+      titleNode.textContent = payload.visualization ? payload.visualization.title : '';
+    }
+
+    function renderPlotlyPreview(containerNode, payload, isMiniPreview) {
+      if (!containerNode) {
+        return;
+      }
+
+      const rows = payload.data || [];
+      if (!rows.length) {
+        if (isMiniPreview) {
+          containerNode.innerHTML = '<p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No hay datos para esta vista previa.</p>';
+        }
+
+        return;
+      }
+
+      const series = getPlotSeries(rows);
+      const trace = getPlotlyTrace(payload.visualization ? payload.visualization.type : '', series);
+      if (!trace) {
+        return;
+      }
+
+      Plotly.newPlot(
+        containerNode,
+        [trace],
+        getChartLayout(payload, isMiniPreview),
+        isMiniPreview
+          ? { responsive: true, displayModeBar: false, staticPlot: true }
+          : { responsive: true }
+      );
+    }
+
+    (function () {
+      const previewCards = document.querySelectorAll('[data-visualization-preview-card]');
+      const previewOverlay = document.querySelector('[data-visualization-preview-overlay]');
+      const closeButtons = document.querySelectorAll('[data-visualization-preview-close]');
+      const modalTitleNode = document.getElementById('dashboard-preview-modal-title');
+      const modalCopyNode = document.getElementById('dashboard-preview-modal-copy');
+      const modalChartNode = document.getElementById('dashboard-project-visualization-preview-chart');
+      const modalTableWrapNode = document.getElementById('dashboard-project-visualization-preview-table-wrap');
+      const modalTableBodyNode = document.getElementById('dashboard-project-visualization-preview-table-body');
+      const modalTableXHeaderNode = document.getElementById('dashboard-project-visualization-preview-table-x-header');
+      const modalTableYHeaderNode = document.getElementById('dashboard-project-visualization-preview-table-y-header');
+      const modalKpiCardNode = document.getElementById('dashboard-project-visualization-preview-kpi-card');
+      const modalKpiTitleNode = document.getElementById('dashboard-project-visualization-preview-kpi-title');
+      const modalKpiValueNode = document.getElementById('dashboard-project-visualization-preview-kpi-value');
+      const modalKpiLabelNode = document.getElementById('dashboard-project-visualization-preview-kpi-label');
+      const modalEmptyNode = document.getElementById('dashboard-project-visualization-preview-empty');
+
+      function hideModalPreviewNodes() {
+        if (modalChartNode) {
+          modalChartNode.hidden = true;
+          modalChartNode.innerHTML = '';
+        }
+
+        if (modalTableWrapNode) {
+          modalTableWrapNode.hidden = true;
+        }
+
+        if (modalTableBodyNode) {
+          modalTableBodyNode.innerHTML = '';
+        }
+
+        if (modalKpiCardNode) {
+          modalKpiCardNode.hidden = true;
+        }
+
+        if (modalKpiTitleNode) {
+          modalKpiTitleNode.textContent = '';
+        }
+
+        if (modalKpiValueNode) {
+          modalKpiValueNode.textContent = '';
+        }
+
+        if (modalKpiLabelNode) {
+          modalKpiLabelNode.textContent = '';
+        }
+
+        if (modalEmptyNode) {
+          modalEmptyNode.hidden = true;
+        }
+      }
+
+      function openModalFromPayload(payload, visualizationTitle) {
+        if (!previewOverlay) {
+          return;
+        }
+
+        hideModalPreviewNodes();
+
+        if (modalTitleNode) {
+          modalTitleNode.textContent = visualizationTitle ? 'Previsualización: ' + visualizationTitle : 'Previsualización';
+        }
+
+        if (modalCopyNode) {
+          modalCopyNode.textContent = 'Así se verá la visualización con su configuración guardada.';
+        }
+
+        const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+
+        if (visualizationType === 'data_table') {
+          if (modalTableWrapNode) {
+            modalTableWrapNode.hidden = false;
+          }
+
+          renderDataTable(payload, modalTableBodyNode, modalTableXHeaderNode, modalTableYHeaderNode);
+        } else if (visualizationType === 'kpi_card') {
+          if (modalKpiCardNode) {
+            modalKpiCardNode.hidden = false;
+          }
+
+          renderKpiCard(payload, modalKpiValueNode, modalKpiLabelNode, modalKpiTitleNode);
+        } else if (payload.data && payload.data.length) {
+          if (modalChartNode) {
+            modalChartNode.hidden = false;
+          }
+
+          renderPlotlyPreview(modalChartNode, payload, false);
+        } else if (modalEmptyNode) {
+          modalEmptyNode.hidden = false;
+        }
+
+        previewOverlay.classList.add('dashboard-preview-modal-overlay--open');
+        document.body.classList.add('dashboard-preview-modal-open');
+      }
+
+      function closeModal() {
+        if (!previewOverlay) {
+          return;
+        }
+
+        previewOverlay.classList.remove('dashboard-preview-modal-overlay--open');
+        document.body.classList.remove('dashboard-preview-modal-open');
+      }
+
+      previewCards.forEach(function (card) {
+        const payloadNode = card.querySelector('[id^="project-visualization-preview-payload-"]');
+
+        if (!payloadNode) {
+          return;
+        }
+
+        let payload = null;
+
+        try {
+          payload = JSON.parse(payloadNode.textContent || '{}');
+        } catch (error) {
+          return;
+        }
+
+        const visualizationType = payload && payload.visualization ? payload.visualization.type : '';
+        const visualizationId = card.getAttribute('data-visualization-id');
+
+        if (visualizationType === 'data_table') {
+          renderDataTable(
+            payload,
+            card.querySelector('[data-visualization-mini-table-body]'),
+            card.querySelector('#dashboard-visualization-mini-table-x-header-' + visualizationId),
+            card.querySelector('#dashboard-visualization-mini-table-y-header-' + visualizationId)
+          );
+        } else if (visualizationType === 'kpi_card') {
+          renderKpiCard(
+            payload,
+            card.querySelector('[data-visualization-mini-kpi-value]'),
+            card.querySelector('[data-visualization-mini-kpi-label]'),
+            card.querySelector('.dashboard-visualization-preview-kpi-title')
+          );
+        } else {
+          renderPlotlyPreview(card.querySelector('[data-visualization-mini-chart]'), payload, true);
+        }
+
+        const triggerNode = card.querySelector('[data-visualization-preview-trigger]');
+        if (triggerNode) {
+          triggerNode.addEventListener('click', function () {
+            openModalFromPayload(payload, triggerNode.getAttribute('data-visualization-preview-title') || '');
+          });
+        }
+      });
+
+      closeButtons.forEach(function (button) {
+        button.addEventListener('click', closeModal);
+      });
+
+      if (previewOverlay) {
+        previewOverlay.addEventListener('click', function (event) {
+          if (event.target === previewOverlay) {
+            closeModal();
+          }
+        });
+      }
+    })();
+  </script>
 {% endblock %}
