@@ -159,6 +159,55 @@ def _build_recent_activity_events(owner, start_datetime, recent_limit):
     return events[:recent_limit]
 
 
+def build_project_publish_checklist(project):
+    items = [
+        {
+            "key": "question",
+            "label": "Pregunta de análisis",
+            "satisfied": bool(project.question and project.question.strip()),
+            "pending_text": "Completa la pregunta de análisis.",
+        },
+        {
+            "key": "description",
+            "label": "Descripción",
+            "satisfied": bool(project.description and project.description.strip()),
+            "pending_text": "Completa la descripción del proyecto.",
+        },
+        {
+            "key": "processed_dataset",
+            "label": "Dataset procesado",
+            "satisfied": any(data_source.processing_status == DataSource.ProcessingStatus.PROCESSED for data_source in getattr(project, "project_data_sources", [])),
+            "pending_text": "Agrega al menos un dataset procesado.",
+        },
+        {
+            "key": "active_visualization",
+            "label": "Visualización activa",
+            "satisfied": bool(getattr(project, "active_visualizations", [])),
+            "pending_text": "Agrega al menos una visualización activa.",
+        },
+        {
+            "key": "findings",
+            "label": "Hallazgos",
+            "satisfied": bool(project.findings and project.findings.strip()),
+            "pending_text": "Completa los hallazgos.",
+        },
+        {
+            "key": "conclusion",
+            "label": "Conclusión",
+            "satisfied": bool(project.conclusion and project.conclusion.strip()),
+            "pending_text": "Completa la conclusión.",
+        },
+    ]
+
+    pending_items = [item for item in items if not item["satisfied"]]
+
+    return {
+        "items": items,
+        "pending_items": pending_items,
+        "all_ready": not pending_items,
+    }
+
+
 def _format_activity_date(value):
     local_value = timezone.localtime(value)
     return local_value.strftime("%d/%m/%Y")

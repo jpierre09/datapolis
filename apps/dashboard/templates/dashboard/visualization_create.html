@@ -5,13 +5,13 @@
 
 {% block dashboard_content %}
   <header class="page-header dashboard-visualization-page-header">
-    <h2>Crear visualización</h2>
-    <p>Elige cómo quieres mostrar los datos. Datapolis ya seleccionó una configuración inicial para ayudarte.</p>
+    <h2>{{ page_heading }}</h2>
+    <p>{{ page_description }}</p>
   </header>
 
   <section class="dashboard-visualization-quick-context">
     <div class="dashboard-visualization-quick-context-line">
-      <span class="dashboard-visualization-quick-context-label">Nueva visualización para:</span>
+      <span class="dashboard-visualization-quick-context-label">{{ context_label }}</span>
       <strong>{{ project.title }}</strong>
     </div>
     <div class="dashboard-visualization-quick-context-line">
@@ -140,7 +140,7 @@
         </div>
 
         <div class="dashboard-form-actions dashboard-visualization-actions-row">
-          <button type="submit" name="action" value="create" class="dashboard-button-primary">Crear visualización</button>
+          <button type="submit" name="action" value="create" class="dashboard-button-primary">{{ submit_label }}</button>
           <button type="submit" name="action" value="preview" class="dashboard-button-secondary">Previsualizar</button>
           <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
         </div>
@@ -187,7 +187,7 @@
 
         <div class="dashboard-form-actions dashboard-preview-modal-actions">
           <button type="button" class="dashboard-button-secondary" data-preview-modal-close>Cerrar</button>
-          <button type="submit" form="visualization-form" name="action" value="create" class="dashboard-button-primary">Crear visualización</button>
+          <button type="submit" form="visualization-form" name="action" value="create" class="dashboard-button-primary">{{ submit_label }}</button>
         </div>
       </section>
       {{ preview_payload|json_script:"preview-payload" }}

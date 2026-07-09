@@ -11,9 +11,9 @@ class ProjectCreateForm(forms.ModelForm):
         model = PortfolioProject
         fields = ["title", "question", "description", "project_type", "category", "status", "findings", "conclusion"]
         labels = {
-            "title": "Título del proyecto",
+            "title": "Da un nombre a tu proyecto",
             "question": "Pregunta de análisis",
-            "description": "Descripción corta",
+            "description": "Pequeña descripción",
             "project_type": "Tipo de proyecto",
             "category": "Categoría",
             "status": "Estado del proyecto",

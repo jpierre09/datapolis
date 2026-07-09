@@ -81,6 +81,42 @@
         <p class="dashboard-project-detail-copy">{{ project.description|default:"Sin descripción." }}</p>
       </section>
 
+      <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section dashboard-publish-checklist-card">
+        <div class="section-head-inline">
+          <h3 class="dashboard-section-title">Checklist de publicación</h3>
+          {% if project_publish_checklist.all_ready %}
+            <span class="dashboard-badge dashboard-publish-checklist-badge dashboard-publish-checklist-badge--ready">Listo para publicar</span>
+          {% else %}
+            <span class="dashboard-badge dashboard-publish-checklist-badge dashboard-publish-checklist-badge--pending">Pendiente</span>
+          {% endif %}
+        </div>
+
+        <ul class="dashboard-publish-checklist-list">
+          {% for item in project_publish_checklist.items %}
+            <li class="dashboard-publish-checklist-item dashboard-publish-checklist-item--{% if item.satisfied %}ok{% else %}pending{% endif %}">
+              <span class="dashboard-publish-checklist-icon dashboard-badge dashboard-publish-checklist-icon--{% if item.satisfied %}ok{% else %}pending{% endif %}" aria-hidden="true">{% if item.satisfied %}✓{% else %}○{% endif %}</span>
+              <span class="dashboard-publish-checklist-label">{{ item.label }}</span>
+            </li>
+          {% endfor %}
+        </ul>
+
+        {% if project_publish_checklist.all_ready %}
+          <form method="post" class="dashboard-publish-checklist-actions">
+            {% csrf_token %}
+            <button type="submit" name="action" value="publish_project" class="dashboard-button-primary">Publicar proyecto</button>
+          </form>
+        {% else %}
+          <div class="dashboard-publish-checklist-pending">
+            <p class="dashboard-project-detail-copy">Faltan estos requisitos antes de publicar:</p>
+            <ul class="dashboard-publish-checklist-pending-list">
+              {% for item in project_publish_checklist.pending_items %}
+                <li>{{ item.pending_text }}</li>
+              {% endfor %}
+            </ul>
+          </div>
+        {% endif %}
+      </section>
+
       <section class="dashboard-card dashboard-card-dashed dashboard-project-detail-section">
         <div class="section-head-inline">
           <h3 class="dashboard-section-title">Visualizaciones</h3>
@@ -89,64 +125,7 @@
         {% if project.active_visualizations %}
           <div class="dashboard-visualization-grid">
             {% for visualization in project.active_visualizations %}
-              <article class="dashboard-card dashboard-card-dashed dashboard-visualization-card" data-visualization-preview-card data-visualization-id="{{ visualization.id }}">
-                <div class="dashboard-card-header">
-                  <h4 class="dashboard-card-title">{{ visualization.title }}</h4>
-                  <span class="dashboard-badge">{{ visualization.get_visualization_type_display }}</span>
-                </div>
-
-                <div class="dashboard-visualization-mini-preview" data-visualization-mini-preview>
-                  {% if visualization.preview_has_error %}
-                    <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
-                  {% elif visualization.preview_payload %}
-                    {% with vtype=visualization.preview_payload.visualization.type %}
-                      {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
-                        <div id="dashboard-visualization-mini-chart-{{ visualization.id }}" class="dashboard-visualization-mini-preview-chart" data-visualization-mini-chart></div>
-                      {% elif vtype == "data_table" %}
-                        <div class="dashboard-dataset-columns-table-wrap dashboard-visualization-mini-preview-table-wrap">
-                          <table class="dashboard-dataset-columns-table dashboard-visualization-mini-preview-table">
-                            <thead>
-                              <tr>
-                                <th id="dashboard-visualization-mini-table-x-header-{{ visualization.id }}">X</th>
-                                <th id="dashboard-visualization-mini-table-y-header-{{ visualization.id }}">Y</th>
-                              </tr>
-                            </thead>
-                            <tbody id="dashboard-visualization-mini-table-body-{{ visualization.id }}" data-visualization-mini-table-body></tbody>
-                          </table>
-                        </div>
-                      {% elif vtype == "kpi_card" %}
-                        <article class="dashboard-card dashboard-card-dashed dashboard-visualization-mini-preview-kpi">
-                          <p class="dashboard-visualization-preview-kpi-title">{{ visualization.preview_payload.visualization.title }}</p>
-                          <p id="dashboard-visualization-mini-kpi-value-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-value" data-visualization-mini-kpi-value></p>
-                          <p id="dashboard-visualization-mini-kpi-label-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-label" data-visualization-mini-kpi-label></p>
-                        </article>
-                      {% else %}
-                        <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">Este tipo de visualización aún no tiene vista previa disponible.</p>
-                      {% endif %}
-                    {% endwith %}
-                    {{ visualization.preview_payload|json_script:visualization.preview_payload_script_id }}
-                  {% else %}
-                    <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
-                  {% endif %}
-                </div>
-
-                {% if visualization.preview_payload %}
-                  <div class="dashboard-visualization-card-actions">
-                    <button
-                      type="button"
-                      class="dashboard-button-secondary dashboard-visualization-expand-button"
-                      data-visualization-preview-trigger
-                      data-visualization-preview-target="{{ visualization.preview_payload_script_id }}"
-                      data-visualization-preview-title="{{ visualization.title|escape }}"
-                    >
-                      Ampliar
-                    </button>
-                  </div>
-                {% endif %}
-
-                <p class="dashboard-visualization-type"><strong>Tipo:</strong> {{ visualization.get_visualization_type_display }}</p>
-                <p class="dashboard-project-detail-copy">{{ visualization.description|default:"Sin descripción." }}</p>
-              </article>
+              {% include "dashboard/partials/visualization_card.html" %}
             {% endfor %}
           </div>
         {% else %}
@@ -171,7 +150,6 @@
       <header class="dashboard-preview-modal-header">
         <div>
           <h3 id="dashboard-preview-modal-title" class="dashboard-section-title">Previsualización</h3>
-          <p id="dashboard-preview-modal-copy" class="dashboard-form-section-copy">Así se verá la visualización con su configuración guardada.</p>
         </div>
         <button type="button" class="dashboard-button-secondary dashboard-preview-modal-close" data-visualization-preview-close>Cerrar</button>
       </header>

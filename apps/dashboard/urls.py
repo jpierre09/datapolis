@@ -16,5 +16,10 @@ urlpatterns = [
         views.visualization_create,
         name="visualization_create",
     ),
+    path(
+        "projects/<slug:project_slug>/visualizations/<int:visualization_id>/edit/",
+        views.visualization_edit,
+        name="visualization_edit",
+    ),
     path("projects/<slug:slug>/", views.project_detail, name="project_detail"),
 ]

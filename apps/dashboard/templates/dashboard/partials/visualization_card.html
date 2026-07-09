@@ -1,0 +1,92 @@
+<article class="dashboard-card dashboard-card-dashed dashboard-visualization-card" data-visualization-preview-card data-visualization-id="{{ visualization.id }}">
+  <div class="dashboard-card-header">
+    <h4 class="dashboard-card-title">{{ visualization.title }}</h4>
+    <div class="dashboard-visualization-card-badges">
+      <span class="dashboard-badge">{{ visualization.get_visualization_type_display }}</span>
+      <span class="dashboard-badge">{% if visualization.is_active %}Activa{% else %}Inactiva{% endif %}</span>
+    </div>
+  </div>
+
+  {% if visualization.preview_payload %}
+    <div
+      class="dashboard-visualization-mini-preview dashboard-visualization-mini-preview--interactive"
+      data-visualization-mini-preview
+      data-visualization-preview-trigger
+      data-visualization-preview-target="{{ visualization.preview_payload_script_id }}"
+      data-visualization-preview-title="{{ visualization.title|escape }}"
+      role="button"
+      tabindex="0"
+      aria-label="Abrir previsualización de {{ visualization.title }}"
+    >
+      {% with vtype=visualization.preview_payload.visualization.type %}
+        {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
+          <div id="dashboard-visualization-mini-chart-{{ visualization.id }}" class="dashboard-visualization-mini-preview-chart" data-visualization-mini-chart></div>
+        {% elif vtype == "data_table" %}
+          <div class="dashboard-dataset-columns-table-wrap dashboard-visualization-mini-preview-table-wrap">
+            <table class="dashboard-dataset-columns-table dashboard-visualization-mini-preview-table">
+              <thead>
+                <tr>
+                  <th id="dashboard-visualization-mini-table-x-header-{{ visualization.id }}">X</th>
+                  <th id="dashboard-visualization-mini-table-y-header-{{ visualization.id }}">Y</th>
+                </tr>
+              </thead>
+              <tbody id="dashboard-visualization-mini-table-body-{{ visualization.id }}" data-visualization-mini-table-body></tbody>
+            </table>
+          </div>
+        {% elif vtype == "kpi_card" %}
+          <article class="dashboard-card dashboard-card-dashed dashboard-visualization-mini-preview-kpi">
+            <p class="dashboard-visualization-preview-kpi-title">{{ visualization.preview_payload.visualization.title }}</p>
+            <p id="dashboard-visualization-mini-kpi-value-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-value" data-visualization-mini-kpi-value></p>
+            <p id="dashboard-visualization-mini-kpi-label-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-label" data-visualization-mini-kpi-label></p>
+          </article>
+        {% else %}
+          <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">Este tipo de visualización aún no tiene vista previa disponible.</p>
+        {% endif %}
+      {% endwith %}
+      {{ visualization.preview_payload|json_script:visualization.preview_payload_script_id }}
+    </div>
+  {% elif visualization.preview_has_error %}
+    <div class="dashboard-visualization-mini-preview" data-visualization-mini-preview>
+      <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
+    </div>
+  {% else %}
+    <div class="dashboard-visualization-mini-preview" data-visualization-mini-preview>
+      <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">No se pudo generar la vista previa</p>
+    </div>
+  {% endif %}
+
+  <div class="dashboard-visualization-card-actions">
+    <a href="{% url 'dashboard:visualization_edit' project.slug visualization.id %}" class="dashboard-button-secondary dashboard-visualization-edit-button">Editar</a>
+  </div>
+
+  <ul class="dashboard-card-meta dashboard-visualization-card-meta">
+    <li><strong>Dataset asociado:</strong> <a href="{% url 'dashboard:dataset_detail' project.slug visualization.source_dataset.id %}">{{ visualization.source_dataset.name }}</a></li>
+    <li><strong>Columna X:</strong> {{ visualization.x_axis_column|default:"Sin columna" }}</li>
+    <li><strong>Columna Y:</strong> {{ visualization.y_axis_column|default:"Sin columna" }}</li>
+    <li><strong>Agregación:</strong>
+      {% if visualization.aggregation_method == "none" %}Sin agregación{% elif visualization.aggregation_method == "sum" %}Suma{% elif visualization.aggregation_method == "average" %}Promedio{% elif visualization.aggregation_method == "count" %}Conteo{% elif visualization.aggregation_method == "minimum" %}Mínimo{% elif visualization.aggregation_method == "maximum" %}Máximo{% else %}{{ visualization.get_aggregation_method_display }}{% endif %}
+    </li>
+    <li><strong>Estado:</strong> {% if visualization.is_active %}Activa{% else %}Inactiva{% endif %}</li>
+    <li><strong>display_order:</strong> {{ visualization.display_order }}</li>
+  </ul>
+
+  <p class="dashboard-project-detail-copy">{{ visualization.description|default:"Sin descripción." }}</p>
+
+  <script>
+    (function () {
+      const card = document.currentScript ? document.currentScript.closest('[data-visualization-preview-card]') : null;
+      const previewContainer = card ? card.querySelector('[data-visualization-preview-trigger]') : null;
+
+      if (!previewContainer) {
+        return;
+      }
+
+      previewContainer.addEventListener('keydown', function (event) {
+        if (event.key === 'Enter' || event.key === ' ') {
+          event.preventDefault();
+          previewContainer.click();
+        }
+      });
+    })();
+  </script>
+</article>

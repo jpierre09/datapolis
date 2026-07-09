@@ -12,7 +12,7 @@ from apps.portfolio_projects.models import PortfolioProject
 
 from .dataset_columns import analyze_data_source_columns
 from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm
-from .services import build_overview_activity
+from .services import build_overview_activity, build_project_publish_checklist
 
 STATUS_LABELS = {
     PortfolioProject.Status.DRAFT: "Borrador",
@@ -49,6 +49,42 @@ def _project_form_page_context(*, form, page_title, page_heading, page_descripti
         "submit_label": submit_label,
         "cancel_url": cancel_url,
         "status_note": status_note,
+    }
+
+
+def _visualization_form_page_context(
+    *,
+    form,
+    project,
+    data_source,
+    page_title,
+    page_heading,
+    page_description,
+    submit_label,
+    cancel_url,
+    context_label,
+    preview_payload,
+    preview_error,
+):
+    column_context = analyze_data_source_columns(data_source)
+
+    return {
+        "dashboard_section": "projects",
+        "project": project,
+        "data_source": data_source,
+        "form": form,
+        "page_title": page_title,
+        "page_heading": page_heading,
+        "page_description": page_description,
+        "submit_label": submit_label,
+        "cancel_url": cancel_url,
+        "context_label": context_label,
+        "status_label": STATUS_LABELS.get(project.status, project.status),
+        "processing_status_label": DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status),
+        "source_type_label": data_source.get_source_type_display(),
+        "preview_payload": preview_payload,
+        "preview_error": preview_error,
+        **column_context,
     }
 
 
@@ -184,6 +220,13 @@ def project_detail(request, slug):
         slug=slug,
     )
 
+    project_publish_checklist = build_project_publish_checklist(project)
+
+    if request.method == "POST" and request.POST.get("action") == "publish_project" and project_publish_checklist["all_ready"]:
+        project.status = PortfolioProject.Status.PUBLISHED
+        project.save(update_fields=["status", "updated_at"])
+        return redirect("dashboard:project_detail", slug=project.slug)
+
     main_dataset = project.project_data_sources[0] if project.project_data_sources else None
 
     for data_source in project.project_data_sources:
@@ -205,6 +248,7 @@ def project_detail(request, slug):
             "main_dataset": main_dataset,
             "datasets_count": len(project.project_data_sources),
             "visualizations_count": len(project.active_visualizations),
+            "project_publish_checklist": project_publish_checklist,
         },
     )
 
@@ -353,7 +397,6 @@ def visualization_create(request, project_slug, dataset_id):
         project=project,
     )
 
-    column_context = analyze_data_source_columns(data_source)
     preview_payload = None
     preview_error = ""
 
@@ -388,23 +431,79 @@ def visualization_create(request, project_slug, dataset_id):
     return render(
         request,
         "dashboard/visualization_create.html",
-        {
-            "dashboard_section": "projects",
-            "project": project,
-            "data_source": data_source,
-            "form": form,
-            "page_title": f"Dashboard | Nueva visualización para {data_source.name}",
-            "page_heading": "Nueva visualización",
-            "page_description": "Crea una visualización a partir de las columnas detectadas en este dataset.",
-            "submit_label": "Crear visualización",
-            "cancel_url": reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}),
-            "status_label": STATUS_LABELS.get(project.status, project.status),
-            "processing_status_label": DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status),
-            "source_type_label": data_source.get_source_type_display(),
-            "preview_payload": preview_payload,
-            "preview_error": preview_error,
-            **column_context,
-        },
+        _visualization_form_page_context(
+            form=form,
+            project=project,
+            data_source=data_source,
+            page_title=f"Dashboard | Nueva visualización para {data_source.name}",
+            page_heading="Nueva visualización",
+            page_description="Crea una visualización a partir de las columnas detectadas en este dataset.",
+            submit_label="Crear visualización",
+            cancel_url=reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}),
+            context_label="Nueva visualización para:",
+            preview_payload=preview_payload,
+            preview_error=preview_error,
+        ),
+    )
+
+
+def visualization_edit(request, project_slug, visualization_id):
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    visualization = get_object_or_404(
+        ProjectVisualization.objects.select_related("portfolio_project", "source_dataset"),
+        pk=visualization_id,
+        portfolio_project=project,
+    )
+    data_source = visualization.source_dataset
+
+    preview_payload = None
+    preview_error = ""
+
+    if request.method == "POST":
+        form = VisualizationCreateForm(request.POST, instance=visualization, data_source=data_source)
+        action = request.POST.get("action", "save")
+        if form.is_valid():
+            updated_visualization = form.save(commit=False)
+            updated_visualization.portfolio_project = project
+            updated_visualization.source_dataset = data_source
+
+            try:
+                preview_payload = build_visualization_payload(updated_visualization)
+            except VisualizationEngineError as exc:
+                preview_error = str(exc)
+                form.add_error(None, preview_error)
+            else:
+                if action == "preview":
+                    pass
+                else:
+                    updated_visualization.save()
+                    return redirect("dashboard:project_detail", slug=project.slug)
+    else:
+        form = VisualizationCreateForm(
+            instance=visualization,
+            data_source=data_source,
+            initial={
+                "display_order": visualization.display_order,
+                "is_active": visualization.is_active,
+            },
+        )
+
+    return render(
+        request,
+        "dashboard/visualization_create.html",
+        _visualization_form_page_context(
+            form=form,
+            project=project,
+            data_source=data_source,
+            page_title=f"Dashboard | Editar visualización {visualization.title}",
+            page_heading="Editar visualización",
+            page_description="Actualiza la configuración guardada de esta visualización sin cambiar su fuente de datos.",
+            submit_label="Guardar cambios",
+            cancel_url=reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
+            context_label="Editar visualización de:",
+            preview_payload=preview_payload,
+            preview_error=preview_error,
+        ),
     )
 
 
