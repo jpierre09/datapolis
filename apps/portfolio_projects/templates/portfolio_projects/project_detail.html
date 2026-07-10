@@ -1,126 +1,248 @@
 {% extends "base/base.html" %}
 
+{% load static %}
+
 {% block content %}
+  <link rel="stylesheet" href="{% static 'portfolio_projects/css/public_project.css' %}">
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+      <div class="navbar-container">
+          <a href="/" class="navbar-brand">Datapolis</a>
+          <div class="navbar-links">
+              <a href="#" class="navbar-link">Investigación</a>
+              <a href="#" class="navbar-link active">Proyectos</a>
+              <a href="#" class="navbar-link">Archivo</a>
+          </div>
+          <div class="navbar-actions">
+              <span class="material-symbols-outlined">search</span>
+              <span class="material-symbols-outlined">bookmark</span>
+          </div>
+      </div>
+  </nav>
+
   <main>
-    <h1>{{ project.title }}</h1>
-    <p><strong>Question:</strong> {{ project.question }}</p>
-    <p><strong>Description:</strong> {{ project.description }}</p>
-    <p><strong>Findings:</strong> {{ project.findings }}</p>
-    <p><strong>Conclusion:</strong> {{ project.conclusion }}</p>
-    <p><strong>Category:</strong> {{ project.category }}</p>
-    <p><strong>Project type:</strong> {{ project.project_type }}</p>
-    <p><strong>Owner:</strong> {{ project.owner }}</p>
+      <!-- Hero Editorial -->
+      <section class="container-max">
+          <div class="hero-section">
+              <div class="hero-left">
+                  <div class="badges-row">
+                      <span class="badge-editorial">{{ project.category.name|default:project.category }}</span>
+                      <span class="badge-editorial">{{ project.project_type.name|default:project.project_type }}</span>
+                  </div>
+                  <h1 class="hero-title">{{ project.title }}</h1>
+                  <p class="hero-meta-label">Por {{ project.owner.get_full_name|default:project.owner.username }}</p>
+              </div>
+              <div class="hero-right">
+                  <div class="hero-meta">
+                      <p class="hero-meta-label">Publicado</p>
+                      <p class="hero-meta-value">{{ project.created_at|date:"M Y" }}</p>
+                  </div>
+              </div>
+          </div>
+      </section>
 
-    <section>
-      <h2>Fuentes de datos</h2>
+      <!-- Pull Quote / Research Question -->
+      <section class="pull-quote-section">
+          <div class="pull-quote-container">
+              <div class="custom-rule"></div>
+              <h2 class="editorial-pull-quote">
+                  "{{ project.question }}"
+              </h2>
+              <div class="custom-rule"></div>
+          </div>
+      </section>
 
-      {% if data_sources %}
-        {% for data_source in data_sources %}
-          <article>
-            <h3>{{ data_source.name }}</h3>
-            <p><strong>Source type:</strong> {{ data_source.source_type }}</p>
-            <p><strong>Processing status:</strong> {{ data_source.processing_status }}</p>
-            <p><strong>Row count:</strong> {{ data_source.row_count|default:"-" }}</p>
-            <p><strong>Original filename:</strong> {{ data_source.original_filename|default:"-" }}</p>
+      <!-- Narrative Section -->
+      <section class="container-max narrative-section">
+          <div class="narrative-container">
+              <div class="narrative-sidebar">
+                  <h3 class="section-label">La Narrativa</h3>
+              </div>
+              <div class="narrative-content">
+                  {{ project.description|linebreaksbr }}
+              </div>
+          </div>
+      </section>
 
-            {% if data_source.processing_status == "failed" and data_source.processing_error %}
-              <p><strong>Processing error:</strong> {{ data_source.processing_error }}</p>
-            {% endif %}
-
-            {% with columns=data_source.columns_schema.columns %}
-              {% if columns %}
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Name</th>
-                      <th>Type</th>
-                      <th>Original dtype</th>
-                      <th>Nullable</th>
-                      <th>Null count</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {% for column in columns %}
-                      <tr>
-                        <td>{{ column.name }}</td>
-                        <td>{{ column.type }}</td>
-                        <td>{{ column.original_dtype }}</td>
-                        <td>{{ column.nullable }}</td>
-                        <td>{{ column.null_count }}</td>
-                      </tr>
-                    {% endfor %}
-                  </tbody>
-                </table>
+      <!-- Visualizations Section -->
+      <section class="visualizations-section">
+          <div class="container-max">
+              <h2 class="visualizations-heading">Evidencia de Datos</h2>
+              {% if visualization_payloads %}
+                  <div class="visualizations-grid">
+                      {% for item in visualization_payloads %}
+                          <div class="visualization-card {% if visualization_payloads|length == 1 or forloop.counter|divisibleby:3 %}full-width{% endif %}">
+                              <h3 class="visualization-title">{{ item.visualization.title }}</h3>
+                              
+                              <div class="visualization-render-area">
+                              {% if item.error %}
+                                  <div class="visualization-error">
+                                      <span class="material-symbols-outlined">error</span>
+                                      <p>{{ item.error }}</p>
+                                  </div>
+                              {% elif item.payload %}
+                                  {% with vtype=item.payload.visualization.type %}
+                                      {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
+                                          {% if item.payload.data %}
+                                              <div id="chart-{{ item.visualization.id }}" class="chart-container"></div>
+                                          {% else %}
+                                              <div class="visualization-empty">No hay datos disponibles para esta visualización.</div>
+                                          {% endif %}
+                                          {{ item.payload|json_script:item.payload_script_id }}
+                                      {% elif vtype == "data_table" %}
+                                          {% if item.payload.data %}
+                                              <div id="table-wrap-{{ item.visualization.id }}" class="data-table-wrapper">
+                                                  <table id="table-{{ item.visualization.id }}" class="data-table">
+                                                      <thead>
+                                                          <tr>
+                                                              <th id="table-x-header-{{ item.visualization.id }}">X</th>
+                                                              <th id="table-y-header-{{ item.visualization.id }}">Y</th>
+                                                          </tr>
+                                                      </thead>
+                                                      <tbody id="table-body-{{ item.visualization.id }}"></tbody>
+                                                  </table>
+                                              </div>
+                                          {% else %}
+                                              <div class="visualization-empty">No hay datos disponibles para esta tabla.</div>
+                                          {% endif %}
+                                          {{ item.payload|json_script:item.payload_script_id }}
+                                      {% elif vtype == "kpi_card" %}
+                                          {% if item.payload.data %}
+                                              <div id="kpi-card-{{ item.visualization.id }}" class="kpi-card">
+                                                  <p id="kpi-value-{{ item.visualization.id }}" class="kpi-value"></p>
+                                                  <p id="kpi-label-{{ item.visualization.id }}" class="kpi-label"></p>
+                                              </div>
+                                          {% else %}
+                                              <div class="visualization-empty">No hay datos disponibles para esta tarjeta.</div>
+                                          {% endif %}
+                                          {{ item.payload|json_script:item.payload_script_id }}
+                                      {% else %}
+                                          <div class="visualization-unsupported">Este tipo de visualización aún no está soportado en el render público.</div>
+                                      {% endif %}
+                                  {% endwith %}
+                              {% else %}
+                                  <div class="visualization-unsupported">Este tipo de visualización aún no está soportado en el render público.</div>
+                              {% endif %}
+                              </div>
+                          </div>
+                      {% endfor %}
+                  </div>
+              {% else %}
+                  <p class="visualization-empty">Este proyecto aún no tiene visualizaciones configuradas.</p>
               {% endif %}
-            {% endwith %}
-          </article>
-        {% endfor %}
-      {% else %}
-        <p>Este proyecto aún no tiene fuentes de datos asociadas.</p>
+          </div>
+      </section>
+
+      <!-- Data Sources Section -->
+      <section class="sources-section">
+          <div class="sources-container">
+              <h2 class="sources-heading">Fuentes de Datos</h2>
+              {% if data_sources %}
+                  {% for data_source in data_sources %}
+                      <div class="source-item">
+                          <h3>{{ data_source.name }}</h3>
+                          <div class="source-meta">
+                              <div class="source-meta-item">
+                                  <strong>Tipo de fuente:</strong> {{ data_source.get_source_type_display|default:data_source.source_type }}
+                              </div>
+                              <div class="source-meta-item">
+                                  <strong>Estado de procesamiento:</strong> {{ data_source.get_processing_status_display|default:data_source.processing_status }}
+                              </div>
+                              <div class="source-meta-item">
+                                  <strong>Total de filas:</strong> {{ data_source.row_count|default:"-" }}
+                              </div>
+                              <div class="source-meta-item">
+                                  <strong>Archivo original:</strong> {{ data_source.original_filename|default:"-" }}
+                              </div>
+                          </div>
+
+                          {% if data_source.processing_status == "failed" and data_source.processing_error %}
+                              <div class="visualization-error" style="text-align: left; padding: 16px; margin-bottom: 16px;">
+                                  <strong>Error de procesamiento:</strong> {{ data_source.processing_error }}
+                              </div>
+                          {% endif %}
+
+                          {% with columns=data_source.columns_schema.columns %}
+                              {% if columns %}
+                                  <div class="data-table-wrapper">
+                                      <table class="data-table">
+                                          <thead>
+                                              <tr>
+                                                  <th>Nombre de la Columna</th>
+                                                  <th>Tipo</th>
+                                                  <th>Tipo Original (dtype)</th>
+                                                  <th>Permite Nulos</th>
+                                                  <th>Nulos Encontrados</th>
+                                              </tr>
+                                          </thead>
+                                          <tbody>
+                                              {% for column in columns %}
+                                                  <tr>
+                                                      <td><strong>{{ column.name }}</strong></td>
+                                                      <td>{{ column.type }}</td>
+                                                      <td>{{ column.original_dtype }}</td>
+                                                      <td>{% if column.nullable %}Sí{% else %}No{% endif %}</td>
+                                                      <td>{{ column.null_count }}</td>
+                                                  </tr>
+                                              {% endfor %}
+                                          </tbody>
+                                      </table>
+                                  </div>
+                              {% endif %}
+                          {% endwith %}
+                      </div>
+                  {% endfor %}
+              {% else %}
+                  <p class="visualization-empty">Este proyecto aún no tiene fuentes de datos asociadas.</p>
+              {% endif %}
+          </div>
+      </section>
+
+      <!-- Findings Section -->
+      {% if project.findings %}
+          <section class="findings-section">
+              <div class="findings-container">
+                  <div class="findings-content">
+                      <h2 class="findings-title">Hallazgos Destacados</h2>
+                      <p class="findings-text">{{ project.findings|linebreaksbr }}</p>
+                  </div>
+                  <div class="findings-icon-box">
+                      <span class="material-symbols-outlined">insights</span>
+                  </div>
+              </div>
+          </section>
       {% endif %}
-    </section>
 
-    <section>
-      <h2>Visualizaciones</h2>
-
-      {% if visualization_payloads %}
-        {% for item in visualization_payloads %}
-          <article>
-            <h3>{{ item.visualization.title }}</h3>
-
-            {% if item.error %}
-              <p>{{ item.error }}</p>
-            {% elif item.payload %}
-              {% with vtype=item.payload.visualization.type %}
-                {% if vtype == "bar_chart" or vtype == "line_chart" or vtype == "scatter_plot" or vtype == "pie_chart" %}
-                  {% if item.payload.data %}
-                    <div id="chart-{{ item.visualization.id }}"></div>
-                  {% else %}
-                    <p>Esta visualización no tiene datos disponibles.</p>
-                  {% endif %}
-                  {{ item.payload|json_script:item.payload_script_id }}
-                {% elif vtype == "data_table" %}
-                  {% if item.payload.data %}
-                    <div id="table-wrap-{{ item.visualization.id }}">
-                      <table id="table-{{ item.visualization.id }}">
-                        <thead>
-                          <tr>
-                            <th id="table-x-header-{{ item.visualization.id }}">X</th>
-                            <th id="table-y-header-{{ item.visualization.id }}">Y</th>
-                          </tr>
-                        </thead>
-                        <tbody id="table-body-{{ item.visualization.id }}"></tbody>
-                      </table>
-                    </div>
-                  {% else %}
-                    <p>Esta visualización no tiene datos disponibles.</p>
-                  {% endif %}
-                  {{ item.payload|json_script:item.payload_script_id }}
-                {% elif vtype == "kpi_card" %}
-                  {% if item.payload.data %}
-                    <div id="kpi-card-{{ item.visualization.id }}">
-                      <p><strong>{{ item.payload.visualization.title }}</strong></p>
-                      <p id="kpi-value-{{ item.visualization.id }}"></p>
-                      <p id="kpi-label-{{ item.visualization.id }}"></p>
-                    </div>
-                  {% else %}
-                    <p>Esta visualización no tiene datos disponibles.</p>
-                  {% endif %}
-                  {{ item.payload|json_script:item.payload_script_id }}
-                {% else %}
-                  <p>Este tipo de visualización aún no está soportado en el render público.</p>
-                {% endif %}
-              {% endwith %}
-            {% else %}
-              <p>Este tipo de visualización aún no está soportado en el render público.</p>
-            {% endif %}
-          </article>
-        {% endfor %}
-      {% else %}
-        <p>Este proyecto aún no tiene visualizaciones configuradas.</p>
+      <!-- Conclusion Section -->
+      {% if project.conclusion %}
+          <section class="container-max conclusion-section">
+              <div class="conclusion-card">
+                  <h2 class="conclusion-title">Resonancia Colectiva</h2>
+                  <p class="conclusion-text">{{ project.conclusion|linebreaksbr }}</p>
+                  <a href="#" class="conclusion-button">
+                      Explorar Archivo Completo
+                      <span class="material-symbols-outlined">arrow_forward</span>
+                  </a>
+              </div>
+          </section>
       {% endif %}
-    </section>
   </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+      <div class="footer-nav">
+          <div class="footer-brand">Datapolis</div>
+          <div class="footer-links">
+              <a href="#" class="footer-link">Política de Privacidad</a>
+              <a href="#" class="footer-link">Metodología</a>
+              <a href="#" class="footer-link">Contacto</a>
+          </div>
+          <div class="footer-copy">
+              © 2026 Datapolis Editorial Research
+          </div>
+      </div>
+  </footer>
 
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <script>
@@ -174,6 +296,8 @@
         height: chartHeight,
         showlegend: showLegend,
         margin: { t: 50, r: 20, b: 60, l: 50 },
+        paper_bgcolor: 'rgba(0,0,0,0)',
+        plot_bgcolor: 'rgba(0,0,0,0)',
         xaxis: { title: { text: xAxisTitle } },
         yaxis: { title: { text: yAxisTitle } }
       };
