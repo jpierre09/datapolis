@@ -96,6 +96,48 @@ class DataSourceUploadForm(forms.ModelForm):
             field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
 
 
+class DataSourceEditForm(forms.ModelForm):
+    file = forms.FileField(
+        label="Reemplazar archivo",
+        required=False,
+        help_text="Opcional. Sube un nuevo archivo .csv, .xlsx o .xls para reemplazar la fuente de datos actual. Al hacerlo, se actualizará automáticamente la metadata.",
+        widget=forms.ClearableFileInput(attrs={"accept": ".csv,.xlsx,.xls"}),
+    )
+
+    class Meta:
+        model = DataSource
+        fields = ["name", "source_type", "is_active", "file"]
+        labels = {
+            "name": "Nombre del dataset",
+            "source_type": "Tipo de archivo",
+            "is_active": "Dataset Activo",
+        }
+        help_texts = {
+            "name": "Usa un nombre claro para identificar el dataset dentro del proyecto.",
+            "source_type": "Elige CSV o Excel según el tipo de archivo que vas a subir si vas a reemplazarlo.",
+            "is_active": "Las fuentes de datos inactivas están ocultas y no disponibles para nuevas visualizaciones.",
+        }
+        widgets = {
+            "name": forms.TextInput(attrs={"placeholder": "Ej. Ventas regionales 2026"}),
+            "source_type": forms.Select(),
+            "is_active": forms.CheckboxInput(),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        for field_name, field in self.fields.items():
+            widget_class = "dashboard-input"
+            if isinstance(field.widget, forms.Select):
+                widget_class = "dashboard-input dashboard-select"
+            elif isinstance(field.widget, forms.CheckboxInput):
+                widget_class = ""  # Keep browser/dashboard default styles for checkbox
+
+            existing_classes = field.widget.attrs.get("class", "")
+            if widget_class:
+                field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+
 class VisualizationCreateForm(forms.ModelForm):
     VISUALIZATION_TYPE_CHOICES = [
         (ProjectVisualization.VisualizationType.BAR_CHART, "Barras"),

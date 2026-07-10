@@ -47,6 +47,17 @@
             <p class="dashboard-help-text">{{ form.file.help_text }}</p>
             {% for error in form.file.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
           </div>
+
+          {% if form.is_active %}
+            <div class="dashboard-field dashboard-field--full dashboard-checkbox-row">
+              <label class="dashboard-checkbox-label" for="{{ form.is_active.id_for_label }}">
+                {{ form.is_active }}
+                <span>{{ form.is_active.label }}</span>
+              </label>
+              <p class="dashboard-help-text">{{ form.is_active.help_text }}</p>
+              {% for error in form.is_active.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+          {% endif %}
         </div>
       </section>
 
@@ -60,7 +71,10 @@
         </div>
 
         <div class="dashboard-form-actions">
-          <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+          <button type="submit" name="action" value="save" class="dashboard-button-primary">{{ submit_label }}</button>
+          {% if is_edit %}
+            <button type="submit" name="action" value="reprocess" class="dashboard-button-secondary">Re-procesar metadata</button>
+          {% endif %}
           <a href="{{ cancel_url }}" class="dashboard-button-secondary">Cancelar</a>
         </div>
       </section>

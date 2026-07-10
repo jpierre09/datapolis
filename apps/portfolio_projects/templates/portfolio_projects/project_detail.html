@@ -74,7 +74,7 @@
                       {% for item in visualization_payloads %}
                           <div class="visualization-card {% if visualization_payloads|length == 1 or forloop.counter|divisibleby:3 %}full-width{% endif %}">
                               <h3 class="visualization-title">{{ item.visualization.title }}</h3>
-                              
+
                               <div class="visualization-render-area">
                               {% if item.error %}
                                   <div class="visualization-error">

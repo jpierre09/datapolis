@@ -24,6 +24,15 @@
         </header>
 
         <main class="content">
+          {% if messages %}
+            <div class="dashboard-messages">
+              {% for message in messages %}
+                <div class="dashboard-message {% if 'error' in message.tags %}dashboard-message-error{% elif 'warning' in message.tags %}dashboard-message-warning{% else %}dashboard-message-success{% endif %}">
+                  {{ message }}
+                </div>
+              {% endfor %}
+            </div>
+          {% endif %}
           {% block dashboard_content %}{% endblock %}
         </main>
 

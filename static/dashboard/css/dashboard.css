@@ -1676,3 +1676,36 @@ body.dashboard-preview-modal-open {
     position: static;
   }
 }
+
+/* Dashboard Messages System */
+.dashboard-messages {
+  margin-bottom: 24px;
+}
+
+.dashboard-message {
+  margin-bottom: 12px;
+  padding: 16px;
+  border-radius: 8px;
+  font-size: 14px;
+  line-height: 1.45;
+  border: 1px solid rgba(191, 200, 199, 0.3);
+}
+
+.dashboard-message-success {
+  background-color: #e9f6f9;
+  color: #226362;
+  border-color: rgba(62, 124, 123, 0.25);
+}
+
+.dashboard-message-warning {
+  background-color: #ffd9e0;
+  color: #764f58;
+  border-color: rgba(216, 167, 177, 0.55);
+}
+
+.dashboard-message-error {
+  background-color: #ffdad6;
+  color: #ba1a1a;
+  border-color: rgba(186, 26, 26, 0.25);
+}
+

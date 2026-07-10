@@ -1,3 +1,4 @@
+from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
@@ -11,7 +12,7 @@ from apps.data_visualizations.models import ProjectVisualization
 from apps.portfolio_projects.models import PortfolioProject
 
 from .dataset_columns import analyze_data_source_columns
-from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm
+from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm, DataSourceEditForm
 from .services import build_overview_activity, build_project_publish_checklist
 
 STATUS_LABELS = {
@@ -385,6 +386,144 @@ def dataset_detail(request, project_slug, dataset_id):
             "data_source": data_source,
             "status_label": STATUS_LABELS.get(project.status, project.status),
             **data_source_context,
+        },
+    )
+
+
+def _check_visualization_column_mismatches(data_source):
+    if not data_source.columns_schema or "columns" not in data_source.columns_schema:
+        return []
+
+    columns = data_source.columns_schema.get("columns", [])
+    column_names = {col.get("name") for col in columns if "name" in col}
+
+    active_visualizations = data_source.project_visualizations.filter(is_active=True)
+    warnings = []
+    for vis in active_visualizations:
+        vis_warnings = []
+        if vis.x_axis_column and vis.x_axis_column not in column_names:
+            vis_warnings.append(f"eje X '{vis.x_axis_column}'")
+        if vis.y_axis_column and vis.y_axis_column not in column_names:
+            vis_warnings.append(f"eje Y '{vis.y_axis_column}'")
+
+        if vis_warnings:
+            warnings.append(
+                f"La visualización '{vis.title}' (ID {vis.id}) hace referencia a {', '.join(vis_warnings)} que ya no existe en el dataset."
+            )
+    return warnings
+
+
+def dataset_edit(request, project_slug, dataset_id):
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    data_source = get_object_or_404(
+        DataSource.objects.select_related("project"),
+        pk=dataset_id,
+        project=project,
+    )
+
+    action = request.POST.get("action", "save") if request.method == "POST" else "view"
+
+    if request.method == "POST":
+        if action == "reprocess":
+            # Re-process current file
+            try:
+                columns_schema = extract_metadata(data_source)
+                data_source.columns_schema = columns_schema
+                data_source.row_count = columns_schema.get("row_count")
+                data_source.processing_status = DataSource.ProcessingStatus.PROCESSED
+                data_source.processing_error = ""
+                messages.success(request, f"La metadata de {data_source.name} ha sido re-procesada exitosamente.")
+            except Exception as exc:
+                data_source.columns_schema = {}
+                data_source.row_count = None
+                data_source.processing_status = DataSource.ProcessingStatus.FAILED
+                data_source.processing_error = f"La extracción de metadata falló: {exc}"
+                messages.error(request, f"Error al re-procesar metadata: {exc}")
+
+            data_source.save(
+                update_fields=[
+                    "columns_schema",
+                    "row_count",
+                    "processing_status",
+                    "processing_error",
+                    "updated_at",
+                ]
+            )
+
+            # Check for visualization column mismatches after reprocessing
+            warnings = _check_visualization_column_mismatches(data_source)
+            for warning in warnings:
+                messages.warning(request, warning)
+
+            return redirect("dashboard:dataset_detail", project_slug=project.slug, dataset_id=data_source.id)
+
+        else:
+            form = DataSourceEditForm(request.POST, request.FILES, instance=data_source)
+            if form.is_valid():
+                ds = form.save(commit=False)
+                new_file = form.cleaned_data.get("file")
+
+                # Check if file is being replaced
+                file_replaced = False
+                if new_file:
+                    ds.original_filename = new_file.name.rsplit("/", 1)[-1]
+                    ds.processing_status = DataSource.ProcessingStatus.PENDING
+                    ds.processing_error = ""
+                    file_replaced = True
+
+                ds.save()
+
+                if file_replaced:
+                    try:
+                        columns_schema = extract_metadata(ds)
+                        ds.columns_schema = columns_schema
+                        ds.row_count = columns_schema.get("row_count")
+                        ds.processing_status = DataSource.ProcessingStatus.PROCESSED
+                        ds.processing_error = ""
+                        messages.success(request, "El archivo ha sido reemplazado y la metadata ha sido procesada exitosamente.")
+                    except Exception as exc:
+                        ds.columns_schema = {}
+                        ds.row_count = None
+                        ds.processing_status = DataSource.ProcessingStatus.FAILED
+                        ds.processing_error = f"La extracción de metadata falló: {exc}"
+                        messages.error(request, f"Error al extraer metadata del nuevo archivo: {exc}")
+
+                    ds.save(
+                        update_fields=[
+                            "original_filename",
+                            "columns_schema",
+                            "row_count",
+                            "processing_status",
+                            "processing_error",
+                            "updated_at",
+                        ]
+                    )
+
+                    # Check for visualization column mismatches after replacing file
+                    warnings = _check_visualization_column_mismatches(ds)
+                    for warning in warnings:
+                        messages.warning(request, warning)
+                else:
+                    messages.success(request, f"El dataset {ds.name} ha sido actualizado correctamente.")
+
+                return redirect("dashboard:dataset_detail", project_slug=project.slug, dataset_id=ds.id)
+    else:
+        form = DataSourceEditForm(instance=data_source)
+
+    return render(
+        request,
+        "dashboard/dataset_create.html",
+        {
+            "dashboard_section": "projects",
+            "project": project,
+            "data_source": data_source,
+            "form": form,
+            "page_title": f"Dashboard | Editar dataset {data_source.name}",
+            "page_heading": "Editar dataset",
+            "page_description": "Modifica las opciones básicas del dataset o reemplaza el archivo fuente.",
+            "submit_label": "Guardar cambios",
+            "cancel_url": reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}),
+            "is_edit": True,
         },
     )
 

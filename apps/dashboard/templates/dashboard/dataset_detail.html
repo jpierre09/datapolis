@@ -20,6 +20,7 @@
 
         <div class="dashboard-form-actions dashboard-project-detail-sidebar-actions">
           <a href="{% url 'dashboard:visualization_create' project.slug data_source.id %}" class="dashboard-button-primary">Crear visualización</a>
+          <a href="{% url 'dashboard:dataset_edit' project.slug data_source.id %}" class="dashboard-button-secondary">Editar dataset</a>
           <a href="{% url 'dashboard:project_detail' project.slug %}" class="dashboard-button-secondary">Volver al proyecto</a>
         </div>
       </article>
@@ -32,6 +33,9 @@
             <h2>{{ data_source.name }}</h2>
             <p>{{ project.title }}</p>
           </div>
+        </div>
+        <div>
+          <a href="{% url 'dashboard:dataset_edit' project.slug data_source.id %}" class="dashboard-button-secondary">Editar dataset</a>
         </div>
       </header>
 
