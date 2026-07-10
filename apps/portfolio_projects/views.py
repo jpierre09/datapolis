@@ -4,7 +4,7 @@ from apps.data_visualizations.engine.builder import build_visualization_payload
 from apps.data_visualizations.engine.exceptions import VisualizationEngineError
 from apps.data_visualizations.models import ProjectVisualization
 
-from .models import PortfolioProject
+from .models import PortfolioProject, ProjectCategory
 
 
 def project_list(request):
@@ -13,7 +13,30 @@ def project_list(request):
 		.select_related("category", "project_type", "owner")
 		.order_by("-created_at")
 	)
-	return render(request, "portfolio_projects/project_list.html", {"projects": projects})
+
+	# Group projects by category
+	categories_with_projects = []
+	categories = ProjectCategory.objects.all().order_by("name")
+
+	for category in categories:
+		cat_projects = [p for p in projects if p.category_id == category.id]
+		if cat_projects:
+			categories_with_projects.append({
+				"category": category,
+				"projects": cat_projects
+			})
+
+	# Look for any projects that don't fall into ProjectCategory queried (just in case)
+	# Though ProjectCategory is a ForeignKey on PortfolioProject, so they must have one.
+
+	return render(
+		request,
+		"portfolio_projects/project_list.html",
+		{
+			"projects": projects,
+			"categories_with_projects": categories_with_projects,
+		}
+	)
 
 
 def project_detail(request, slug):

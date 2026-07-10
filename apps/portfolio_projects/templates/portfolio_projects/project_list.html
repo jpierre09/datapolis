@@ -1,24 +1,94 @@
 {% extends "base/base.html" %}
 
-{% block content %}
-  <main>
-    <h1>Projects</h1>
+{% load static %}
 
-    {% if projects %}
-      <ul>
-        {% for project in projects %}
-          <li>
-            <h2>{{ project.title }}</h2>
-            <p><strong>Question:</strong> {{ project.question }}</p>
-            <p><strong>Category:</strong> {{ project.category }}</p>
-            <p><strong>Project type:</strong> {{ project.project_type }}</p>
-            <p><strong>Status:</strong> {{ project.status }}</p>
-            <p><a href="{% url 'portfolio_projects:project_detail' project.slug %}">View detail</a></p>
-          </li>
-        {% endfor %}
-      </ul>
-    {% else %}
-      <p>No published projects yet.</p>
-    {% endif %}
+{% block content %}
+  <link rel="stylesheet" href="{% static 'portfolio_projects/css/public_project.css' %}">
+
+  <!-- Navigation Bar -->
+  <nav class="navbar">
+      <div class="navbar-container">
+          <a href="/" class="navbar-brand">Datapolis</a>
+          <div class="navbar-links">
+              <a href="#" class="navbar-link">Investigación</a>
+              <a href="{% url 'portfolio_projects:project_list' %}" class="navbar-link active">Proyectos</a>
+              <a href="#" class="navbar-link">Archivo</a>
+          </div>
+          <div class="navbar-actions">
+              <span class="material-symbols-outlined">search</span>
+              <span class="material-symbols-outlined">bookmark</span>
+          </div>
+      </div>
+  </nav>
+
+  <main>
+      <!-- Portfolio Hero -->
+      <section class="portfolio-header">
+          <div class="container-max">
+              <h1 class="hero-title">
+                  {% if projects %}
+                      {% with first_p=projects.0 %}
+                          Portafolio de {{ first_p.owner.get_full_name|default:first_p.owner.username }}
+                      {% endwith %}
+                  {% else %}
+                      Portafolio del Analista
+                  {% endif %}
+              </h1>
+              <!-- Tagline de texto estático (placeholder a reemplazar cuando exista perfil real) -->
+              <p class="portfolio-tagline">
+                  Exploración de datos independiente, periodismo de datos y análisis visual sobre fenómenos complejos globales.
+              </p>
+          </div>
+      </section>
+
+      <!-- Projects Grouped by Category -->
+      <section class="container-max" style="padding-top: 20px; padding-bottom: 80px;">
+          {% if categories_with_projects %}
+              {% for group in categories_with_projects %}
+                  <div class="portfolio-category-section">
+                      <h2 class="portfolio-category-title">{{ group.category.name }}</h2>
+                      <div class="portfolio-grid">
+                          {% for project in group.projects %}
+                              <a href="{% url 'portfolio_projects:project_detail' project.slug %}" class="portfolio-card">
+                                  <div class="portfolio-card-header">
+                                      <div class="badges-row" style="margin-bottom: 12px;">
+                                          <span class="badge-editorial" style="font-size: 10px; padding: 4px 8px;">{{ project.project_type.name }}</span>
+                                      </div>
+                                      <h3 class="portfolio-card-title">{{ project.title }}</h3>
+                                      <p class="portfolio-card-question">"{{ project.question }}"</p>
+                                  </div>
+                                  <div class="portfolio-card-actions">
+                                      <span class="portfolio-card-link">
+                                          Explorar análisis
+                                          <span class="material-symbols-outlined" style="font-size: 16px;">arrow_forward</span>
+                                      </span>
+                                  </div>
+                              </a>
+                          {% endfor %}
+                      </div>
+                  </div>
+              {% endfor %}
+          {% else %}
+              <div class="portfolio-empty-container">
+                  <h2 class="portfolio-empty-title">Sin proyectos publicados</h2>
+                  <p class="portfolio-empty-text">Este portafolio aún no tiene investigaciones ni análisis publicados para consulta general.</p>
+              </div>
+          {% endif %}
+      </section>
   </main>
+
+  <!-- Footer -->
+  <footer class="footer">
+      <div class="footer-nav">
+          <div class="footer-brand">Datapolis</div>
+          <div class="footer-links">
+              <a href="#" class="footer-link">Política de Privacidad</a>
+              <a href="#" class="footer-link">Metodología</a>
+              <a href="#" class="footer-link">Contacto</a>
+          </div>
+          <div class="footer-copy">
+              © 2026 Datapolis Editorial Research
+          </div>
+      </div>
+  </footer>
 {% endblock %}

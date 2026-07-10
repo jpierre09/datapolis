@@ -381,6 +381,10 @@ body {
   align-items: start;
 }
 
+.dashboard-profile-layout--full-width {
+  display: block;
+}
+
 .profile-panel {
   display: flex;
   min-width: 0;
