@@ -201,6 +201,30 @@ def project_list(request):
     )
 
 
+def dataset_list(request):
+    datasets_qs = (
+        DataSource.objects.select_related("project")
+        .order_by("-uploaded_at")
+    )
+    datasets = list(datasets_qs)
+
+    for ds in datasets:
+        ds.processing_status_label = DATA_SOURCE_STATUS_LABELS.get(ds.processing_status, ds.processing_status)
+        ds.source_type_label = ds.get_source_type_display()
+
+    metrics = _build_dashboard_metrics()
+
+    return render(
+        request,
+        "dashboard/dataset_list.html",
+        {
+            "dashboard_section": "datasets",
+            "datasets": datasets,
+            "metrics": metrics,
+        },
+    )
+
+
 def project_detail(request, slug):
     data_sources_prefetch = Prefetch(
         "data_sources",

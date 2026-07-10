@@ -1,0 +1,64 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}Dashboard | Datasets{% endblock %}
+{% block page_title %}Datasets{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-profile-layout dashboard-profile-grid">
+    <aside class="profile-panel dashboard-profile-sidebar">
+      {% include "dashboard/partials/analyst_profile_card.html" %}
+    </aside>
+
+    <div class="main-panel dashboard-profile-main">
+      <header class="page-header section-head-inline dashboard-profile-page-header dashboard-projects-header">
+        <div>
+          <h2>Mis Datasets</h2>
+          <p>Gestiona todos tus conjuntos de datos cargados cross-proyecto.</p>
+        </div>
+      </header>
+
+      <section class="dashboard-grid dashboard-dataset-grid">
+        {% for data_source in datasets %}
+          <article class="dashboard-card dashboard-card-dashed dashboard-dataset-card">
+            <div class="dashboard-card-header" style="display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 8px;">
+              <div>
+                <h3 class="dashboard-card-title" style="margin: 0; font-size: 1.15rem; color: var(--color-primary-dark);">{{ data_source.name }}</h3>
+                <p class="dashboard-dataset-original" style="margin: 4px 0 0; font-size: 0.86rem; color: #5a6b6f;">
+                  {{ data_source.original_filename|default:"Sin nombre original" }}
+                </p>
+              </div>
+              <div style="display: flex; flex-direction: column; align-items: flex-end; gap: 6px;">
+                <span class="dashboard-badge">{{ data_source.processing_status_label }}</span>
+                {% if data_source.is_active %}
+                  <span class="dashboard-badge dashboard-publish-checklist-badge--ready">Activo</span>
+                {% else %}
+                  <span class="dashboard-badge dashboard-publish-checklist-badge--pending">Inactivo</span>
+                {% endif %}
+              </div>
+            </div>
+
+            <ul class="dashboard-card-meta dashboard-dataset-meta" style="list-style: none; padding: 0; margin: 12px 0; font-size: 0.9rem; display: grid; gap: 6px; color: #3f4948;">
+              <li><strong>Proyecto:</strong> <a href="{% url 'dashboard:project_detail' data_source.project.slug %}" class="dashboard-card-link" style="color: var(--color-primary-dark); font-weight: 550; text-decoration: none;">{{ data_source.project.title }}</a></li>
+              <li><strong>Tipo de archivo:</strong> {{ data_source.source_type_label }}</li>
+              <li><strong>Total de filas:</strong> {% if data_source.row_count is not None %}{{ data_source.row_count }}{% else %}Sin procesar{% endif %}</li>
+              <li><strong>Fecha de subida:</strong> {{ data_source.uploaded_at|date:"d/m/Y H:i" }}</li>
+            </ul>
+
+            <div class="dashboard-dataset-actions" style="margin-top: auto; padding-top: 12px; border-top: 1px dashed rgba(191, 200, 199, 0.4); display: flex; gap: 8px;">
+              <a href="{% url 'dashboard:dataset_detail' data_source.project.slug data_source.id %}" class="dashboard-button-secondary" style="font-size: 0.85rem; padding: 6px 12px; text-decoration: none; text-align: center; border-radius: 6px;">Ver detalle</a>
+              <a href="{% url 'dashboard:visualization_create' data_source.project.slug data_source.id %}" class="dashboard-button-primary" style="font-size: 0.85rem; padding: 6px 12px; text-decoration: none; text-align: center; border-radius: 6px;">Crear visualización</a>
+            </div>
+
+            {% if data_source.processing_status == "failed" and data_source.processing_error %}
+              <p class="dashboard-dataset-error" style="margin-top: 10px; font-size: 0.85rem; color: #ba1a1a; background-color: #ffdad6; padding: 8px; border-radius: 6px; border: 1px solid rgba(186, 26, 26, 0.15);">{{ data_source.processing_error }}</p>
+            {% endif %}
+          </article>
+        {% empty %}
+          <div class="dashboard-empty-state" style="grid-column: 1 / -1; text-align: center; padding: 48px; border: 1px dashed var(--color-neutral); border-radius: 12px; background-color: var(--color-card);">
+            <p>Aún no tienes ningún conjunto de datos registrado.</p>
+          </div>
+        {% endfor %}
+      </section>
+    </div>
+  </section>
+{% endblock %}
