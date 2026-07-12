@@ -7,3 +7,4 @@ psycopg[binary]==3.2.9
 sqlparse==0.5.5
 gunicorn
 whitenoise
+pillow
