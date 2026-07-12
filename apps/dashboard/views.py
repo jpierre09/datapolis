@@ -1,3 +1,4 @@
+from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
@@ -118,6 +119,7 @@ def _get_dashboard_owner():
     return user
 
 
+@login_required
 def overview(request):
     owner = request.user if request.user.is_authenticated else _get_dashboard_owner()
     active_data_sources_prefetch = Prefetch(
@@ -151,6 +153,7 @@ def overview(request):
     )
 
 
+@login_required
 def project_list(request):
     status_filter = request.GET.get("status", "all")
     if status_filter not in STATUS_FILTERS:
@@ -201,6 +204,7 @@ def project_list(request):
     )
 
 
+@login_required
 def dataset_list(request):
     datasets_qs = (
         DataSource.objects.select_related("project")
@@ -225,6 +229,7 @@ def dataset_list(request):
     )
 
 
+@login_required
 def project_detail(request, slug):
     data_sources_prefetch = Prefetch(
         "data_sources",
@@ -278,6 +283,7 @@ def project_detail(request, slug):
     )
 
 
+@login_required
 def project_create(request):
     if request.method == "POST":
         form = ProjectCreateForm(request.POST)
@@ -309,6 +315,7 @@ def project_create(request):
     )
 
 
+@login_required
 def project_edit(request, slug):
     project = get_object_or_404(PortfolioProject.objects.select_related("category", "project_type"), slug=slug)
 
@@ -335,6 +342,7 @@ def project_edit(request, slug):
     )
 
 
+@login_required
 def project_add_dataset(request, slug):
     project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=slug)
 
@@ -391,6 +399,7 @@ def project_add_dataset(request, slug):
     )
 
 
+@login_required
 def dataset_detail(request, project_slug, dataset_id):
     project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
     data_source = get_object_or_404(
@@ -437,6 +446,7 @@ def _check_visualization_column_mismatches(data_source):
     return warnings
 
 
+@login_required
 def dataset_edit(request, project_slug, dataset_id):
     project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
     data_source = get_object_or_404(
@@ -552,6 +562,7 @@ def dataset_edit(request, project_slug, dataset_id):
     )
 
 
+@login_required
 def visualization_create(request, project_slug, dataset_id):
     project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
     data_source = get_object_or_404(
@@ -610,6 +621,7 @@ def visualization_create(request, project_slug, dataset_id):
     )
 
 
+@login_required
 def visualization_edit(request, project_slug, visualization_id):
     project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
     visualization = get_object_or_404(

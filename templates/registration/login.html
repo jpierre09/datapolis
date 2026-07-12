@@ -1,0 +1,54 @@
+{% load static %}
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Datapolis | Iniciar sesión</title>
+    <link rel="icon" type="image/svg+xml" sizes="any" href="{% static 'images/brand/datapolis-icono.svg' %}">
+    <link rel="icon" type="image/png" href="{% static 'images/brand/datapolis-icono.png' %}">
+    <!-- Reutilizando dashboard.css para consistencia con el diseño del dashboard -->
+    <link rel="stylesheet" href="{% static 'dashboard/css/dashboard.css' %}">
+  </head>
+  <body style="background: var(--color-background); display: flex; align-items: center; justify-content: center; min-height: 100vh; padding: 20px;">
+    <div style="width: 100%; max-width: 440px;">
+      <div style="text-align: center; margin-bottom: 24px;">
+        <img src="{% static 'images/brand/datapolis-logo.png' %}" alt="Datapolis" style="height: 48px; max-width: 100%; object-fit: contain;">
+      </div>
+
+      <div class="dashboard-card" style="padding: 32px; box-shadow: 0 4px 20px rgba(31, 50, 53, 0.08); border: 1px solid var(--color-neutral);">
+        <h2 style="font-family: 'Libre Caslon Text', Georgia, serif; font-size: 24px; color: var(--color-primary-dark); margin-bottom: 8px; text-align: center;">Iniciar sesión</h2>
+        <p style="color: #5a6b6f; font-size: 14px; text-align: center; margin-bottom: 24px;">Ingresa tus credenciales para acceder al panel de Datapolis.</p>
+
+        <form method="post" class="dashboard-form">
+          {% csrf_token %}
+
+          {% if form.errors %}
+            <div class="dashboard-form-errors" style="margin-bottom: 20px; font-size: 14px; padding: 10px 12px; border-radius: 8px;">
+              Usuario o contraseña incorrectos. Por favor, verifica tus datos de acceso.
+            </div>
+          {% endif %}
+
+          <div class="dashboard-field" style="margin-bottom: 16px;">
+            <label class="dashboard-label" for="id_username">Usuario o correo</label>
+            <input type="text" name="username" autofocus maxlength="254" required id="id_username" class="dashboard-input" placeholder="Ej. analista" style="width: 100%;">
+          </div>
+
+          <div class="dashboard-field" style="margin-bottom: 24px;">
+            <label class="dashboard-label" for="id_password">Contraseña</label>
+            <input type="password" name="password" required id="id_password" class="dashboard-input" placeholder="••••••••" style="width: 100%;">
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 12px;">
+            <button type="submit" class="dashboard-button-primary" style="width: 100%; justify-content: center; height: 42px; font-size: 14px;">Ingresar al panel</button>
+            <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary" style="width: 100%; justify-content: center; height: 42px; font-size: 14px; text-decoration: none; display: flex; align-items: center; border-radius: 8px;">← Volver al portafolio público</a>
+          </div>
+        </form>
+      </div>
+
+      <div style="text-align: center; margin-top: 24px; color: #5a6b6f; font-size: 13px;">
+        © 2026 Datapolis Editorial Research
+      </div>
+    </div>
+  </body>
+</html>
