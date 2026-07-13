@@ -1,6 +1,5 @@
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.contrib.auth import get_user_model
 from django.db.models import Prefetch
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.text import slugify
@@ -105,11 +104,24 @@ def _visualization_form_page_context(
 
 def _build_dashboard_metrics():
     return {
-        "total_projects": PortfolioProject.objects.count(),
-        "published_projects": PortfolioProject.objects.filter(status=PortfolioProject.Status.PUBLISHED).count(),
-        "draft_projects": PortfolioProject.objects.filter(status=PortfolioProject.Status.DRAFT).count(),
-        "datasets": DataSource.objects.filter(is_active=True).count(),
-        "visualizations": ProjectVisualization.objects.filter(is_active=True).count(),
+        "total_projects": 0,
+        "published_projects": 0,
+        "draft_projects": 0,
+        "datasets": 0,
+        "visualizations": 0,
+    }
+
+
+def _build_dashboard_metrics_for_owner(owner):
+    if owner is None:
+        return _build_dashboard_metrics()
+
+    return {
+        "total_projects": PortfolioProject.objects.filter(owner=owner).count(),
+        "published_projects": PortfolioProject.objects.filter(owner=owner, status=PortfolioProject.Status.PUBLISHED).count(),
+        "draft_projects": PortfolioProject.objects.filter(owner=owner, status=PortfolioProject.Status.DRAFT).count(),
+        "datasets": DataSource.objects.filter(project__owner=owner, is_active=True).count(),
+        "visualizations": ProjectVisualization.objects.filter(portfolio_project__owner=owner, is_active=True).count(),
     }
 
 
@@ -127,21 +139,17 @@ def _build_visualization_preview_context(visualization):
     return preview_payload, preview_error
 
 
-def _get_dashboard_owner():
-    user = get_user_model().objects.order_by("id").first()
-    return user
-
-
 @login_required
 def overview(request):
-    owner = request.user if request.user.is_authenticated else _get_dashboard_owner()
+    owner = request.user
     active_data_sources_prefetch = Prefetch(
         "data_sources",
         queryset=DataSource.objects.filter(is_active=True).order_by("-uploaded_at"),
         to_attr="active_data_sources",
     )
     recent_projects = list(
-        PortfolioProject.objects.select_related("project_type", "category")
+        PortfolioProject.objects.filter(owner=owner)
+        .select_related("project_type", "category")
         .prefetch_related(active_data_sources_prefetch)
         .order_by("-updated_at")[:6]
     )
@@ -151,7 +159,7 @@ def overview(request):
         main_dataset = project.active_data_sources[0] if project.active_data_sources else None
         project.main_dataset_name = main_dataset.name if main_dataset else "Sin dataset"
 
-    metrics = _build_dashboard_metrics()
+    metrics = _build_dashboard_metrics_for_owner(owner)
     activity_context = build_overview_activity(owner, recent_limit=3)
 
     return render(
@@ -182,7 +190,7 @@ def project_list(request):
         queryset=ProjectVisualization.objects.filter(is_active=True).order_by("display_order", "id"),
         to_attr="active_visualizations",
     )
-    projects_qs = PortfolioProject.objects.select_related("project_type", "category").prefetch_related(
+    projects_qs = PortfolioProject.objects.filter(owner=request.user).select_related("project_type", "category").prefetch_related(
         active_data_sources_prefetch,
         active_visualizations_prefetch,
     )
@@ -197,7 +205,7 @@ def project_list(request):
         project.main_dataset_name = main_dataset.name if main_dataset else "Sin dataset"
         project.visualizations_count = len(project.active_visualizations)
 
-    metrics = _build_dashboard_metrics()
+    metrics = _build_dashboard_metrics_for_owner(request.user)
 
     return render(
         request,
@@ -221,6 +229,7 @@ def project_list(request):
 def dataset_list(request):
     datasets_qs = (
         DataSource.objects.select_related("project")
+        .filter(project__owner=request.user)
         .order_by("-uploaded_at")
     )
     datasets = list(datasets_qs)
@@ -229,7 +238,7 @@ def dataset_list(request):
         ds.processing_status_label = DATA_SOURCE_STATUS_LABELS.get(ds.processing_status, ds.processing_status)
         ds.source_type_label = ds.get_source_type_display()
 
-    metrics = _build_dashboard_metrics()
+    metrics = _build_dashboard_metrics_for_owner(request.user)
 
     return render(
         request,
@@ -291,6 +300,7 @@ def project_detail(request, slug):
     project = get_object_or_404(
         PortfolioProject.objects.select_related("category", "project_type")
         .prefetch_related(data_sources_prefetch, active_visualizations_prefetch),
+        owner=request.user,
         slug=slug,
     )
 
@@ -332,15 +342,11 @@ def project_create(request):
     if request.method == "POST":
         form = ProjectCreateForm(request.POST)
         if form.is_valid():
-            user = request.user if request.user.is_authenticated else get_user_model().objects.order_by("id").first()
-            if not user:
-                form.add_error(None, "No hay usuarios disponibles para asignar el proyecto.")
-            else:
-                project = form.save(commit=False)
-                project.owner = user
-                project.slug = _build_unique_slug(project.title)
-                project.save()
-                return redirect("dashboard:project_detail", slug=project.slug)
+            project = form.save(commit=False)
+            project.owner = request.user
+            project.slug = _build_unique_slug(project.title)
+            project.save()
+            return redirect("dashboard:project_detail", slug=project.slug)
     else:
         form = ProjectCreateForm()
 
@@ -361,7 +367,11 @@ def project_create(request):
 
 @login_required
 def project_edit(request, slug):
-    project = get_object_or_404(PortfolioProject.objects.select_related("category", "project_type"), slug=slug)
+    project = get_object_or_404(
+        PortfolioProject.objects.select_related("category", "project_type"),
+        owner=request.user,
+        slug=slug,
+    )
 
     if request.method == "POST":
         form = ProjectCreateForm(request.POST, instance=project)
@@ -388,7 +398,7 @@ def project_edit(request, slug):
 
 @login_required
 def project_add_dataset(request, slug):
-    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=slug)
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), owner=request.user, slug=slug)
 
     if request.method == "POST":
         form = DataSourceUploadForm(request.POST, request.FILES)
@@ -445,7 +455,7 @@ def project_add_dataset(request, slug):
 
 @login_required
 def dataset_detail(request, project_slug, dataset_id):
-    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), owner=request.user, slug=project_slug)
     data_source = get_object_or_404(
         DataSource.objects.select_related("project"),
         pk=dataset_id,
@@ -492,7 +502,7 @@ def _check_visualization_column_mismatches(data_source):
 
 @login_required
 def dataset_edit(request, project_slug, dataset_id):
-    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), owner=request.user, slug=project_slug)
     data_source = get_object_or_404(
         DataSource.objects.select_related("project"),
         pk=dataset_id,
@@ -608,7 +618,7 @@ def dataset_edit(request, project_slug, dataset_id):
 
 @login_required
 def visualization_create(request, project_slug, dataset_id):
-    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), owner=request.user, slug=project_slug)
     data_source = get_object_or_404(
         DataSource.objects.select_related("project"),
         pk=dataset_id,
@@ -667,7 +677,7 @@ def visualization_create(request, project_slug, dataset_id):
 
 @login_required
 def visualization_edit(request, project_slug, visualization_id):
-    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), slug=project_slug)
+    project = get_object_or_404(PortfolioProject.objects.only("id", "slug", "title"), owner=request.user, slug=project_slug)
     visualization = get_object_or_404(
         ProjectVisualization.objects.select_related("portfolio_project", "source_dataset"),
         pk=visualization_id,
