@@ -25,22 +25,38 @@
       <!-- Portfolio Hero -->
       <section class="portfolio-header">
           <div class="container-max">
-              <h1 class="hero-title">
-                  {% if projects %}
-                      {% with first_p=projects.0 %}
-                          Portafolio de {{ first_p.owner.get_full_name|default:first_p.owner.username }}
-                      {% endwith %}
-                  {% else %}
-                      Portafolio del Analista
-                  {% endif %}
-              </h1>
-              <!--
-                PLACEHOLDER TEMPORAL: Tagline/bio de texto estático a reemplazar
-                cuando se asocie un PublicProfile o perfil real del analista.
-              -->
-              <p class="portfolio-tagline">
-                  Exploración de datos independiente, periodismo de datos y análisis visual sobre fenómenos complejos globales.
-              </p>
+              <div class="portfolio-profile-shell">
+                  <div class="portfolio-profile-avatar">
+                      {% if portfolio_profile.avatar_url %}
+                          <img src="{{ portfolio_profile.avatar_url }}" alt="Avatar de {{ portfolio_profile.display_name }}">
+                      {% else %}
+                          <span>{{ portfolio_profile.display_name|slice:":1" }}</span>
+                      {% endif %}
+                  </div>
+                  <div class="portfolio-profile-copy">
+                      <p class="portfolio-profile-kicker">Perfil público</p>
+                      <h1 class="hero-title">Portafolio de {{ portfolio_profile.display_name }}</h1>
+                      <p class="portfolio-tagline">{{ portfolio_profile.headline }}</p>
+                      <p class="portfolio-profile-bio">{{ portfolio_profile.bio }}</p>
+                      {% if portfolio_profile.location %}
+                          <p class="portfolio-profile-location">{{ portfolio_profile.location }}</p>
+                      {% endif %}
+                      {% if portfolio_profile.skills %}
+                          <div class="portfolio-skill-chips">
+                              {% for skill in portfolio_profile.skills %}
+                                  <span class="portfolio-skill-chip">{{ skill }}</span>
+                              {% endfor %}
+                          </div>
+                      {% endif %}
+                      {% if portfolio_profile.links %}
+                          <div class="portfolio-link-row">
+                              {% for link in portfolio_profile.links %}
+                                  <a class="portfolio-link-pill" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>
+                              {% endfor %}
+                          </div>
+                      {% endif %}
+                  </div>
+              </div>
           </div>
       </section>
 

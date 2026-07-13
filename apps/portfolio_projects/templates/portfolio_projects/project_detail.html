@@ -31,9 +31,26 @@
                       <span class="badge-editorial">{{ project.project_type.name|default:project.project_type }}</span>
                   </div>
                   <h1 class="hero-title">{{ project.title }}</h1>
-                  <p class="hero-meta-label">Por {{ project.owner.get_full_name|default:project.owner.username }}</p>
+                  <p class="hero-meta-label">Por {{ project_profile.display_name }}</p>
               </div>
               <div class="hero-right">
+                  <div class="portfolio-author-card">
+                      <div class="portfolio-author-avatar">
+                          {% if project_profile.avatar_url %}
+                              <img src="{{ project_profile.avatar_url }}" alt="Avatar de {{ project_profile.display_name }}">
+                          {% else %}
+                              <span>{{ project_profile.display_name|slice:":1" }}</span>
+                          {% endif %}
+                      </div>
+                      <div class="portfolio-author-copy">
+                          <p class="hero-meta-label">Perfil público</p>
+                          <p class="portfolio-author-name">{{ project_profile.display_name }}</p>
+                          <p class="portfolio-author-headline">{{ project_profile.headline }}</p>
+                          {% if project_profile.location %}
+                              <p class="portfolio-author-location">{{ project_profile.location }}</p>
+                          {% endif %}
+                      </div>
+                  </div>
                   <div class="hero-meta">
                       <p class="hero-meta-label">Publicado</p>
                       <p class="hero-meta-value">{{ project.created_at|date:"M Y" }}</p>
@@ -41,6 +58,25 @@
               </div>
           </div>
       </section>
+
+      {% if project_profile.skills or project_profile.links %}
+          <section class="container-max portfolio-author-details">
+              {% if project_profile.skills %}
+                  <div class="portfolio-skill-chips portfolio-skill-chips--compact">
+                      {% for skill in project_profile.skills %}
+                          <span class="portfolio-skill-chip">{{ skill }}</span>
+                      {% endfor %}
+                  </div>
+              {% endif %}
+              {% if project_profile.links %}
+                  <div class="portfolio-link-row">
+                      {% for link in project_profile.links %}
+                          <a class="portfolio-link-pill" href="{{ link.url }}" target="_blank" rel="noopener noreferrer">{{ link.label }}</a>
+                      {% endfor %}
+                  </div>
+              {% endif %}
+          </section>
+      {% endif %}
 
       <!-- Pull Quote / Research Question -->
       <section class="pull-quote-section">

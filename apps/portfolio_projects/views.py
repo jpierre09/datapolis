@@ -7,10 +7,73 @@ from apps.data_visualizations.models import ProjectVisualization
 from .models import PortfolioProject, ProjectCategory
 
 
+def _get_user_public_profile(user):
+	if user is None or not hasattr(user, "public_profile"):
+		return None
+	return user.public_profile
+
+
+def _normalize_external_links(external_links):
+	links = []
+	if isinstance(external_links, dict):
+		for label, url in external_links.items():
+			if not url:
+				continue
+			links.append({"label": str(label).replace("_", " ").strip().title(), "url": url})
+	elif isinstance(external_links, list):
+		for item in external_links:
+			if isinstance(item, dict) and item.get("url"):
+				links.append({
+					"label": str(item.get("label") or item.get("name") or item["url"]).strip().title(),
+					"url": item["url"],
+				})
+	return links
+
+
+def _build_public_profile_context(user):
+	profile = _get_user_public_profile(user)
+	avatar_url = ""
+	if profile and profile.avatar:
+		try:
+			avatar_url = profile.avatar.url
+		except ValueError:
+			avatar_url = ""
+
+	display_name = "Analista"
+	headline = "Perfil público aún no configurado"
+	bio = "Este portafolio todavía no tiene una biografía pública visible."
+	location = ""
+	skills = []
+	links = []
+	profile_available = profile is not None
+
+	if user:
+		display_name = user.get_full_name() or user.username or display_name
+
+	if profile:
+		display_name = profile.display_name or display_name
+		headline = profile.headline or headline
+		bio = profile.bio or bio
+		location = profile.location or ""
+		skills = [str(skill).strip() for skill in (profile.skills or []) if str(skill).strip()]
+		links = _normalize_external_links(profile.external_links)
+
+	return {
+		"profile_available": profile_available,
+		"display_name": display_name,
+		"headline": headline,
+		"bio": bio,
+		"location": location,
+		"skills": skills,
+		"links": links,
+		"avatar_url": avatar_url,
+	}
+
+
 def project_list(request):
 	projects = (
 		PortfolioProject.objects.filter(status=PortfolioProject.Status.PUBLISHED)
-		.select_related("category", "project_type", "owner")
+		.select_related("category", "project_type", "owner", "owner__public_profile")
 		.order_by("-created_at")
 	)
 
@@ -26,6 +89,9 @@ def project_list(request):
 				"projects": cat_projects
 			})
 
+	portfolio_owner = projects[0].owner if projects else None
+	portfolio_profile = _build_public_profile_context(portfolio_owner)
+
 	# Look for any projects that don't fall into ProjectCategory queried (just in case)
 	# Though ProjectCategory is a ForeignKey on PortfolioProject, so they must have one.
 
@@ -35,13 +101,14 @@ def project_list(request):
 		{
 			"projects": projects,
 			"categories_with_projects": categories_with_projects,
+			"portfolio_profile": portfolio_profile,
 		}
 	)
 
 
 def project_detail(request, slug):
 	project = get_object_or_404(
-		PortfolioProject.objects.select_related("category", "project_type", "owner"),
+		PortfolioProject.objects.select_related("category", "project_type", "owner", "owner__public_profile"),
 		slug=slug,
 		status=PortfolioProject.Status.PUBLISHED,
 	)
@@ -81,5 +148,6 @@ def project_detail(request, slug):
 			"project": project,
 			"data_sources": data_sources,
 			"visualization_payloads": visualization_payloads,
+			"project_profile": _build_public_profile_context(project.owner),
 		},
 	)
