@@ -2,8 +2,12 @@ from django import forms
 
 from apps.data_sources.models import DataSource
 from apps.dashboard.dataset_columns import analyze_data_source_columns, build_recommended_column_choices
+from apps.dashboard.models import PublicProfile
 from apps.portfolio_projects.models import PortfolioProject
 from apps.data_visualizations.models import ProjectVisualization
+
+
+PROFILE_EXTERNAL_LINK_SLOTS = 4
 
 
 class ProjectCreateForm(forms.ModelForm):
@@ -136,6 +140,110 @@ class DataSourceEditForm(forms.ModelForm):
             existing_classes = field.widget.attrs.get("class", "")
             if widget_class:
                 field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+
+class PublicProfileForm(forms.ModelForm):
+    skills_text = forms.CharField(
+        label="Habilidades",
+        required=False,
+        help_text="Escribe tus habilidades separadas por coma. Ejemplo: Python, SQL, Data Visualization.",
+        widget=forms.TextInput(attrs={"placeholder": "Python, SQL, Data Visualization"}),
+    )
+
+    class Meta:
+        model = PublicProfile
+        fields = ["display_name", "headline", "bio", "location", "avatar"]
+        labels = {
+            "display_name": "Nombre para mostrar",
+            "headline": "Titular",
+            "bio": "Biografía",
+            "location": "Ubicación",
+            "avatar": "Foto de perfil",
+        }
+        help_texts = {
+            "display_name": "Nombre que verán en el portafolio público.",
+            "headline": "Una línea breve que resuma tu perfil.",
+            "bio": "Un texto corto y profesional sobre tu trabajo o experiencia.",
+            "location": "Ciudad, país o referencia geográfica opcional.",
+            "avatar": "Imagen cuadrada o vertical, idealmente de buena calidad.",
+        }
+        widgets = {
+            "display_name": forms.TextInput(attrs={"placeholder": "Ej. Laura Pérez"}),
+            "headline": forms.TextInput(attrs={"placeholder": "Ej. Analista de datos y storytelling visual"}),
+            "bio": forms.Textarea(attrs={"rows": 5, "placeholder": "Resume tu experiencia, enfoque y especialidad."}),
+            "location": forms.TextInput(attrs={"placeholder": "Ej. Bogotá, Colombia"}),
+            "avatar": forms.ClearableFileInput(attrs={"accept": "image/*"}),
+        }
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+
+        skills = []
+        if self.instance and self.instance.pk:
+            skills = [str(skill).strip() for skill in (self.instance.skills or []) if str(skill).strip()]
+            external_links = self.instance.external_links if isinstance(self.instance.external_links, dict) else {}
+            for slot in range(1, PROFILE_EXTERNAL_LINK_SLOTS + 1):
+                label_key = f"external_link_{slot}_label"
+                url_key = f"external_link_{slot}_url"
+                link_label = ""
+                link_url = ""
+                if slot <= len(external_links):
+                    try:
+                        label, url = list(external_links.items())[slot - 1]
+                    except (ValueError, IndexError):
+                        label, url = "", ""
+                    link_label = str(label).strip()
+                    link_url = str(url).strip()
+                self.fields[label_key].initial = link_label
+                self.fields[url_key].initial = link_url
+
+        self.fields["skills_text"].initial = ", ".join(skills)
+
+        for field_name, field in self.fields.items():
+            widget_class = "dashboard-input"
+            if isinstance(field.widget, forms.Textarea):
+                widget_class = "dashboard-input dashboard-textarea"
+            elif isinstance(field.widget, forms.ClearableFileInput):
+                widget_class = "dashboard-input"
+
+            existing_classes = field.widget.attrs.get("class", "")
+            field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+    def _clean_skills(self):
+        skills_text = self.cleaned_data.get("skills_text", "")
+        return [skill.strip() for skill in skills_text.split(",") if skill.strip()]
+
+    def _clean_external_links(self):
+        external_links = {}
+        for slot in range(1, PROFILE_EXTERNAL_LINK_SLOTS + 1):
+            label = self.cleaned_data.get(f"external_link_{slot}_label", "").strip()
+            url = self.cleaned_data.get(f"external_link_{slot}_url", "").strip()
+            if label and url:
+                external_links[label] = url
+        return external_links
+
+    def save(self, commit=True):
+        instance = super().save(commit=False)
+        instance.skills = self._clean_skills()
+        instance.external_links = self._clean_external_links()
+        if commit:
+            instance.save()
+        return instance
+
+
+for slot in range(1, PROFILE_EXTERNAL_LINK_SLOTS + 1):
+    PublicProfileForm.base_fields[f"external_link_{slot}_label"] = forms.CharField(
+        label=f"Enlace {slot} - texto",
+        required=False,
+        help_text="Ej. Sitio web, GitHub o LinkedIn.",
+        widget=forms.TextInput(attrs={"placeholder": "GitHub"}),
+    )
+    PublicProfileForm.base_fields[f"external_link_{slot}_url"] = forms.URLField(
+        label=f"Enlace {slot} - URL",
+        required=False,
+        help_text="Pega la URL completa del enlace.",
+        widget=forms.URLInput(attrs={"placeholder": "https://github.com/usuario"}),
+    )
 
 
 class VisualizationCreateForm(forms.ModelForm):

@@ -10,10 +10,11 @@ from apps.data_sources.models import DataSource
 from apps.data_sources.services import extract_metadata
 from apps.data_visualizations.engine import VisualizationEngineError, build_visualization_payload
 from apps.data_visualizations.models import ProjectVisualization
+from apps.dashboard.models import PublicProfile
 from apps.portfolio_projects.models import PortfolioProject
 
 from .dataset_columns import analyze_data_source_columns
-from .forms import DataSourceUploadForm, ProjectCreateForm, VisualizationCreateForm, DataSourceEditForm
+from .forms import DataSourceEditForm, DataSourceUploadForm, ProjectCreateForm, PublicProfileForm, VisualizationCreateForm
 from .services import build_overview_activity, build_project_publish_checklist
 
 STATUS_LABELS = {
@@ -51,6 +52,18 @@ def _project_form_page_context(*, form, page_title, page_heading, page_descripti
         "submit_label": submit_label,
         "cancel_url": cancel_url,
         "status_note": status_note,
+    }
+
+
+def _profile_form_page_context(*, form, page_title, page_heading, page_description, submit_label, cancel_url):
+    return {
+        "dashboard_section": "profile",
+        "form": form,
+        "page_title": page_title,
+        "page_heading": page_heading,
+        "page_description": page_description,
+        "submit_label": submit_label,
+        "cancel_url": cancel_url,
     }
 
 
@@ -226,6 +239,37 @@ def dataset_list(request):
             "datasets": datasets,
             "metrics": metrics,
         },
+    )
+
+
+@login_required
+def profile_edit(request):
+    if request.method == "POST":
+        profile, _ = PublicProfile.objects.get_or_create(user=request.user)
+        form = PublicProfileForm(request.POST, request.FILES, instance=profile)
+        if form.is_valid():
+            profile = form.save(commit=False)
+            profile.user = request.user
+            profile.save()
+            messages.success(request, "Tu perfil público se actualizó correctamente.")
+            return redirect("dashboard:profile_edit")
+    else:
+        profile = PublicProfile.objects.filter(user=request.user).first()
+        if profile is None:
+            profile = PublicProfile(user=request.user)
+        form = PublicProfileForm(instance=profile)
+
+    return render(
+        request,
+        "dashboard/profile_edit.html",
+        _profile_form_page_context(
+            form=form,
+            page_title="Dashboard | Perfil público",
+            page_heading="Perfil público",
+            page_description="Edita la tarjeta pública que acompaña tu portafolio de proyectos.",
+            submit_label="Guardar perfil público",
+            cancel_url=reverse("dashboard:overview"),
+        ),
     )
 
 

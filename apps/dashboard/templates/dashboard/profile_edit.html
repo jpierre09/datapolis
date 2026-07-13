@@ -1,0 +1,131 @@
+{% extends "dashboard/base_dashboard.html" %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block dashboard_content %}
+  <div class="page-header">
+    <h2>{{ page_heading }}</h2>
+    <p>{{ page_description }}</p>
+  </div>
+
+  <section class="dashboard-card dashboard-form-shell">
+    <form method="post" enctype="multipart/form-data" class="dashboard-form">
+      {% csrf_token %}
+
+      {% if form.non_field_errors %}
+        <div class="dashboard-form-errors">{{ form.non_field_errors }}</div>
+      {% endif %}
+
+      <div class="dashboard-form-grid">
+        <div class="dashboard-field">
+          <label class="dashboard-label" for="{{ form.display_name.id_for_label }}">{{ form.display_name.label }}</label>
+          {{ form.display_name }}
+          {% if form.display_name.help_text %}<p class="dashboard-help-text">{{ form.display_name.help_text }}</p>{% endif %}
+          {% for error in form.display_name.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="dashboard-field">
+          <label class="dashboard-label" for="{{ form.location.id_for_label }}">{{ form.location.label }}</label>
+          {{ form.location }}
+          {% if form.location.help_text %}<p class="dashboard-help-text">{{ form.location.help_text }}</p>{% endif %}
+          {% for error in form.location.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="dashboard-field dashboard-field--full">
+          <label class="dashboard-label" for="{{ form.headline.id_for_label }}">{{ form.headline.label }}</label>
+          {{ form.headline }}
+          {% if form.headline.help_text %}<p class="dashboard-help-text">{{ form.headline.help_text }}</p>{% endif %}
+          {% for error in form.headline.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="dashboard-field dashboard-field--full">
+          <label class="dashboard-label" for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
+          {{ form.bio }}
+          {% if form.bio.help_text %}<p class="dashboard-help-text">{{ form.bio.help_text }}</p>{% endif %}
+          {% for error in form.bio.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+        </div>
+
+        <div class="dashboard-field dashboard-field--full">
+          <label class="dashboard-label" for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}</label>
+          {{ form.avatar }}
+          {% if form.avatar.help_text %}<p class="dashboard-help-text">{{ form.avatar.help_text }}</p>{% endif %}
+          {% for error in form.avatar.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+        </div>
+      </div>
+
+      <div class="dashboard-form-section">
+        <div class="dashboard-form-section-header">
+          <div class="dashboard-form-section-number">2</div>
+          <div>
+            <h3>Habilidades y enlaces</h3>
+            <p class="dashboard-form-section-copy">Convierte tu perfil en una tarjeta pública más clara y profesional.</p>
+          </div>
+        </div>
+
+        <div class="dashboard-form-grid">
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.skills_text.id_for_label }}">{{ form.skills_text.label }}</label>
+            {{ form.skills_text }}
+            {% if form.skills_text.help_text %}<p class="dashboard-help-text">{{ form.skills_text.help_text }}</p>{% endif %}
+            {% for error in form.skills_text.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label">Enlaces externos</label>
+            <p class="dashboard-help-text">Completa solo los enlaces que quieras mostrar públicamente. Puedes usar Sitio web, GitHub, LinkedIn u otro texto corto.</p>
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_1_label.id_for_label }}">{{ form.external_link_1_label.label }}</label>
+            {{ form.external_link_1_label }}
+            {% for error in form.external_link_1_label.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_1_url.id_for_label }}">{{ form.external_link_1_url.label }}</label>
+            {{ form.external_link_1_url }}
+            {% for error in form.external_link_1_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_2_label.id_for_label }}">{{ form.external_link_2_label.label }}</label>
+            {{ form.external_link_2_label }}
+            {% for error in form.external_link_2_label.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_2_url.id_for_label }}">{{ form.external_link_2_url.label }}</label>
+            {{ form.external_link_2_url }}
+            {% for error in form.external_link_2_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_3_label.id_for_label }}">{{ form.external_link_3_label.label }}</label>
+            {{ form.external_link_3_label }}
+            {% for error in form.external_link_3_label.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_3_url.id_for_label }}">{{ form.external_link_3_url.label }}</label>
+            {{ form.external_link_3_url }}
+            {% for error in form.external_link_3_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_4_label.id_for_label }}">{{ form.external_link_4_label.label }}</label>
+            {{ form.external_link_4_label }}
+            {% for error in form.external_link_4_label.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+          <div class="dashboard-field">
+            <label class="dashboard-label" for="{{ form.external_link_4_url.id_for_label }}">{{ form.external_link_4_url.label }}</label>
+            {{ form.external_link_4_url }}
+            {% for error in form.external_link_4_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+        </div>
+      </div>
+
+      <div class="dashboard-form-actions">
+        <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
+        <a href="{{ cancel_url }}" class="dashboard-button-secondary">Volver al dashboard</a>
+        <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary">Ver mi portafolio público</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

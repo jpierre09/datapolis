@@ -11,6 +11,8 @@ services:
       DJANGO_SECRET_KEY: ${DJANGO_SECRET_KEY:-change-me}
       DJANGO_ALLOWED_HOSTS: ${DJANGO_ALLOWED_HOSTS:-localhost,127.0.0.1}
       DATABASE_URL: ${DATABASE_URL:-postgresql://datapolis:datapolis@db:5432/datapolis}
+      GOOGLE_OAUTH_CLIENT_ID: ${GOOGLE_OAUTH_CLIENT_ID}
+      GOOGLE_OAUTH_CLIENT_SECRET: ${GOOGLE_OAUTH_CLIENT_SECRET}
     depends_on:
       db:
         condition: service_healthy

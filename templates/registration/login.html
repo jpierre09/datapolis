@@ -1,4 +1,4 @@
-{% load static %}
+{% load static socialaccount %}
 <!doctype html>
 <html lang="es">
   <head>
@@ -41,6 +41,7 @@
 
           <div style="display: flex; flex-direction: column; gap: 12px;">
             <button type="submit" class="dashboard-button-primary" style="width: 100%; justify-content: center; height: 42px; font-size: 14px;">Ingresar al panel</button>
+            <a href="{% provider_login_url 'google' %}" class="dashboard-button-secondary" style="width: 100%; justify-content: center; height: 42px; font-size: 14px; text-decoration: none; display: flex; align-items: center; border-radius: 8px;">Iniciar sesión con Google</a>
             <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary" style="width: 100%; justify-content: center; height: 42px; font-size: 14px; text-decoration: none; display: flex; align-items: center; border-radius: 8px;">← Volver al portafolio público</a>
           </div>
         </form>

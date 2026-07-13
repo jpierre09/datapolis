@@ -53,12 +53,24 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sites",
+    "allauth",
+    "allauth.account",
+    "allauth.socialaccount",
+    "allauth.socialaccount.providers.google",
     "apps.platform.apps.PlatformConfig",
     "apps.portfolio_projects.apps.PortfolioProjectsConfig",
     "apps.data_sources.apps.DataSourcesConfig",
     "apps.data_visualizations.apps.DataVisualizationsConfig",
     "apps.external_dashboards.apps.ExternalDashboardsConfig",
     "apps.dashboard.apps.DashboardConfig",
+]
+
+SITE_ID = 1
+
+AUTHENTICATION_BACKENDS = [
+    "django.contrib.auth.backends.ModelBackend",
+    "allauth.account.auth_backends.AuthenticationBackend",
 ]
 
 MIDDLEWARE = [
@@ -70,6 +82,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "allauth.account.middleware.AccountMiddleware",
 ]
 
 ROOT_URLCONF = "datapolis_project.urls"
@@ -148,6 +161,18 @@ STATIC_URL = "static/"
 STATIC_ROOT = BASE_DIR / "staticfiles"
 STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 STATICFILES_DIRS = [BASE_DIR / "static"]
+
+SOCIALACCOUNT_PROVIDERS = {
+    "google": {
+        "APP": {
+            "client_id": os.getenv("GOOGLE_OAUTH_CLIENT_ID", ""),
+            "secret": os.getenv("GOOGLE_OAUTH_CLIENT_SECRET", ""),
+            "key": "",
+        },
+        "SCOPE": ["profile", "email"],
+        "AUTH_PARAMS": {"access_type": "online"},
+    }
+}
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard:overview"
