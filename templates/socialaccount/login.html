@@ -1,0 +1,34 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block title %}Datapolis | Sign In Via {{ provider.name }}{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-card dashboard-auth-shell dashboard-auth-card">
+    <div class="dashboard-auth-header">
+      <p class="dashboard-auth-kicker">Google</p>
+      {% if process == 'connect' %}
+        <h2 class="dashboard-auth-title">Conectar {{ provider.name }}</h2>
+        <p class="dashboard-auth-copy">Vas a vincular una cuenta externa a tu perfil de Datapolis.</p>
+      {% else %}
+        <h2 class="dashboard-auth-title">Iniciar sesión con {{ provider.name }}</h2>
+        <p class="dashboard-auth-copy">Confirma el acceso para continuar al dashboard editorial.</p>
+      {% endif %}
+    </div>
+
+    <div class="dashboard-auth-divider"></div>
+
+    <form method="post" class="dashboard-form">
+      {% csrf_token %}
+      <div class="dashboard-auth-actions">
+        <button type="submit" class="dashboard-button-primary dashboard-social-button">
+          <svg class="dashboard-social-button-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#FFFFFF" d="M21.35 11.1H12v2.9h5.38c-.23 1.4-1.57 4.11-5.38 4.11-3.24 0-5.89-2.68-5.89-5.98s2.65-5.98 5.89-5.98c1.84 0 3.08.78 3.79 1.46l2.58-2.48C16.72 3.65 14.58 2.6 12 2.6 6.8 2.6 2.6 6.77 2.6 12s4.2 9.4 9.4 9.4c5.42 0 9-3.8 9-9.16 0-.62-.07-1.1-.15-1.14Z"/>
+          </svg>
+          {% if process == 'connect' %}Conectar con Google{% else %}Continuar con Google{% endif %}
+        </button>
+        <a href="{% url 'account_login' %}" class="dashboard-button-secondary">Volver al inicio de sesión</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

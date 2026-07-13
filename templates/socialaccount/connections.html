@@ -1,0 +1,55 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n socialaccount %}
+
+{% block title %}Datapolis | Conexiones{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-card dashboard-auth-shell dashboard-auth-card">
+    <div class="dashboard-auth-header">
+      <p class="dashboard-auth-kicker">Cuenta</p>
+      <h2 class="dashboard-auth-title">Conexiones externas</h2>
+      <p class="dashboard-auth-copy">Administra las cuentas sociales conectadas a tu usuario de Datapolis.</p>
+    </div>
+
+    <div class="dashboard-auth-divider"></div>
+
+    {% if form.accounts %}
+      <form method="post" action="{% url 'socialaccount_connections' %}" class="dashboard-form">
+        {% csrf_token %}
+        <div class="dashboard-auth-list">
+          {% for acc in form.fields.account.choices %}
+            {% with account=acc.0.instance.get_provider_account %}
+              <label class="dashboard-auth-entry" for="id_account_{{ account.account.pk }}">
+                <div class="dashboard-auth-entry-header">
+                  <div>
+                    <p class="dashboard-auth-entry-title">{{ account }}</p>
+                    <p class="dashboard-auth-entry-meta">{{ account.get_brand.name }}</p>
+                  </div>
+                  <input type="radio" name="account" value="{{ account.account.pk }}" id="id_account_{{ account.account.pk }}">
+                </div>
+              </label>
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+        <div class="dashboard-auth-actions">
+          <button type="submit" class="dashboard-button-secondary">Eliminar conexión</button>
+        </div>
+      </form>
+    {% else %}
+      <p class="dashboard-auth-empty">Todavía no tienes cuentas externas conectadas.</p>
+    {% endif %}
+
+    <div class="dashboard-auth-divider"></div>
+    <h3 class="dashboard-card-title">Agregar una cuenta social</h3>
+    <div class="dashboard-auth-actions">
+      {% provider_login_url 'google' process='connect' as google_connect_url %}
+      <a href="{{ google_connect_url }}" class="dashboard-button-primary dashboard-social-button">
+        <svg class="dashboard-social-button-icon" viewBox="0 0 24 24" aria-hidden="true">
+          <path fill="#FFFFFF" d="M21.35 11.1H12v2.9h5.38c-.23 1.4-1.57 4.11-5.38 4.11-3.24 0-5.89-2.68-5.89-5.98s2.65-5.98 5.89-5.98c1.84 0 3.08.78 3.79 1.46l2.58-2.48C16.72 3.65 14.58 2.6 12 2.6 6.8 2.6 2.6 6.77 2.6 12s4.2 9.4 9.4 9.4c5.42 0 9-3.8 9-9.16 0-.62-.07-1.1-.15-1.14Z"/>
+        </svg>
+        Conectar Google
+      </a>
+    </div>
+  </section>
+{% endblock %}

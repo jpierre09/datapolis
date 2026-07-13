@@ -1,0 +1,67 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block title %}Datapolis | Correos{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-card dashboard-auth-shell dashboard-auth-card">
+    <div class="dashboard-auth-header">
+      <p class="dashboard-auth-kicker">Cuenta</p>
+      <h2 class="dashboard-auth-title">Direcciones de correo</h2>
+      <p class="dashboard-auth-copy">Gestiona los correos asociados a tu cuenta de Datapolis.</p>
+    </div>
+
+    <div class="dashboard-auth-divider"></div>
+
+    {% if emailaddresses %}
+      <form method="post" action="{% url 'account_email' %}" class="dashboard-form">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        <div class="dashboard-auth-list">
+          {% for radio in emailaddress_radios %}
+            {% with emailaddress=radio.emailaddress %}
+              <label class="dashboard-auth-entry" for="{{ radio.id }}">
+                <div class="dashboard-auth-entry-header">
+                  <div>
+                    <p class="dashboard-auth-entry-title">{{ emailaddress.email }}</p>
+                    <p class="dashboard-auth-entry-meta">{% if emailaddress.primary %}Correo principal{% else %}Correo secundario{% endif %}</p>
+                  </div>
+                  <input type="radio" name="email" value="{{ emailaddress.email }}" id="{{ radio.id }}" {% if radio.checked %}checked{% endif %}>
+                </div>
+              </label>
+            {% endwith %}
+          {% endfor %}
+        </div>
+
+        <div class="dashboard-auth-actions">
+          <button type="submit" name="action_primary" class="dashboard-button-primary">Hacer principal</button>
+          <button type="submit" name="action_send" class="dashboard-button-secondary">Reenviar verificación</button>
+          <button type="submit" name="action_remove" class="dashboard-button-secondary">Eliminar</button>
+        </div>
+      </form>
+    {% else %}
+      <p class="dashboard-auth-empty">No hay direcciones de correo asociadas todavía.</p>
+    {% endif %}
+
+    {% if can_add_email %}
+      <div class="dashboard-auth-divider"></div>
+      <h3 class="dashboard-card-title">Agregar correo</h3>
+      <form method="post" action="{% url 'account_email' %}" class="dashboard-form">
+        {% csrf_token %}
+        <div class="dashboard-form-grid">
+          {% for field in form.visible_fields %}
+            <div class="dashboard-field dashboard-field--full">
+              <label class="dashboard-label" for="{{ field.id_for_label }}">{{ field.label }}</label>
+              {{ field }}
+              {% if field.help_text %}<p class="dashboard-help-text">{{ field.help_text }}</p>{% endif %}
+              {% for error in field.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            </div>
+          {% endfor %}
+        </div>
+        <div class="dashboard-auth-actions">
+          <button type="submit" name="action_add" class="dashboard-button-primary">Agregar correo</button>
+        </div>
+      </form>
+    {% endif %}
+  </section>
+{% endblock %}

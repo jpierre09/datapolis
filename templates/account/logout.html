@@ -1,0 +1,25 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load i18n %}
+
+{% block title %}Datapolis | Cerrar sesión{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-card dashboard-auth-shell dashboard-auth-card">
+    <div class="dashboard-auth-header">
+      <p class="dashboard-auth-kicker">Sesión</p>
+      <h2 class="dashboard-auth-title">Cerrar sesión</h2>
+      <p class="dashboard-auth-copy">¿Seguro que deseas cerrar tu sesión en Datapolis?</p>
+    </div>
+
+    <div class="dashboard-auth-divider"></div>
+
+    <form method="post" action="{% url 'account_logout' %}" class="dashboard-form">
+      {% csrf_token %}
+      {{ redirect_field }}
+      <div class="dashboard-auth-actions">
+        <button type="submit" class="dashboard-button-primary">Cerrar sesión</button>
+        <a href="{% url 'dashboard:overview' %}" class="dashboard-button-secondary">Volver al dashboard</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}

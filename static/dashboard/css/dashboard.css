@@ -770,6 +770,130 @@ body {
   transform: translateY(-1px);
 }
 
+.dashboard-auth-shell {
+  max-width: 760px;
+  margin: 0 auto;
+  width: 100%;
+}
+
+.dashboard-auth-card {
+  display: grid;
+  gap: 18px;
+}
+
+.dashboard-auth-header {
+  display: grid;
+  gap: 8px;
+  text-align: center;
+  padding-bottom: 4px;
+}
+
+.dashboard-auth-kicker {
+  margin: 0;
+  color: #3E7C7B;
+  font-size: 0.78rem;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.dashboard-auth-title {
+  margin: 0;
+  font-family: "Libre Caslon Text", Georgia, serif;
+  font-size: clamp(1.7rem, 3vw, 2.3rem);
+  color: #213436;
+  line-height: 1.08;
+}
+
+.dashboard-auth-copy {
+  margin: 0;
+  color: #4a5f63;
+  line-height: 1.5;
+}
+
+.dashboard-auth-divider {
+  height: 1px;
+  background: rgba(183, 196, 199, 0.75);
+}
+
+.dashboard-auth-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 4px;
+}
+
+.dashboard-auth-actions .dashboard-button-primary,
+.dashboard-auth-actions .dashboard-button-secondary {
+  min-height: 44px;
+}
+
+.dashboard-social-button {
+  gap: 10px;
+  min-height: 44px;
+  border-color: rgba(62, 124, 123, 0.2);
+  background: linear-gradient(135deg, rgba(62, 124, 123, 0.98), rgba(127, 183, 190, 0.98));
+  color: #FFFFFF;
+  box-shadow: 0 10px 20px rgba(62, 124, 123, 0.16);
+}
+
+.dashboard-social-button:hover {
+  background: linear-gradient(135deg, rgba(52, 109, 108, 0.98), rgba(112, 170, 176, 0.98));
+}
+
+.dashboard-social-button-icon {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.dashboard-auth-list {
+  display: grid;
+  gap: 12px;
+}
+
+.dashboard-auth-entry {
+  display: grid;
+  gap: 10px;
+  padding: 14px 16px;
+  border-radius: 14px;
+  border: 1px solid rgba(183, 196, 199, 0.78);
+  background: rgba(255, 255, 255, 0.92);
+}
+
+.dashboard-auth-entry--clickable {
+  cursor: pointer;
+}
+
+.dashboard-auth-entry-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.dashboard-auth-entry-title {
+  margin: 0;
+  font-weight: 700;
+  color: #213436;
+}
+
+.dashboard-auth-entry-meta {
+  margin: 0;
+  color: #5a6b6f;
+  font-size: 0.92rem;
+}
+
+.dashboard-auth-empty {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px dashed rgba(183, 196, 199, 0.75);
+  background: rgba(255, 255, 255, 0.76);
+  color: #5a6b6f;
+}
+
 .dashboard-section-title {
   margin: 18px 0 10px;
   padding-bottom: 6px;

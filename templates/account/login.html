@@ -1,0 +1,64 @@
+{% extends "dashboard/base_dashboard.html" %}
+{% load socialaccount i18n %}
+
+{% block title %}Datapolis | Iniciar sesión{% endblock %}
+
+{% block dashboard_content %}
+  <section class="dashboard-card dashboard-auth-shell dashboard-auth-card">
+    <div class="dashboard-auth-header">
+      <p class="dashboard-auth-kicker">Acceso</p>
+      <h2 class="dashboard-auth-title">Iniciar sesión</h2>
+      <p class="dashboard-auth-copy">Ingresa con tu usuario y contraseña o continúa con Google para entrar al dashboard editorial de Datapolis.</p>
+    </div>
+
+    <div class="dashboard-auth-divider"></div>
+
+    <form method="post" action="{% url 'account_login' %}" class="dashboard-form">
+      {% csrf_token %}
+      {{ redirect_field }}
+
+      {% if form.non_field_errors %}
+        <div class="dashboard-form-errors">
+          {{ form.non_field_errors }}
+        </div>
+      {% endif %}
+
+      <div class="dashboard-form-grid">
+        {% for field in form.visible_fields %}
+          <div class="dashboard-field {% if field.name == 'remember' %}dashboard-field--full{% endif %}">
+            {% if field.name == 'remember' %}
+              <label class="dashboard-auth-entry dashboard-auth-entry--clickable" for="{{ field.id_for_label }}">
+                <div class="dashboard-auth-entry-header">
+                  <div>
+                    <p class="dashboard-auth-entry-title">{{ field.label }}</p>
+                    <p class="dashboard-auth-entry-meta">Mantener la sesión abierta en este dispositivo.</p>
+                  </div>
+                  {{ field }}
+                </div>
+              </label>
+            {% else %}
+              <label class="dashboard-label" for="{{ field.id_for_label }}">
+                {% if field.name == 'login' %}Usuario o correo{% else %}{{ field.label }}{% endif %}
+              </label>
+              {{ field }}
+              {% if field.help_text %}<p class="dashboard-help-text">{{ field.help_text }}</p>{% endif %}
+              {% for error in field.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+            {% endif %}
+          </div>
+        {% endfor %}
+      </div>
+
+      <div class="dashboard-auth-actions">
+        <button type="submit" class="dashboard-button-primary">Ingresar al panel</button>
+        {% provider_login_url 'google' process='login' as google_login_url %}
+        <a href="{{ google_login_url }}" class="dashboard-button-secondary dashboard-social-button">
+          <svg class="dashboard-social-button-icon" viewBox="0 0 24 24" aria-hidden="true">
+            <path fill="#FFFFFF" d="M21.35 11.1H12v2.9h5.38c-.23 1.4-1.57 4.11-5.38 4.11-3.24 0-5.89-2.68-5.89-5.98s2.65-5.98 5.89-5.98c1.84 0 3.08.78 3.79 1.46l2.58-2.48C16.72 3.65 14.58 2.6 12 2.6 6.8 2.6 2.6 6.77 2.6 12s4.2 9.4 9.4 9.4c5.42 0 9-3.8 9-9.16 0-.62-.07-1.1-.15-1.14Z"/>
+          </svg>
+          Iniciar sesión con Google
+        </a>
+        <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary">Volver al portafolio público</a>
+      </div>
+    </form>
+  </section>
+{% endblock %}
