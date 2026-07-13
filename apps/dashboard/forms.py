@@ -321,7 +321,6 @@ class VisualizationCreateForm(forms.ModelForm):
         }
         help_texts = {
             "title": "Usa un título claro para identificar la visualización.",
-            "description": "Resume qué responde la visualización o qué muestra.",
             "visualization_type": "Elige el tipo visual que mejor represente el dato.",
             "x_axis_column": "Solo se muestran columnas recomendadas para el eje X.",
             "y_axis_column": "Solo se muestran columnas numéricas recomendadas para el eje Y.",
