@@ -51,12 +51,12 @@
       <div class="dashboard-auth-actions">
         <button type="submit" class="dashboard-button-primary">Ingresar al panel</button>
         {% provider_login_url 'google' process='login' as google_login_url %}
-        <a href="{{ google_login_url }}" class="dashboard-button-secondary dashboard-social-button">
+        <button type="submit" class="dashboard-button-primary dashboard-social-button" formaction="{{ google_login_url }}" formmethod="get">
           <svg class="dashboard-social-button-icon" viewBox="0 0 24 24" aria-hidden="true">
             <path fill="#FFFFFF" d="M21.35 11.1H12v2.9h5.38c-.23 1.4-1.57 4.11-5.38 4.11-3.24 0-5.89-2.68-5.89-5.98s2.65-5.98 5.89-5.98c1.84 0 3.08.78 3.79 1.46l2.58-2.48C16.72 3.65 14.58 2.6 12 2.6 6.8 2.6 2.6 6.77 2.6 12s4.2 9.4 9.4 9.4c5.42 0 9-3.8 9-9.16 0-.62-.07-1.1-.15-1.14Z"/>
           </svg>
           Iniciar sesión con Google
-        </a>
+        </button>
         <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary">Volver al portafolio público</a>
       </div>
     </form>
