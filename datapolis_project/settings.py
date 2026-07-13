@@ -176,7 +176,7 @@ SOCIALACCOUNT_PROVIDERS = {
 
 LOGIN_URL = "login"
 LOGIN_REDIRECT_URL = "dashboard:overview"
-LOGOUT_REDIRECT_URL = "login"
+LOGOUT_REDIRECT_URL = "/"
 
 MEDIA_URL = "/media/"
 MEDIA_ROOT = Path(os.getenv("MEDIA_ROOT", BASE_DIR / "media"))

@@ -24,9 +24,12 @@
             <div class="avatar-slot">
               {{ request.user.get_full_name|default:request.user.username }}
             </div>
-            <a href="{% url 'logout' %}" class="dashboard-logout-btn" id="dashboard-logout-btn" aria-label="Cerrar sesión" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(216, 167, 177, 0.4); background: #ffffff; color: #764f58; cursor: pointer; transition: all 0.2s ease;" title="Cerrar sesión">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-link-icon" style="margin: 0; color: #764f58;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
-            </a>
+            <form action="{% url 'account_logout' %}" method="post" style="display: inline; margin: 0;">
+              {% csrf_token %}
+              <button type="submit" class="dashboard-logout-btn" id="dashboard-logout-btn" aria-label="Cerrar sesión" style="display: inline-flex; align-items: center; justify-content: center; width: 34px; height: 34px; border-radius: 999px; border: 1px solid rgba(216, 167, 177, 0.4); background: #ffffff; color: #764f58; cursor: pointer; transition: all 0.2s ease;" title="Cerrar sesión">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="sidebar-link-icon" style="margin: 0; color: #764f58;"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
+              </button>
+            </form>
           </div>
         </header>
 
