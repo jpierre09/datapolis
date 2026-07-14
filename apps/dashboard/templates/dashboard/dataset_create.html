@@ -41,7 +41,14 @@
             {% for error in form.source_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
           </div>
 
-          <div class="dashboard-field dashboard-field--full">
+          <div class="dashboard-field dashboard-field--full" id="field-source-url">
+            <label class="dashboard-label" for="{{ form.source_url.id_for_label }}">{{ form.source_url.label }}</label>
+            {{ form.source_url }}
+            <p class="dashboard-help-text">{{ form.source_url.help_text }}</p>
+            {% for error in form.source_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full" id="field-file">
             <label class="dashboard-label" for="{{ form.file.id_for_label }}">{{ form.file.label }}</label>
             {{ form.file }}
             <p class="dashboard-help-text">{{ form.file.help_text }}</p>

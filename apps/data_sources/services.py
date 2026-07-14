@@ -3,6 +3,20 @@ from __future__ import annotations
 from typing import Any
 
 
+def build_google_sheets_export_url(url):
+    import re
+    if not url:
+        raise ValueError("URL de Google Sheets no proporcionada.")
+    match = re.search(r'(https://docs\.google\.com/spreadsheets/d/[a-zA-Z0-9-_]+)', url)
+    if not match:
+        raise ValueError("URL de Google Sheets inválida.")
+
+    base_url = match.group(1)
+    gid_match = re.search(r'[#&]gid=([0-9]+)', url)
+    gid_part = f"&gid={gid_match.group(1)}" if gid_match else ""
+    return f"{base_url}/export?format=csv{gid_part}"
+
+
 def extract_metadata(data_source):
     import pandas as pd
 
@@ -10,6 +24,9 @@ def extract_metadata(data_source):
         dataframe = pd.read_csv(data_source.file.path)
     elif data_source.source_type == "excel":
         dataframe = pd.read_excel(data_source.file.path, engine="openpyxl")
+    elif data_source.source_type == "google_sheets":
+        export_url = build_google_sheets_export_url(data_source.source_url)
+        dataframe = pd.read_csv(export_url)
     else:
         raise ValueError(f"Unsupported source_type: {data_source.source_type}")
 

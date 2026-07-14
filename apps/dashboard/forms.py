@@ -71,20 +71,23 @@ class ProjectCreateForm(forms.ModelForm):
 class DataSourceUploadForm(forms.ModelForm):
     class Meta:
         model = DataSource
-        fields = ["name", "source_type", "file"]
+        fields = ["name", "source_type", "source_url", "file"]
         labels = {
             "name": "Nombre del dataset",
-            "source_type": "Tipo de archivo",
+            "source_type": "Origen de datos",
+            "source_url": "URL de Google Sheets",
             "file": "Archivo",
         }
         help_texts = {
             "name": "Usa un nombre claro para identificar el dataset dentro del proyecto.",
-            "source_type": "Elige CSV o Excel según el archivo que vas a subir.",
-            "file": "Sube un archivo .csv, .xlsx o .xls.",
+            "source_type": "Elige CSV, Excel o Google Sheets.",
+            "source_url": "URL pública del documento de Google Sheets (Requiere origen 'Google Sheets').",
+            "file": "Sube un archivo .csv, .xlsx o .xls. (No requerido para Google Sheets).",
         }
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "Ej. Ventas regionales 2026"}),
             "source_type": forms.Select(),
+            "source_url": forms.URLInput(attrs={"placeholder": "https://docs.google.com/spreadsheets/d/..."}),
             "file": forms.ClearableFileInput(attrs={"accept": ".csv,.xlsx,.xls"}),
         }
 
@@ -99,31 +102,56 @@ class DataSourceUploadForm(forms.ModelForm):
             existing_classes = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
 
+    def clean(self):
+        cleaned_data = super().clean()
+        source_type = cleaned_data.get("source_type")
+        source_url = cleaned_data.get("source_url")
+        file = cleaned_data.get("file")
+
+        form_errors = False
+        if source_type == DataSource.SourceType.GOOGLE_SHEETS:
+            if not source_url:
+                self.add_error("source_url", "Debes ingresar una URL de Google Sheets.")
+                form_errors = True
+        else:
+            if not file and not self.instance.file:
+                self.add_error("file", "Debes subir un archivo para este tipo de fuente.")
+                form_errors = True
+
+        if form_errors:
+            # Let Django's add_error handle it, no need to clear fields unless we want to
+            pass
+
+        return cleaned_data
+
 
 class DataSourceEditForm(forms.ModelForm):
     file = forms.FileField(
         label="Reemplazar archivo",
         required=False,
-        help_text="Opcional. Sube un nuevo archivo .csv, .xlsx o .xls para reemplazar la fuente de datos actual. Al hacerlo, se actualizará automáticamente la metadata.",
+        help_text="Opcional. Sube un nuevo archivo .csv, .xlsx o .xls. (No requerido para Google Sheets o si mantienes el archivo actual).",
         widget=forms.ClearableFileInput(attrs={"accept": ".csv,.xlsx,.xls"}),
     )
 
     class Meta:
         model = DataSource
-        fields = ["name", "source_type", "is_active", "file"]
+        fields = ["name", "source_type", "is_active", "source_url", "file"]
         labels = {
             "name": "Nombre del dataset",
-            "source_type": "Tipo de archivo",
+            "source_type": "Origen de datos",
             "is_active": "Dataset Activo",
+            "source_url": "URL de Google Sheets",
         }
         help_texts = {
             "name": "Usa un nombre claro para identificar el dataset dentro del proyecto.",
-            "source_type": "Elige CSV o Excel según el tipo de archivo que vas a subir si vas a reemplazarlo.",
+            "source_type": "Elige CSV, Excel o Google Sheets.",
             "is_active": "Las fuentes de datos inactivas están ocultas y no disponibles para nuevas visualizaciones.",
+            "source_url": "Actualiza la URL pública si vas a cambiar el origen a otra hoja de Google Sheets.",
         }
         widgets = {
             "name": forms.TextInput(attrs={"placeholder": "Ej. Ventas regionales 2026"}),
             "source_type": forms.Select(),
+            "source_url": forms.URLInput(attrs={"placeholder": "https://docs.google.com/spreadsheets/d/..."}),
             "is_active": forms.CheckboxInput(),
         }
 
@@ -135,11 +163,26 @@ class DataSourceEditForm(forms.ModelForm):
             if isinstance(field.widget, forms.Select):
                 widget_class = "dashboard-input dashboard-select"
             elif isinstance(field.widget, forms.CheckboxInput):
-                widget_class = ""  # Keep browser/dashboard default styles for checkbox
+                widget_class = ""
 
             existing_classes = field.widget.attrs.get("class", "")
             if widget_class:
                 field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+    def clean(self):
+        cleaned_data = super().clean()
+        source_type = cleaned_data.get("source_type")
+        source_url = cleaned_data.get("source_url")
+        file = cleaned_data.get("file")
+
+        if source_type == DataSource.SourceType.GOOGLE_SHEETS:
+            if not source_url:
+                self.add_error("source_url", "Debes ingresar una URL de Google Sheets.")
+        else:
+            if not file and not getattr(self.instance, "file", None):
+                self.add_error("file", "Debes subir un archivo para este tipo de fuente.")
+
+        return cleaned_data
 
 
 class PublicProfileForm(forms.ModelForm):

@@ -12,6 +12,9 @@
           <h3 class="dashboard-card-title">{{ data_source.name }}</h3>
           <ul class="dashboard-project-detail-meta-list">
             <li><strong>Archivo original:</strong> {{ data_source.original_filename|default:"Sin archivo original" }}</li>
+            {% if data_source.source_type == "google_sheets" and data_source.source_url %}
+            <li><strong>URL:</strong> <a href="{{ data_source.source_url }}" target="_blank" rel="noopener noreferrer" style="color: var(--color-primary-dark); text-decoration: underline;" title="{{ data_source.source_url }}">Abrir Google Sheets</a></li>
+            {% endif %}
             <li><strong>Tipo:</strong> {{ source_type_label }}</li>
             <li><strong>Filas:</strong> {% if data_source.row_count is not None %}{{ data_source.row_count }}{% else %}Sin procesar{% endif %}</li>
             <li><strong>Proyecto:</strong> {{ project.title }}</li>

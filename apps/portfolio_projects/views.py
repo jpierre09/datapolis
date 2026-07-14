@@ -76,7 +76,7 @@ def project_list(request):
 	principal_user = User.objects.filter(
 		public_profile__isnull=False,
 	).exclude(public_profile__slug="").order_by("-is_superuser", "id").first()
-	
+
 	if principal_user:
 		return redirect("public_profile_detail", slug=principal_user.public_profile.slug)
 

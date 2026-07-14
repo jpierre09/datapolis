@@ -7,6 +7,7 @@ class DataSource(models.Model):
 	class SourceType(models.TextChoices):
 		CSV = "csv", "CSV"
 		EXCEL = "excel", "Excel"
+		GOOGLE_SHEETS = "google_sheets", "Google Sheets"
 
 	class ProcessingStatus(models.TextChoices):
 		PENDING = "pending", "Pending"
@@ -23,7 +24,8 @@ class DataSource(models.Model):
 		max_length=20,
 		choices=SourceType.choices,
 	)
-	file = models.FileField(upload_to="data_sources/")
+	source_url = models.URLField(max_length=500, blank=True)
+	file = models.FileField(upload_to="data_sources/", blank=True)
 	original_filename = models.CharField(max_length=255, blank=True)
 	columns_schema = models.JSONField(default=dict, blank=True)
 	row_count = models.PositiveIntegerField(null=True, blank=True)

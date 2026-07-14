@@ -443,8 +443,13 @@ def project_add_dataset(request, slug):
         if form.is_valid():
             data_source = form.save(commit=False)
             data_source.project = project
-            uploaded_file = form.cleaned_data["file"]
-            data_source.original_filename = uploaded_file.name.rsplit("/", 1)[-1]
+            uploaded_file = form.cleaned_data.get("file")
+
+            if data_source.source_type == DataSource.SourceType.GOOGLE_SHEETS:
+                data_source.original_filename = "Google Sheets"
+            elif uploaded_file:
+                data_source.original_filename = uploaded_file.name.rsplit("/", 1)[-1]
+
             data_source.processing_status = DataSource.ProcessingStatus.PENDING
             data_source.processing_error = ""
             data_source.save()
@@ -596,6 +601,11 @@ def dataset_edit(request, project_slug, dataset_id):
                     ds.processing_status = DataSource.ProcessingStatus.PENDING
                     ds.processing_error = ""
                     file_replaced = True
+                elif ds.source_type == DataSource.SourceType.GOOGLE_SHEETS and ("source_url" in form.changed_data or "source_type" in form.changed_data):
+                    ds.original_filename = "Google Sheets"
+                    ds.processing_status = DataSource.ProcessingStatus.PENDING
+                    ds.processing_error = ""
+                    file_replaced = True
 
                 ds.save()
 
@@ -606,13 +616,13 @@ def dataset_edit(request, project_slug, dataset_id):
                         ds.row_count = columns_schema.get("row_count")
                         ds.processing_status = DataSource.ProcessingStatus.PROCESSED
                         ds.processing_error = ""
-                        messages.success(request, "El archivo ha sido reemplazado y la metadata ha sido procesada exitosamente.")
+                        messages.success(request, "La fuente de datos ha sido actualizada y la metadata procesada exitosamente.")
                     except Exception as exc:
                         ds.columns_schema = {}
                         ds.row_count = None
                         ds.processing_status = DataSource.ProcessingStatus.FAILED
                         ds.processing_error = f"La extracción de metadata falló: {exc}"
-                        messages.error(request, f"Error al extraer metadata del nuevo archivo: {exc}")
+                        messages.error(request, f"Error al extraer metadata de la fuente de datos: {exc}")
 
                     ds.save(
                         update_fields=[
