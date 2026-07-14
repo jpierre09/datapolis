@@ -33,6 +33,7 @@ urlpatterns = [
     path("projects/", include("apps.portfolio_projects.urls")),
     path("dashboard/", include("apps.dashboard.urls")),
     path("u/<slug:slug>/", portfolio_views.public_profile_detail, name="public_profile_detail"),
+    path("u/<slug:profile_slug>/projects/<slug:project_slug>/", portfolio_views.public_profile_project_detail, name="public_profile_project_detail"),
 ]
 
 if settings.DEBUG:

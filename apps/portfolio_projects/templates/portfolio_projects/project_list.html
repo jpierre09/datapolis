@@ -68,7 +68,11 @@
                       <h2 class="portfolio-category-title">{{ group.category.name }}</h2>
                       <div class="portfolio-grid">
                           {% for project in group.projects %}
-                              <a href="{% url 'portfolio_projects:project_detail' project.slug %}" class="portfolio-card">
+                              {% if is_user_portfolio and public_profile and public_profile.slug %}
+                                  <a href="{% url 'public_profile_project_detail' public_profile.slug project.slug %}" class="portfolio-card">
+                              {% else %}
+                                  <a href="{% url 'portfolio_projects:project_detail' project.slug %}" class="portfolio-card">
+                              {% endif %}
                                   <div class="portfolio-card-header">
                                       <div class="badges-row" style="margin-bottom: 12px;">
                                           <span class="badge-editorial" style="font-size: 10px; padding: 4px 8px;">{{ project.project_type.name }}</span>

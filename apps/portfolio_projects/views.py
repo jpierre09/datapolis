@@ -191,3 +191,57 @@ def public_profile_detail(request, slug):
 			"is_user_portfolio": True,
 		}
 	)
+
+
+def public_profile_project_detail(request, profile_slug, project_slug):
+	public_profile = get_object_or_404(
+		PublicProfile.objects.select_related("user"),
+		slug=profile_slug,
+	)
+
+	project = get_object_or_404(
+		PortfolioProject.objects.select_related("category", "project_type", "owner", "owner__public_profile"),
+		slug=project_slug,
+		owner=public_profile.user,
+		status=PortfolioProject.Status.PUBLISHED,
+	)
+	
+	data_sources = project.data_sources.filter(is_active=True).order_by("-uploaded_at")
+	visualizations = (
+		ProjectVisualization.objects.filter(portfolio_project=project, is_active=True)
+		.select_related("source_dataset")
+		.order_by("display_order", "id")
+	)
+
+	visualization_payloads = []
+	for visualization in visualizations:
+		try:
+			payload = build_visualization_payload(visualization)
+			visualization_payloads.append(
+				{
+					"visualization": visualization,
+					"payload": payload,
+					"payload_script_id": f"payload-{visualization.id}",
+					"error": "",
+				}
+			)
+		except VisualizationEngineError as exc:
+			visualization_payloads.append(
+				{
+					"visualization": visualization,
+					"payload": None,
+					"payload_script_id": "",
+					"error": str(exc),
+				}
+			)
+
+	return render(
+		request,
+		"portfolio_projects/project_detail.html",
+		{
+			"project": project,
+			"data_sources": data_sources,
+			"visualization_payloads": visualization_payloads,
+			"project_profile": _build_public_profile_context(project.owner),
+		},
+	)
