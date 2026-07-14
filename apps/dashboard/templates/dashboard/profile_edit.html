@@ -124,8 +124,17 @@
       <div class="dashboard-form-actions">
         <button type="submit" class="dashboard-button-primary">{{ submit_label }}</button>
         <a href="{{ cancel_url }}" class="dashboard-button-secondary">Volver al dashboard</a>
-        <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary">Ver mi portafolio público</a>
-      </div>
+        <!-- <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary">Ver mi portafolio público</a> -->
+        {% if request.user.public_profile.slug %}
+        <a href="{% url 'public_profile_detail' request.user.public_profile.slug %}" class="dashboard-button-secondary" target="_blank" rel="noopener noreferrer">
+            Ver mi portafolio público
+        </a>
+        {% else %}
+        <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary" target="_blank" rel="noopener noreferrer">
+            Ver mi portafolio público
+        </a>
+        {% endif %}
+    </div>
     </form>
   </section>
 {% endblock %}

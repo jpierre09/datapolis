@@ -37,6 +37,15 @@
 
   <div class="profile-actions dashboard-profile-actions">
     <!-- <a href="#" class="btn-primary dashboard-button-primary" aria-disabled="true" title="Disponible en una fase posterior">Editar perfil público</a> -->
-    <a href="{% url 'portfolio_projects:project_list' %}" class="btn-secondary dashboard-button-secondary">Ver portafolio público</a>
+    <!-- <a href="{% url 'portfolio_projects:project_list' %}" class="btn-secondary dashboard-button-secondary">Ver portafolio público</a> -->
+        {% if request.user.public_profile.slug %}
+        <a href="{% url 'public_profile_detail' request.user.public_profile.slug %}" class="dashboard-button-secondary" target="_blank" rel="noopener noreferrer">
+            Ver mi portafolio público
+        </a>
+        {% else %}
+        <a href="{% url 'portfolio_projects:project_list' %}" class="dashboard-button-secondary" target="_blank" rel="noopener noreferrer">
+            Ver mi portafolio público
+        </a>
+        {% endif %}
   </div>
 </article>

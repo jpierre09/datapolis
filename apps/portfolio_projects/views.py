@@ -3,7 +3,7 @@ from django.shortcuts import get_object_or_404, render
 from apps.data_visualizations.engine.builder import build_visualization_payload
 from apps.data_visualizations.engine.exceptions import VisualizationEngineError
 from apps.data_visualizations.models import ProjectVisualization
-
+from apps.dashboard.models import PublicProfile
 from .models import PortfolioProject, ProjectCategory
 
 
@@ -150,4 +150,44 @@ def project_detail(request, slug):
 			"visualization_payloads": visualization_payloads,
 			"project_profile": _build_public_profile_context(project.owner),
 		},
+	)
+
+def public_profile_detail(request, slug):
+	public_profile = get_object_or_404(
+		PublicProfile.objects.select_related("user"),
+		slug=slug,
+	)
+
+	projects = (
+		PortfolioProject.objects.filter(
+			status=PortfolioProject.Status.PUBLISHED,
+			owner=public_profile.user,
+		)
+		.select_related("category", "project_type", "owner", "owner__public_profile")
+		.order_by("-created_at")
+	)
+
+	categories_with_projects = []
+	categories = ProjectCategory.objects.all().order_by("name")
+
+	for category in categories:
+		cat_projects = [p for p in projects if p.category_id == category.id]
+		if cat_projects:
+			categories_with_projects.append({
+				"category": category,
+				"projects": cat_projects,
+			})
+
+	portfolio_profile = _build_public_profile_context(public_profile.user)
+
+	return render(
+		request,
+		"portfolio_projects/project_list.html",
+		{
+			"projects": projects,
+			"categories_with_projects": categories_with_projects,
+			"portfolio_profile": portfolio_profile,
+			"public_profile": public_profile,
+			"is_user_portfolio": True,
+		}
 	)

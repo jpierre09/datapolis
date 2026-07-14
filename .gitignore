@@ -5,3 +5,13 @@ db.sqlite3
 .env
 .DS_Store
 *.csv
+*.jpg
+*.jpeg
+*.png
+*.pdf
+*.mp4
+*.mov
+*.avi
+*.zip
+*.tar.gz
+*.log

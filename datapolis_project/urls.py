@@ -21,6 +21,7 @@ from django.contrib.auth import views as auth_views
 from django.conf.urls.static import static
 from django.conf import settings
 from django.views.generic import RedirectView
+from apps.portfolio_projects import views as portfolio_views
 
 urlpatterns = [
     path("admin/", admin.site.urls),
@@ -31,6 +32,7 @@ urlpatterns = [
     path("", include("apps.platform.urls")),
     path("projects/", include("apps.portfolio_projects.urls")),
     path("dashboard/", include("apps.dashboard.urls")),
+    path("u/<slug:slug>/", portfolio_views.public_profile_detail, name="public_profile_detail"),
 ]
 
 if settings.DEBUG:
