@@ -160,12 +160,26 @@ def _build_recent_activity_events(owner, start_datetime, recent_limit):
 
 
 def build_project_publish_checklist(project):
+    profile_complete = False
+    if hasattr(project, "owner") and project.owner is not None:
+        if hasattr(project.owner, "public_profile"):
+            profile = project.owner.public_profile
+            if (profile.display_name and str(profile.display_name).strip()) or \
+               (profile.headline and str(profile.headline).strip()):
+                profile_complete = True
+
     items = [
         {
             "key": "question",
             "label": "Pregunta de análisis",
             "satisfied": bool(project.question and project.question.strip()),
             "pending_text": "Completa la pregunta de análisis.",
+        },
+        {
+            "key": "public_profile",
+            "label": "Perfil público",
+            "satisfied": profile_complete,
+            "pending_text": "Configura tu perfil público (nombre o encabezado).",
         },
         {
             "key": "description",

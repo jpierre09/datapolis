@@ -1,4 +1,4 @@
-from django.shortcuts import get_object_or_404, render
+from django.shortcuts import get_object_or_404, redirect, render
 
 from apps.data_visualizations.engine.builder import build_visualization_payload
 from apps.data_visualizations.engine.exceptions import VisualizationEngineError
@@ -71,6 +71,15 @@ def _build_public_profile_context(user):
 
 
 def project_list(request):
+	from django.contrib.auth import get_user_model
+	User = get_user_model()
+	principal_user = User.objects.filter(
+		public_profile__isnull=False,
+	).exclude(public_profile__slug="").order_by("-is_superuser", "id").first()
+	
+	if principal_user:
+		return redirect("public_profile_detail", slug=principal_user.public_profile.slug)
+
 	projects = (
 		PortfolioProject.objects.filter(status=PortfolioProject.Status.PUBLISHED)
 		.select_related("category", "project_type", "owner", "owner__public_profile")
@@ -112,6 +121,10 @@ def project_detail(request, slug):
 		slug=slug,
 		status=PortfolioProject.Status.PUBLISHED,
 	)
+
+	if hasattr(project.owner, "public_profile") and project.owner.public_profile.slug:
+		return redirect("public_profile_project_detail", profile_slug=project.owner.public_profile.slug, project_slug=project.slug)
+
 	data_sources = project.data_sources.filter(is_active=True).order_by("-uploaded_at")
 	visualizations = (
 		ProjectVisualization.objects.filter(portfolio_project=project, is_active=True)
@@ -205,7 +218,7 @@ def public_profile_project_detail(request, profile_slug, project_slug):
 		owner=public_profile.user,
 		status=PortfolioProject.Status.PUBLISHED,
 	)
-	
+
 	data_sources = project.data_sources.filter(is_active=True).order_by("-uploaded_at")
 	visualizations = (
 		ProjectVisualization.objects.filter(portfolio_project=project, is_active=True)
