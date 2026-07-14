@@ -1,3 +1,4 @@
+from django.core.exceptions import ObjectDoesNotExist
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.db.models import Prefetch
@@ -139,6 +140,41 @@ def _build_visualization_preview_context(visualization):
     return preview_payload, preview_error
 
 
+def _build_dashboard_profile_context(user):
+    try:
+        profile = user.public_profile
+    except ObjectDoesNotExist:
+        profile = None
+    avatar_url = ""
+
+    if profile and profile.avatar:
+        try:
+            avatar_url = profile.avatar.url
+        except ValueError:
+            avatar_url = ""
+
+    display_name = user.get_full_name() or user.username or "Analista"
+    headline = "Perfil público aún no configurado"
+    bio = "Este perfil todavía no tiene una biografía pública visible."
+    location = ""
+
+    if profile:
+        display_name = profile.display_name or display_name
+        headline = profile.headline or headline
+        bio = profile.bio or bio
+        location = profile.location or ""
+
+    return {
+        "profile_available": profile is not None,
+        "display_name": display_name,
+        "headline": headline,
+        "bio": bio,
+        "location": location,
+        "avatar_url": avatar_url,
+        "avatar_initial": (display_name[:1] if display_name else "A").upper(),
+    }
+
+
 @login_required
 def overview(request):
     owner = request.user
@@ -161,6 +197,7 @@ def overview(request):
 
     metrics = _build_dashboard_metrics_for_owner(owner)
     activity_context = build_overview_activity(owner, recent_limit=3)
+    analyst_profile = _build_dashboard_profile_context(owner)
 
     return render(
         request,
@@ -169,6 +206,7 @@ def overview(request):
             "dashboard_section": "overview",
             "metrics": metrics,
             "recent_projects": recent_projects,
+            "analyst_profile": analyst_profile,
             **activity_context,
         },
     )

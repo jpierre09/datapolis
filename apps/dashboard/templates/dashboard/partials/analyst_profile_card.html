@@ -1,17 +1,23 @@
 <article class="profile-card dashboard-card dashboard-profile-card">
-  <div class="avatar-shell dashboard-profile-avatar" aria-hidden="true">DP</div>
-  <h3 class="profile-name dashboard-profile-name">Analista Datapolis</h3>
-  <p class="profile-username dashboard-profile-username">@datapolis-portfolio</p>
-  <p class="profile-bio dashboard-profile-bio">Portafolio analítico para proyectos de datos, datasets curados y visualizaciones públicas con foco en claridad editorial.</p>
+  <div class="avatar-shell dashboard-profile-avatar" aria-hidden="true">
+    {% if analyst_profile.avatar_url %}
+      <img src="{{ analyst_profile.avatar_url }}" alt="Avatar de {{ analyst_profile.display_name }}">
+    {% else %}
+      {{ analyst_profile.avatar_initial }}
+    {% endif %}
+  </div>
+  <h3 class="profile-name dashboard-profile-name">{{ analyst_profile.display_name }}</h3>
+  <p class="profile-username dashboard-profile-username">@{{ request.user.username }}</p>
+  <p class="profile-bio dashboard-profile-bio">{{ analyst_profile.bio }}</p>
 
   <div class="profile-status dashboard-profile-status">
     <span>●</span>
-    <span>{% if metrics.published_projects > 0 %}Portafolio público activo{% else %}Portafolio público en construcción{% endif %}</span>
+    <span>{% if analyst_profile.profile_available %}Perfil público configurado{% else %}Perfil público aún no configurado{% endif %}</span>
   </div>
 
   <ul class="profile-meta dashboard-profile-meta">
-    <li><strong>Ubicación:</strong> No configurada</li>
-    <li><strong>Identidad:</strong> Perfil analítico de lectura pública</li>
+    <li><strong>Ubicación:</strong> {{ analyst_profile.location|default:"No configurada" }}</li>
+    <li><strong>Identidad:</strong> {{ analyst_profile.headline }}</li>
   </ul>
 
   <div class="profile-summary dashboard-profile-summary" aria-label="Resumen del perfil">
