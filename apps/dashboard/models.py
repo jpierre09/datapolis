@@ -1,5 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import post_save
+from django.dispatch import receiver
 from django.utils.text import slugify
 
 
@@ -47,4 +49,10 @@ class PublicProfile(models.Model):
 			slug = f"{base_slug}-{counter}"
 			counter += 1
 		return slug
+
+
+@receiver(post_save, sender=User)
+def create_public_profile(sender, instance, created, **kwargs):
+	if created:
+		PublicProfile.objects.get_or_create(user=instance)
 
