@@ -74,7 +74,7 @@
               {% for error in form.visualization_type.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
             </div>
 
-            <div class="dashboard-field">
+            <div class="dashboard-field" data-visualization-native-field>
               <label class="dashboard-label" for="{{ form.aggregation_method.id_for_label }}">{{ form.aggregation_method.label }}</label>
               {{ form.aggregation_method }}
               <p class="dashboard-help-text">{{ form.aggregation_method.help_text }}</p>
@@ -83,7 +83,7 @@
           </div>
         </div>
 
-        <div class="dashboard-visualization-block dashboard-visualization-block-tight">
+        <div class="dashboard-visualization-block dashboard-visualization-block-tight" data-visualization-native-field>
           <div class="dashboard-form-section-header dashboard-visualization-block-header">
             <div>
               <h3 class="dashboard-section-title">Configuración de datos</h3>
@@ -107,6 +107,24 @@
             </div>
 
             <div class="dashboard-field dashboard-field--full dashboard-visualization-aggregation-hint">
+            </div>
+          </div>
+        </div>
+
+        <div class="dashboard-visualization-block dashboard-visualization-block-tight" data-visualization-embed-field>
+          <div class="dashboard-form-section-header dashboard-visualization-block-header">
+            <div>
+              <h3 class="dashboard-section-title">Embed externo</h3>
+              <p class="dashboard-form-section-copy">Pega la URL para compartir de tu dashboard de Tableau Public, Power BI o Looker Studio.</p>
+            </div>
+          </div>
+
+          <div class="dashboard-form-grid dashboard-form-grid--full">
+            <div class="dashboard-field dashboard-field--full">
+              <label class="dashboard-label" for="{{ form.embed_url.id_for_label }}">{{ form.embed_url.label }}</label>
+              {{ form.embed_url }}
+              <p class="dashboard-help-text">{{ form.embed_url.help_text }}</p>
+              {% for error in form.embed_url.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
             </div>
           </div>
         </div>
@@ -143,6 +161,29 @@
     </form>
   </div>
 
+  <script>
+    (function () {
+      const typeSelect = document.getElementById("{{ form.visualization_type.id_for_label }}");
+      const nativeFields = document.querySelectorAll("[data-visualization-native-field]");
+      const embedFields = document.querySelectorAll("[data-visualization-embed-field]");
+
+      function syncVisibility() {
+        const isExternal = typeSelect.value === "external_embed";
+        nativeFields.forEach(function (field) {
+          field.style.display = isExternal ? "none" : "";
+        });
+        embedFields.forEach(function (field) {
+          field.style.display = isExternal ? "" : "none";
+        });
+      }
+
+      if (typeSelect) {
+        typeSelect.addEventListener("change", syncVisibility);
+        syncVisibility();
+      }
+    })();
+  </script>
+
   {% if preview_payload %}
     <div class="dashboard-preview-modal-overlay dashboard-preview-modal-overlay--open" data-preview-modal-overlay>
       <section class="dashboard-preview-modal" role="dialog" aria-modal="true" aria-labelledby="dashboard-preview-modal-title">
@@ -175,6 +216,17 @@
               <p id="preview-kpi-value" class="dashboard-visualization-preview-kpi-value"></p>
               <p id="preview-kpi-label" class="dashboard-visualization-preview-kpi-label"></p>
             </article>
+          {% elif preview_payload.visualization.type == "external_embed" %}
+            <div class="dashboard-visualization-mini-preview-embed">
+              <iframe
+                src="{{ preview_payload.visualization.embed_url }}"
+                class="dashboard-visualization-embed-frame"
+                loading="lazy"
+                sandbox="allow-scripts allow-same-origin allow-popups"
+                referrerpolicy="no-referrer"
+                title="Previsualización"
+              ></iframe>
+            </div>
           {% else %}
             <p class="dashboard-empty-state">Este tipo de visualización aún no tiene previsualización disponible.</p>
           {% endif %}

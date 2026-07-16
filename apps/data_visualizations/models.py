@@ -12,6 +12,7 @@ class ProjectVisualization(models.Model):
 		PIE_CHART = "pie_chart", "Pie chart"
 		DATA_TABLE = "data_table", "Data table"
 		KPI_CARD = "kpi_card", "KPI card"
+		EXTERNAL_EMBED = "external_embed", "External embed"
 
 	class AggregationMethod(models.TextChoices):
 		NONE = "none", "None"
@@ -30,6 +31,8 @@ class ProjectVisualization(models.Model):
 		DataSource,
 		on_delete=models.CASCADE,
 		related_name="project_visualizations",
+		null=True,
+		blank=True,
 	)
 	title = models.CharField(max_length=200)
 	description = models.TextField(blank=True)
@@ -44,6 +47,7 @@ class ProjectVisualization(models.Model):
 		choices=AggregationMethod.choices,
 		default=AggregationMethod.NONE,
 	)
+	embed_url = models.URLField(max_length=500, blank=True)
 	visualization_config = models.JSONField(default=dict, blank=True)
 	display_order = models.PositiveIntegerField(default=0)
 	is_active = models.BooleanField(default=True)
@@ -55,3 +59,7 @@ class ProjectVisualization(models.Model):
 
 	def __str__(self):
 		return self.title
+
+	@property
+	def is_external_embed(self):
+		return self.visualization_type == self.VisualizationType.EXTERNAL_EMBED

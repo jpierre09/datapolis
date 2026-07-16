@@ -294,6 +294,7 @@ class VisualizationCreateForm(forms.ModelForm):
         (ProjectVisualization.VisualizationType.PIE_CHART, "Torta"),
         (ProjectVisualization.VisualizationType.DATA_TABLE, "Tabla"),
         (ProjectVisualization.VisualizationType.KPI_CARD, "KPI"),
+        (ProjectVisualization.VisualizationType.EXTERNAL_EMBED, "Embed externo (Tableau / Power BI / Looker Studio)"),
     ]
 
     AGGREGATION_METHOD_CHOICES = [
@@ -325,6 +326,12 @@ class VisualizationCreateForm(forms.ModelForm):
         required=False,
         help_text="Solo se muestran columnas numéricas recomendadas para el eje Y.",
     )
+    embed_url = forms.URLField(
+        label="URL del Dashboard Externo",
+        required=False,
+        help_text="Pega la URL para compartir de tu dashboard de Tableau Public, Power BI o Looker Studio.",
+        widget=forms.URLInput(attrs={"placeholder": "https://public.tableau.com/views/..."}),
+    )
     display_order = forms.IntegerField(
         label="Orden",
         min_value=0,
@@ -346,6 +353,7 @@ class VisualizationCreateForm(forms.ModelForm):
             "x_axis_column",
             "y_axis_column",
             "aggregation_method",
+            "embed_url",
             "display_order",
             "is_active",
         ]
@@ -356,6 +364,7 @@ class VisualizationCreateForm(forms.ModelForm):
             "x_axis_column": "Columna X",
             "y_axis_column": "Columna Y",
             "aggregation_method": "Método de agregación",
+            "embed_url": "URL del Dashboard Externo",
             "display_order": "Orden",
             "is_active": "Activa",
         }
@@ -365,6 +374,7 @@ class VisualizationCreateForm(forms.ModelForm):
             "x_axis_column": "Solo se muestran columnas recomendadas para el eje X.",
             "y_axis_column": "Solo se muestran columnas numéricas recomendadas para el eje Y.",
             "aggregation_method": "Selecciona cómo agrupar o resumir los datos.",
+            "embed_url": "Pega la URL para compartir de tu dashboard de Tableau Public, Power BI o Looker Studio.",
             "display_order": "Un número menor aparece antes en el proyecto público.",
             "is_active": "Las visualizaciones activas aparecen en el portal público.",
         }
@@ -411,3 +421,12 @@ class VisualizationCreateForm(forms.ModelForm):
 
             existing_classes = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        if cleaned_data.get("visualization_type") == ProjectVisualization.VisualizationType.EXTERNAL_EMBED:
+            if not cleaned_data.get("embed_url"):
+                self.add_error("embed_url", "La URL del dashboard externo es obligatoria.")
+
+        return cleaned_data

@@ -39,6 +39,17 @@
             <p id="dashboard-visualization-mini-kpi-value-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-value" data-visualization-mini-kpi-value></p>
             <p id="dashboard-visualization-mini-kpi-label-{{ visualization.id }}" class="dashboard-visualization-preview-kpi-label" data-visualization-mini-kpi-label></p>
           </article>
+        {% elif vtype == "external_embed" %}
+          <div class="dashboard-visualization-mini-preview-embed">
+            <iframe
+              src="{{ visualization.embed_url }}"
+              class="dashboard-visualization-embed-frame"
+              loading="lazy"
+              sandbox="allow-scripts allow-same-origin allow-popups"
+              referrerpolicy="no-referrer"
+              title="{{ visualization.title|escape }}"
+            ></iframe>
+          </div>
         {% else %}
           <p class="dashboard-empty-state dashboard-visualization-mini-preview-empty">Este tipo de visualización aún no tiene vista previa disponible.</p>
         {% endif %}
@@ -60,12 +71,16 @@
   </div>
 
   <ul class="dashboard-card-meta dashboard-visualization-card-meta">
-    <li><strong>Dataset asociado:</strong> <a href="{% url 'dashboard:dataset_detail' project.slug visualization.source_dataset.id %}">{{ visualization.source_dataset.name }}</a></li>
-    <li><strong>Columna X:</strong> {{ visualization.x_axis_column|default:"Sin columna" }}</li>
-    <li><strong>Columna Y:</strong> {{ visualization.y_axis_column|default:"Sin columna" }}</li>
-    <li><strong>Agregación:</strong>
-      {% if visualization.aggregation_method == "none" %}Sin agregación{% elif visualization.aggregation_method == "sum" %}Suma{% elif visualization.aggregation_method == "average" %}Promedio{% elif visualization.aggregation_method == "count" %}Conteo{% elif visualization.aggregation_method == "minimum" %}Mínimo{% elif visualization.aggregation_method == "maximum" %}Máximo{% else %}{{ visualization.get_aggregation_method_display }}{% endif %}
-    </li>
+    {% if visualization.is_external_embed %}
+      <li><strong>Tipo:</strong> Dashboard Externo</li>
+    {% else %}
+      <li><strong>Dataset asociado:</strong> <a href="{% url 'dashboard:dataset_detail' project.slug visualization.source_dataset.id %}">{{ visualization.source_dataset.name }}</a></li>
+      <li><strong>Columna X:</strong> {{ visualization.x_axis_column|default:"Sin columna" }}</li>
+      <li><strong>Columna Y:</strong> {{ visualization.y_axis_column|default:"Sin columna" }}</li>
+      <li><strong>Agregación:</strong>
+        {% if visualization.aggregation_method == "none" %}Sin agregación{% elif visualization.aggregation_method == "sum" %}Suma{% elif visualization.aggregation_method == "average" %}Promedio{% elif visualization.aggregation_method == "count" %}Conteo{% elif visualization.aggregation_method == "minimum" %}Mínimo{% elif visualization.aggregation_method == "maximum" %}Máximo{% else %}{{ visualization.get_aggregation_method_display }}{% endif %}
+      </li>
+    {% endif %}
     <li><strong>Estado:</strong> {% if visualization.is_active %}Activa{% else %}Inactiva{% endif %}</li>
     <li><strong>display_order:</strong> {{ visualization.display_order }}</li>
   </ul>

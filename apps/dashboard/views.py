@@ -83,7 +83,16 @@ def _visualization_form_page_context(
     preview_error,
     breadcrumb_label,
 ):
-    column_context = analyze_data_source_columns(data_source)
+    if data_source is None:
+        column_context = _empty_column_context()
+        processing_status_label = ""
+        source_type_label = ""
+        dataset_breadcrumb = ("Embed externo", None)
+    else:
+        column_context = analyze_data_source_columns(data_source)
+        processing_status_label = DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status)
+        source_type_label = data_source.get_source_type_display()
+        dataset_breadcrumb = (data_source.name, reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}))
 
     return {
         "dashboard_section": "projects",
@@ -97,17 +106,33 @@ def _visualization_form_page_context(
         "cancel_url": cancel_url,
         "context_label": context_label,
         "status_label": STATUS_LABELS.get(project.status, project.status),
-        "processing_status_label": DATA_SOURCE_STATUS_LABELS.get(data_source.processing_status, data_source.processing_status),
-        "source_type_label": data_source.get_source_type_display(),
+        "processing_status_label": processing_status_label,
+        "source_type_label": source_type_label,
         "preview_payload": preview_payload,
         "preview_error": preview_error,
         "breadcrumbs": _breadcrumbs(
             ("Proyectos", reverse("dashboard:project_list")),
             (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
-            (data_source.name, reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id})),
+            dataset_breadcrumb,
             (breadcrumb_label, None),
         ),
         **column_context,
+    }
+
+
+def _empty_column_context():
+    return {
+        "columns_schema": {},
+        "columns": [],
+        "summary": {
+            "total_columns": 0,
+            "numeric_columns": 0,
+            "categorical_columns": 0,
+            "datetime_columns": 0,
+            "nullable_columns": 0,
+        },
+        "x_axis_columns": [],
+        "y_axis_columns": [],
     }
 
 
@@ -139,6 +164,11 @@ def _build_dashboard_metrics_for_owner(owner):
 
 
 def _build_visualization_preview_context(visualization):
+    if visualization.is_external_embed:
+        if not visualization.embed_url:
+            return None, "Este embed externo no tiene una URL configurada"
+        return {"visualization": {"type": "external_embed", "embed_url": visualization.embed_url}}, ""
+
     preview_payload = None
     preview_error = ""
 
@@ -717,14 +747,18 @@ def visualization_create(request, project_slug, dataset_id):
         if form.is_valid():
             visualization = form.save(commit=False)
             visualization.portfolio_project = project
-            visualization.source_dataset = data_source
+            visualization.source_dataset = None if visualization.is_external_embed else data_source
 
-            try:
-                preview_payload = build_visualization_payload(visualization)
-            except VisualizationEngineError as exc:
-                preview_error = str(exc)
-                form.add_error(None, preview_error)
+            if visualization.is_external_embed:
+                preview_payload = {"visualization": {"type": "external_embed", "embed_url": visualization.embed_url}}
             else:
+                try:
+                    preview_payload = build_visualization_payload(visualization)
+                except VisualizationEngineError as exc:
+                    preview_error = str(exc)
+                    form.add_error(None, preview_error)
+
+            if not preview_error:
                 if action == "preview":
                     pass
                 else:
@@ -778,14 +812,18 @@ def visualization_edit(request, project_slug, visualization_id):
         if form.is_valid():
             updated_visualization = form.save(commit=False)
             updated_visualization.portfolio_project = project
-            updated_visualization.source_dataset = data_source
+            updated_visualization.source_dataset = None if updated_visualization.is_external_embed else data_source
 
-            try:
-                preview_payload = build_visualization_payload(updated_visualization)
-            except VisualizationEngineError as exc:
-                preview_error = str(exc)
-                form.add_error(None, preview_error)
+            if updated_visualization.is_external_embed:
+                preview_payload = {"visualization": {"type": "external_embed", "embed_url": updated_visualization.embed_url}}
             else:
+                try:
+                    preview_payload = build_visualization_payload(updated_visualization)
+                except VisualizationEngineError as exc:
+                    preview_error = str(exc)
+                    form.add_error(None, preview_error)
+
+            if not preview_error:
                 if action == "preview":
                     pass
                 else:

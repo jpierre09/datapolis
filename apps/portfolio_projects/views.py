@@ -65,6 +65,39 @@ def _build_public_profile_context(user):
 	}
 
 
+def _build_visualization_payload_entry(visualization):
+	if visualization.is_external_embed:
+		if not visualization.embed_url:
+			return {
+				"visualization": visualization,
+				"payload": None,
+				"payload_script_id": "",
+				"error": "Este embed externo no tiene una URL configurada",
+			}
+		return {
+			"visualization": visualization,
+			"payload": {"visualization": {"type": "external_embed", "embed_url": visualization.embed_url}},
+			"payload_script_id": "",
+			"error": "",
+		}
+
+	try:
+		payload = build_visualization_payload(visualization)
+		return {
+			"visualization": visualization,
+			"payload": payload,
+			"payload_script_id": f"payload-{visualization.id}",
+			"error": "",
+		}
+	except VisualizationEngineError as exc:
+		return {
+			"visualization": visualization,
+			"payload": None,
+			"payload_script_id": "",
+			"error": str(exc),
+		}
+
+
 def project_list(request):
 	from django.contrib.auth import get_user_model
 	User = get_user_model()
@@ -127,27 +160,7 @@ def project_detail(request, slug):
 		.order_by("display_order", "id")
 	)
 
-	visualization_payloads = []
-	for visualization in visualizations:
-		try:
-			payload = build_visualization_payload(visualization)
-			visualization_payloads.append(
-				{
-					"visualization": visualization,
-					"payload": payload,
-					"payload_script_id": f"payload-{visualization.id}",
-					"error": "",
-				}
-			)
-		except VisualizationEngineError as exc:
-			visualization_payloads.append(
-				{
-					"visualization": visualization,
-					"payload": None,
-					"payload_script_id": "",
-					"error": str(exc),
-				}
-			)
+	visualization_payloads = [_build_visualization_payload_entry(visualization) for visualization in visualizations]
 
 	return render(
 		request,
@@ -221,27 +234,7 @@ def public_profile_project_detail(request, profile_slug, project_slug):
 		.order_by("display_order", "id")
 	)
 
-	visualization_payloads = []
-	for visualization in visualizations:
-		try:
-			payload = build_visualization_payload(visualization)
-			visualization_payloads.append(
-				{
-					"visualization": visualization,
-					"payload": payload,
-					"payload_script_id": f"payload-{visualization.id}",
-					"error": "",
-				}
-			)
-		except VisualizationEngineError as exc:
-			visualization_payloads.append(
-				{
-					"visualization": visualization,
-					"payload": None,
-					"payload_script_id": "",
-					"error": str(exc),
-				}
-			)
+	visualization_payloads = [_build_visualization_payload_entry(visualization) for visualization in visualizations]
 
 	return render(
 		request,

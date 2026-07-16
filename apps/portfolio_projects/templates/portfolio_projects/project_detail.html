@@ -153,6 +153,17 @@
                                               <div class="visualization-empty">No hay datos disponibles para esta tarjeta.</div>
                                           {% endif %}
                                           {{ item.payload|json_script:item.payload_script_id }}
+                                      {% elif vtype == "external_embed" %}
+                                          <div class="visualization-embed">
+                                              <iframe
+                                                  src="{{ item.payload.visualization.embed_url }}"
+                                                  class="visualization-embed-frame"
+                                                  loading="lazy"
+                                                  sandbox="allow-scripts allow-same-origin allow-popups"
+                                                  referrerpolicy="no-referrer"
+                                                  title="{{ item.visualization.title|escape }}"
+                                              ></iframe>
+                                          </div>
                                       {% else %}
                                           <div class="visualization-unsupported">Este tipo de visualización aún no está soportado en el render público.</div>
                                       {% endif %}
