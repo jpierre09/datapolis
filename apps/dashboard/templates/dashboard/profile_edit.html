@@ -44,13 +44,6 @@
           {% if form.bio.help_text %}<p class="dashboard-help-text">{{ form.bio.help_text }}</p>{% endif %}
           {% for error in form.bio.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
         </div>
-
-        <div class="dashboard-field dashboard-field--full">
-          <label class="dashboard-label" for="{{ form.avatar.id_for_label }}">{{ form.avatar.label }}</label>
-          {{ form.avatar }}
-          {% if form.avatar.help_text %}<p class="dashboard-help-text">{{ form.avatar.help_text }}</p>{% endif %}
-          {% for error in form.avatar.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-        </div>
       </div>
 
       <div class="dashboard-form-section">

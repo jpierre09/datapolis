@@ -32,12 +32,7 @@ def _normalize_external_links(external_links):
 
 def _build_public_profile_context(user):
 	profile = _get_user_public_profile(user)
-	avatar_url = ""
-	if profile and profile.avatar:
-		try:
-			avatar_url = profile.avatar.url
-		except ValueError:
-			avatar_url = ""
+	avatar_url = profile.avatar_url if profile else ""
 
 	display_name = "Analista"
 	headline = "Perfil público aún no configurado"

@@ -145,13 +145,7 @@ def _build_dashboard_profile_context(user):
         profile = user.public_profile
     except ObjectDoesNotExist:
         profile = None
-    avatar_url = ""
-
-    if profile and profile.avatar:
-        try:
-            avatar_url = profile.avatar.url
-        except ValueError:
-            avatar_url = ""
+    avatar_url = profile.avatar_url if profile else ""
 
     display_name = user.get_full_name() or user.username or "Analista"
     headline = "Perfil público aún no configurado"

@@ -195,27 +195,24 @@ class PublicProfileForm(forms.ModelForm):
 
     class Meta:
         model = PublicProfile
-        fields = ["display_name", "headline", "bio", "location", "avatar"]
+        fields = ["display_name", "headline", "bio", "location"]
         labels = {
             "display_name": "Nombre para mostrar",
             "headline": "Titular",
             "bio": "Biografía",
             "location": "Ubicación",
-            "avatar": "Foto de perfil",
         }
         help_texts = {
             "display_name": "Nombre que verán en el portafolio público.",
             "headline": "Una línea breve que resuma tu perfil.",
             "bio": "Un texto corto y profesional sobre tu trabajo o experiencia.",
             "location": "Ciudad, país o referencia geográfica opcional.",
-            "avatar": "Imagen cuadrada o vertical, idealmente de buena calidad.",
         }
         widgets = {
             "display_name": forms.TextInput(attrs={"placeholder": "Ej. Laura Pérez"}),
             "headline": forms.TextInput(attrs={"placeholder": "Ej. Analista de datos y storytelling visual"}),
             "bio": forms.Textarea(attrs={"rows": 5, "placeholder": "Resume tu experiencia, enfoque y especialidad."}),
             "location": forms.TextInput(attrs={"placeholder": "Ej. Bogotá, Colombia"}),
-            "avatar": forms.ClearableFileInput(attrs={"accept": "image/*"}),
         }
 
     def __init__(self, *args, **kwargs):

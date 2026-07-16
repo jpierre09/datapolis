@@ -16,10 +16,16 @@ class PublicProfile(models.Model):
 	location = models.CharField(max_length=255, blank=True)
 	external_links = models.JSONField(default=dict, blank=True)
 	skills = models.JSONField(default=list, blank=True)
-	avatar = models.ImageField(upload_to="avatars/", null=True, blank=True)
 
 	def __str__(self):
 		return self.display_name or self.user.username
+
+	@property
+	def avatar_url(self):
+		social_account = self.user.socialaccount_set.filter(provider="google").first()
+		if not social_account:
+			return ""
+		return social_account.extra_data.get("picture", "")
 
 	def save(self, *args, **kwargs):
 		if not self.slug:
