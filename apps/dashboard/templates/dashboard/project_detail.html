@@ -122,11 +122,19 @@
           <h3 class="dashboard-section-title">Visualizaciones</h3>
         </div>
 
-        {% if project.active_visualizations %}
+        {% if active_visualizations or inactive_visualizations %}
           <div class="dashboard-visualization-grid">
-            {% for visualization in project.active_visualizations %}
+            {% for visualization in active_visualizations %}
               {% include "dashboard/partials/visualization_card.html" %}
             {% endfor %}
+
+            {% if inactive_visualizations %}
+              <p class="dashboard-visualization-inactive-separator">Ocultas / Inactivas</p>
+
+              {% for visualization in inactive_visualizations %}
+                {% include "dashboard/partials/visualization_card.html" %}
+              {% endfor %}
+            {% endif %}
           </div>
         {% else %}
           <p class="dashboard-empty-state">No tienes visualizaciones activas.</p>

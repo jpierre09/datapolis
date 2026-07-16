@@ -370,10 +370,17 @@ def project_detail(request, slug):
         .order_by("display_order", "id"),
         to_attr="active_visualizations",
     )
+    inactive_visualizations_prefetch = Prefetch(
+        "project_visualizations",
+        queryset=ProjectVisualization.objects.filter(is_active=False)
+        .select_related("source_dataset")
+        .order_by("display_order", "id"),
+        to_attr="inactive_visualizations",
+    )
 
     project = get_object_or_404(
         PortfolioProject.objects.select_related("category", "project_type")
-        .prefetch_related(data_sources_prefetch, active_visualizations_prefetch),
+        .prefetch_related(data_sources_prefetch, active_visualizations_prefetch, inactive_visualizations_prefetch),
         owner=request.user,
         slug=slug,
     )
@@ -406,6 +413,8 @@ def project_detail(request, slug):
             "main_dataset": main_dataset,
             "datasets_count": len(project.project_data_sources),
             "visualizations_count": len(project.active_visualizations),
+            "active_visualizations": project.active_visualizations,
+            "inactive_visualizations": project.inactive_visualizations,
             "project_publish_checklist": project_publish_checklist,
             "breadcrumbs": _breadcrumbs(
                 ("Proyectos", reverse("dashboard:project_list")),

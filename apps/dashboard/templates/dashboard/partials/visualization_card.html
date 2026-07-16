@@ -1,4 +1,4 @@
-<article class="dashboard-card dashboard-card-dashed dashboard-visualization-card" data-visualization-preview-card data-visualization-id="{{ visualization.id }}">
+<article class="dashboard-card dashboard-card-dashed dashboard-visualization-card{% if not visualization.is_active %} dashboard-visualization-card--inactive{% endif %}" data-visualization-preview-card data-visualization-id="{{ visualization.id }}">
   <div class="dashboard-card-header">
     <h4 class="dashboard-card-title">{{ visualization.title }}</h4>
     <div class="dashboard-visualization-card-badges">
