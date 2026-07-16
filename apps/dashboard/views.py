@@ -42,7 +42,7 @@ def _build_project_data_source_context(data_source):
     }
 
 
-def _project_form_page_context(*, form, page_title, page_heading, page_description, submit_label, cancel_url, status_note):
+def _project_form_page_context(*, form, page_title, page_heading, page_description, submit_label, cancel_url, status_note, breadcrumbs):
     return {
         "dashboard_section": "projects",
         "form": form,
@@ -52,6 +52,7 @@ def _project_form_page_context(*, form, page_title, page_heading, page_descripti
         "submit_label": submit_label,
         "cancel_url": cancel_url,
         "status_note": status_note,
+        "breadcrumbs": breadcrumbs,
     }
 
 
@@ -80,6 +81,7 @@ def _visualization_form_page_context(
     context_label,
     preview_payload,
     preview_error,
+    breadcrumb_label,
 ):
     column_context = analyze_data_source_columns(data_source)
 
@@ -99,8 +101,18 @@ def _visualization_form_page_context(
         "source_type_label": data_source.get_source_type_display(),
         "preview_payload": preview_payload,
         "preview_error": preview_error,
+        "breadcrumbs": _breadcrumbs(
+            ("Proyectos", reverse("dashboard:project_list")),
+            (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
+            (data_source.name, reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id})),
+            (breadcrumb_label, None),
+        ),
         **column_context,
     }
+
+
+def _breadcrumbs(*items):
+    return [{"name": name, "url": url} for name, url in items]
 
 
 def _build_dashboard_metrics():
@@ -365,6 +377,10 @@ def project_detail(request, slug):
             "datasets_count": len(project.project_data_sources),
             "visualizations_count": len(project.active_visualizations),
             "project_publish_checklist": project_publish_checklist,
+            "breadcrumbs": _breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                (project.title, None),
+            ),
         },
     )
 
@@ -393,6 +409,10 @@ def project_create(request):
             submit_label="Crear proyecto",
             cancel_url=reverse("dashboard:project_list"),
             status_note="Estado del proyecto: Borrador",
+            breadcrumbs=_breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                ("Crear proyecto", None),
+            ),
         ),
     )
 
@@ -424,6 +444,11 @@ def project_edit(request, slug):
             submit_label="Guardar cambios",
             cancel_url=reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
             status_note=f"Estado actual: {STATUS_LABELS.get(project.status, project.status)}",
+            breadcrumbs=_breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
+                ("Editar proyecto", None),
+            ),
         ),
     )
 
@@ -486,6 +511,11 @@ def project_add_dataset(request, slug):
             "page_description": "Sube un CSV o Excel para asociarlo al proyecto y procesar su metadata.",
             "submit_label": "Guardar dataset",
             "cancel_url": reverse("dashboard:project_detail", kwargs={"slug": project.slug}),
+            "breadcrumbs": _breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
+                ("Cargar dataset", None),
+            ),
         },
     )
 
@@ -509,6 +539,11 @@ def dataset_detail(request, project_slug, dataset_id):
             "project": project,
             "data_source": data_source,
             "status_label": STATUS_LABELS.get(project.status, project.status),
+            "breadcrumbs": _breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
+                (data_source.name, None),
+            ),
             **data_source_context,
         },
     )
@@ -654,6 +689,12 @@ def dataset_edit(request, project_slug, dataset_id):
             "submit_label": "Guardar cambios",
             "cancel_url": reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id}),
             "is_edit": True,
+            "breadcrumbs": _breadcrumbs(
+                ("Proyectos", reverse("dashboard:project_list")),
+                (project.title, reverse("dashboard:project_detail", kwargs={"slug": project.slug})),
+                (data_source.name, reverse("dashboard:dataset_detail", kwargs={"project_slug": project.slug, "dataset_id": data_source.id})),
+                ("Editar dataset", None),
+            ),
         },
     )
 
@@ -713,6 +754,7 @@ def visualization_create(request, project_slug, dataset_id):
             context_label="Nueva visualización para:",
             preview_payload=preview_payload,
             preview_error=preview_error,
+            breadcrumb_label="Nueva visualización",
         ),
     )
 
@@ -774,6 +816,7 @@ def visualization_edit(request, project_slug, visualization_id):
             context_label="Editar visualización de:",
             preview_payload=preview_payload,
             preview_error=preview_error,
+            breadcrumb_label="Editar visualización",
         ),
     )
 
