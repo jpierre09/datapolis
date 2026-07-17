@@ -39,3 +39,5 @@ Deploy: Railway, vía Dockerfile con entrypoint.sh (migrate + collectstatic + gu
 - Reusar datos de modelos existentes antes de proponer campos nuevos.
 - Diccionarios de traducción (tipo de gráfica, agregación) viven en un único lugar dentro de `apps/data_visualizations`, nunca repetidos/hardcodeados en templates.
 - Al generar payloads para preview/mini-preview, envolver en try/except y exponer un flag de error legible a la card, nunca romper la vista completa.
+
+

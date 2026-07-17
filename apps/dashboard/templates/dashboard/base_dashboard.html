@@ -57,7 +57,11 @@
             <a href="#">Privacidad</a>
             <a href="#">Términos</a>
             <a href="#">Contacto</a>
-            <a href="{% url 'portfolio_projects:project_list' %}">Portafolio público</a>
+            {% if request.user.public_profile.slug %}
+              <a href="{% url 'public_profile_detail' request.user.public_profile.slug %}">Portafolio público</a>
+            {% else %}
+              <a href="{% url 'portfolio_projects:project_list' %}">Portafolio público</a>
+            {% endif %}
           </div>
         </footer>
       </div>
