@@ -162,6 +162,7 @@ body {
 }
 
 .content {
+  position: relative;
   padding: 18px 20px 16px;
 }
 
@@ -2028,5 +2029,34 @@ body.dashboard-preview-modal-open {
 
 .dashboard-visualization-embed-skeleton .dashboard-skeleton-bar-chart {
   height: 70%;
+}
+
+@keyframes dashboard-subtle-shimmer-sweep {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+#dashboard-subtle-shimmer {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+}
+
+#dashboard-subtle-shimmer::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  width: 60%;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgba(255, 255, 255, 0.65) 50%, rgba(255, 255, 255, 0) 100%);
+  animation: dashboard-subtle-shimmer-sweep 1.5s ease-in-out infinite;
 }
 

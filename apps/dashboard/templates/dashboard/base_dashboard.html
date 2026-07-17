@@ -34,6 +34,7 @@
         </header>
 
         <main class="content">
+          <div id="dashboard-subtle-shimmer"></div>
           {% if messages %}
             <div class="dashboard-messages">
               {% for message in messages %}
@@ -88,6 +89,20 @@
           });
         }
       })();
+    </script>
+
+    <script>
+      window.addEventListener('load', function () {
+        var shimmer = document.getElementById('dashboard-subtle-shimmer');
+        if (!shimmer) {
+          return;
+        }
+        shimmer.style.transition = 'opacity 0.2s ease';
+        shimmer.style.opacity = '0';
+        setTimeout(function () {
+          shimmer.style.display = 'none';
+        }, 200);
+      });
     </script>
   </body>
 </html>
