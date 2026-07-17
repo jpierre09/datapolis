@@ -1,4 +1,8 @@
+import re
+
 from django import forms
+from django.core.exceptions import ValidationError
+from django.core.validators import URLValidator
 
 from apps.data_sources.models import DataSource
 from apps.dashboard.dataset_columns import analyze_data_source_columns, build_recommended_column_choices
@@ -326,7 +330,7 @@ class VisualizationCreateForm(forms.ModelForm):
         required=False,
         help_text="Solo se muestran columnas numéricas recomendadas para el eje Y.",
     )
-    embed_url = forms.URLField(
+    embed_url = forms.CharField(
         label="URL del Dashboard Externo",
         required=False,
         help_text="Pega la URL para compartir de tu dashboard de Tableau Public, Power BI o Looker Studio.",
@@ -421,6 +425,40 @@ class VisualizationCreateForm(forms.ModelForm):
 
             existing_classes = field.widget.attrs.get("class", "")
             field.widget.attrs["class"] = f"{existing_classes} {widget_class}".strip()
+
+    def clean_embed_url(self):
+        value = (self.cleaned_data.get("embed_url") or "").strip()
+        if not value:
+            return value
+
+        iframe_src_match = re.search(r'<iframe[^>]*\ssrc=["\']([^"\']+)["\']', value, re.IGNORECASE)
+        if iframe_src_match:
+            value = iframe_src_match.group(1).strip()
+
+        value = value.replace("&amp;", "&")
+
+        if "public.tableau.com/app/profile/" in value:
+            path = value.split("?")[0].rstrip("/")
+            path_parts = path.split("/")
+            workbook_name, sheet_name = path_parts[-2], path_parts[-1]
+            value = f"https://public.tableau.com/views/{workbook_name}/{sheet_name}"
+
+        if "public.tableau.com" in value:
+            base_url, _, query = value.partition("?")
+            required_flags = {":showvizhome=no": ":showVizHome=no", ":embed=true": ":embed=true"}
+            existing_flags = {flag.lower() for flag in query.split("&") if flag}
+            missing_flags = [
+                flag for key, flag in required_flags.items() if key not in existing_flags
+            ]
+            value = base_url + "?" + "&".join(filter(None, [query] + missing_flags)) if (query or missing_flags) else base_url
+
+        validator = URLValidator()
+        try:
+            validator(value)
+        except ValidationError:
+            raise ValidationError("Ingresa una URL válida para el dashboard externo.")
+
+        return value
 
     def clean(self):
         cleaned_data = super().clean()
