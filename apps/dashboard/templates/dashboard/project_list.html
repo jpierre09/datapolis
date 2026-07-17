@@ -19,7 +19,7 @@
             <input class="dashboard-repo-search-input" type="search" placeholder="Buscar proyecto..." aria-label="Buscar proyecto">
           </div>
 
-          <div class="dashboard-repo-status-filters" aria-label="Filtro de estado">
+          <div class="dashboard-repo-status-filters" aria-label="Filtro de estado" id="dashboard-repo-status-filters">
             {% for value, label in status_options %}
               <a class="dashboard-pill {% if status_filter == value %}active{% endif %}" href="{% url 'dashboard:project_list' %}?status={{ value }}">{{ label }}</a>
             {% endfor %}
@@ -31,7 +31,18 @@
         </div>
       </section>
 
-      <section class="dashboard-grid dashboard-repo-list">
+      <div class="dashboard-skeleton-container" id="dashboard-project-list-skeleton" style="display: none;">
+        <div class="dashboard-skeleton-kpi-row">
+          <div class="dashboard-skeleton-kpi"></div>
+          <div class="dashboard-skeleton-kpi"></div>
+          <div class="dashboard-skeleton-kpi"></div>
+        </div>
+        <div class="dashboard-skeleton-bar-chart">
+          <div></div><div></div><div></div><div></div><div></div><div></div>
+        </div>
+      </div>
+
+      <section class="dashboard-grid dashboard-repo-list" id="dashboard-project-list-grid">
         {% for project in projects %}
           <a class="dashboard-card dashboard-card-dashed dashboard-repo-item dashboard-repo-link" href="{% url 'dashboard:project_detail' project.slug %}">
             <div class="dashboard-repo-title-row">
@@ -56,4 +67,25 @@
       </section>
     </div>
   </section>
+
+  <script>
+    (function () {
+      var filters = document.getElementById('dashboard-repo-status-filters');
+      var grid = document.getElementById('dashboard-project-list-grid');
+      var skeleton = document.getElementById('dashboard-project-list-skeleton');
+
+      if (!filters || !grid || !skeleton) {
+        return;
+      }
+
+      filters.addEventListener('click', function (event) {
+        var link = event.target.closest('a');
+        if (!link) {
+          return;
+        }
+        grid.style.display = 'none';
+        skeleton.style.display = 'grid';
+      });
+    })();
+  </script>
 {% endblock %}

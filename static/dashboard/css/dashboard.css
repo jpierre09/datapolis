@@ -1093,6 +1093,7 @@ body {
 }
 
 .dashboard-visualization-mini-preview-embed {
+  position: relative;
   min-height: 160px;
   border-radius: 14px;
   overflow: hidden;
@@ -1944,5 +1945,88 @@ body.dashboard-preview-modal-open {
   background-color: #ffdad6;
   color: #ba1a1a;
   border-color: rgba(186, 26, 26, 0.25);
+}
+
+/* Skeleton Loaders System */
+@keyframes dashboard-shimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
+}
+
+.dashboard-skeleton-container {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 14px;
+  border: 1px dashed rgba(127, 183, 190, 0.45);
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.dashboard-skeleton-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 10px;
+}
+
+.dashboard-skeleton-kpi {
+  height: 60px;
+  border-radius: 12px;
+  background: linear-gradient(100deg, rgba(183, 196, 199, 0.4) 20%, rgba(127, 183, 190, 0.65) 40%, rgba(183, 196, 199, 0.4) 60%);
+  background-size: 200% 100%;
+  animation: dashboard-shimmer 1.6s ease-in-out infinite;
+}
+
+.dashboard-skeleton-bar-chart {
+  display: flex;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100px;
+}
+
+.dashboard-skeleton-bar-chart div {
+  flex: 1;
+  border-radius: 6px 6px 0 0;
+  background: linear-gradient(100deg, rgba(183, 196, 199, 0.4) 20%, rgba(127, 183, 190, 0.65) 40%, rgba(183, 196, 199, 0.4) 60%);
+  background-size: 200% 100%;
+  animation: dashboard-shimmer 1.6s ease-in-out infinite;
+}
+
+.dashboard-skeleton-bar-chart div:nth-child(1) { height: 35%; animation-delay: 0s; }
+.dashboard-skeleton-bar-chart div:nth-child(2) { height: 55%; animation-delay: 0.1s; }
+.dashboard-skeleton-bar-chart div:nth-child(3) { height: 40%; animation-delay: 0.2s; }
+.dashboard-skeleton-bar-chart div:nth-child(4) { height: 75%; animation-delay: 0.3s; }
+.dashboard-skeleton-bar-chart div:nth-child(5) { height: 60%; animation-delay: 0.4s; }
+.dashboard-skeleton-bar-chart div:nth-child(6) { height: 90%; animation-delay: 0.5s; }
+
+.dashboard-skeleton-trend {
+  height: 6px;
+  border-radius: 999px;
+  background: linear-gradient(100deg, rgba(216, 167, 177, 0.35) 20%, rgba(216, 167, 177, 0.65) 40%, rgba(216, 167, 177, 0.35) 60%);
+  background-size: 200% 100%;
+  animation: dashboard-shimmer 1.6s ease-in-out infinite;
+}
+
+.dashboard-skeleton-trend + .dashboard-skeleton-trend {
+  width: 70%;
+}
+
+.dashboard-visualization-embed-skeleton {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  gap: 6px;
+  padding: 10px;
+  background: var(--color-card);
+}
+
+.dashboard-visualization-embed-skeleton .dashboard-skeleton-bar-chart {
+  height: 70%;
 }
 

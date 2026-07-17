@@ -41,6 +41,11 @@
           </article>
         {% elif vtype == "external_embed" %}
           <div class="dashboard-visualization-mini-preview-embed">
+            <div class="dashboard-visualization-embed-skeleton">
+              <div class="dashboard-skeleton-bar-chart">
+                <div></div><div></div><div></div><div></div><div></div><div></div>
+              </div>
+            </div>
             <iframe
               src="{{ visualization.embed_url }}"
               class="dashboard-visualization-embed-frame"
@@ -48,6 +53,7 @@
               sandbox="allow-scripts allow-same-origin allow-popups"
               referrerpolicy="no-referrer"
               title="{{ visualization.title|escape }}"
+              onload="this.previousElementSibling.style.display='none'"
             ></iframe>
           </div>
         {% else %}
