@@ -1,8 +1,7 @@
 from django.http import HttpResponse
 from django.shortcuts import render
 
-from apps.data_visualizations.models import ProjectVisualization
-from apps.portfolio_projects.models import PortfolioProject
+from apps.portfolio_projects.models import PortfolioProject, ProjectCategory
 
 
 def home(request):
@@ -24,16 +23,21 @@ def project_explore(request):
 	if featured_project:
 		projects = projects.exclude(pk=featured_project.pk)
 
-	current_filter = request.GET.get("tipo", "todos")
-	if current_filter == "embed":
-		projects = projects.filter(
-			project_visualizations__is_active=True,
-			project_visualizations__visualization_type=ProjectVisualization.VisualizationType.EXTERNAL_EMBED,
-		).distinct()
-	elif current_filter == "dataset":
-		projects = projects.filter(data_sources__is_active=True).exclude(data_sources__file="").distinct()
-	else:
-		current_filter = "todos"
+	categories = (
+		ProjectCategory.objects.filter(
+			is_active=True,
+			projects__status=PortfolioProject.Status.PUBLISHED,
+		)
+		.distinct()
+		.order_by("name")
+	)
+
+	current_category_slug = request.GET.get("categoria", "todos")
+	if current_category_slug != "todos":
+		if categories.filter(slug=current_category_slug).exists():
+			projects = projects.filter(category__slug=current_category_slug)
+		else:
+			current_category_slug = "todos"
 
 	return render(
 		request,
@@ -41,7 +45,8 @@ def project_explore(request):
 		{
 			"featured_project": featured_project,
 			"projects": projects,
-			"current_filter": current_filter,
+			"categories": categories,
+			"current_category_slug": current_category_slug,
 		},
 	)
 
