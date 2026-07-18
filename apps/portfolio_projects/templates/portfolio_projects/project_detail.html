@@ -190,71 +190,6 @@
           </div>
       </section>
 
-      <!-- Data Sources Section -->
-      <section class="sources-section">
-          <div class="sources-container">
-              <h2 class="sources-heading">Fuentes de Datos</h2>
-              {% if data_sources %}
-                  {% for data_source in data_sources %}
-                      <div class="source-item">
-                          <h3>{{ data_source.name }}</h3>
-                          <div class="source-meta">
-                              <div class="source-meta-item">
-                                  <strong>Tipo de fuente:</strong> {{ data_source.get_source_type_display|default:data_source.source_type }}
-                              </div>
-                              <div class="source-meta-item">
-                                  <strong>Estado de procesamiento:</strong> {{ data_source.get_processing_status_display|default:data_source.processing_status }}
-                              </div>
-                              <div class="source-meta-item">
-                                  <strong>Total de filas:</strong> {{ data_source.row_count|default:"-" }}
-                              </div>
-                              <div class="source-meta-item">
-                                  <strong>Archivo original:</strong> {{ data_source.original_filename|default:"-" }}
-                              </div>
-                          </div>
-
-                          {% if data_source.processing_status == "failed" and data_source.processing_error %}
-                              <div class="visualization-error" style="text-align: left; padding: 16px; margin-bottom: 16px;">
-                                  <strong>Error de procesamiento:</strong> {{ data_source.processing_error }}
-                              </div>
-                          {% endif %}
-
-                          {% with columns=data_source.columns_schema.columns %}
-                              {% if columns %}
-                                  <div class="data-table-wrapper">
-                                      <table class="data-table">
-                                          <thead>
-                                              <tr>
-                                                  <th>Nombre de la Columna</th>
-                                                  <th>Tipo</th>
-                                                  <th>Tipo Original (dtype)</th>
-                                                  <th>Permite Nulos</th>
-                                                  <th>Nulos Encontrados</th>
-                                              </tr>
-                                          </thead>
-                                          <tbody>
-                                              {% for column in columns %}
-                                                  <tr>
-                                                      <td><strong>{{ column.name }}</strong></td>
-                                                      <td>{{ column.type }}</td>
-                                                      <td>{{ column.original_dtype }}</td>
-                                                      <td>{% if column.nullable %}Sí{% else %}No{% endif %}</td>
-                                                      <td>{{ column.null_count }}</td>
-                                                  </tr>
-                                              {% endfor %}
-                                          </tbody>
-                                      </table>
-                                  </div>
-                              {% endif %}
-                          {% endwith %}
-                      </div>
-                  {% endfor %}
-              {% else %}
-                  <p class="visualization-empty">Este proyecto aún no tiene fuentes de datos asociadas.</p>
-              {% endif %}
-          </div>
-      </section>
-
       <!-- Findings Section -->
       {% if project.findings %}
           <section class="findings-section">
@@ -283,6 +218,66 @@
               </div>
           </section>
       {% endif %}
+
+      <!-- Data Sources Section (Technical Details) -->
+      <details class="project-technical-details">
+          <summary class="project-technical-summary">
+              <span class="material-symbols-outlined">database</span>
+              Ver ficha técnica y esquema de fuentes de datos
+              <span class="material-symbols-outlined project-technical-summary-arrow">expand_more</span>
+          </summary>
+
+          <div class="sources-container">
+              {% if data_sources %}
+                  {% for data_source in data_sources %}
+                      <div class="source-item">
+                          <h3>{{ data_source.name }}</h3>
+
+                          {% with columns=data_source.columns_schema.columns %}
+                              {% if columns %}
+                                  <div class="source-pills-row">
+                                      <span class="source-pill"><strong>Tipo de fuente</strong>{{ data_source.get_source_type_display|default:data_source.source_type }}</span>
+                                      <span class="source-pill"><strong>Estado</strong>{{ data_source.get_processing_status_display|default:data_source.processing_status }}</span>
+                                      <span class="source-pill"><strong>Total de filas</strong>{{ data_source.row_count|default:"-" }}</span>
+                                      <span class="source-pill"><strong>Archivo original</strong>{{ data_source.original_filename|default:"-" }}</span>
+                                  </div>
+
+                                  {% if data_source.processing_status == "failed" and data_source.processing_error %}
+                                      <div class="visualization-error" style="text-align: left; padding: 16px; margin-bottom: 16px;">
+                                          <strong>Error de procesamiento:</strong> {{ data_source.processing_error }}
+                                      </div>
+                                  {% endif %}
+
+                                  <div class="source-schema-table">
+                                      <div class="source-schema-row source-schema-row--head">
+                                          <span>Columna</span>
+                                          <span>Tipo</span>
+                                          <span>Dtype original</span>
+                                          <span>Nulos</span>
+                                      </div>
+                                      {% for column in columns %}
+                                          <div class="source-schema-row">
+                                              <span class="source-schema-field">{{ column.name }}</span>
+                                              <span><span class="source-schema-badge">{{ column.type }}</span></span>
+                                              <span class="source-schema-meta">{{ column.original_dtype }}</span>
+                                              <span class="source-schema-meta">{% if column.nullable %}Sí{% else %}No{% endif %} · {{ column.null_count }}</span>
+                                          </div>
+                                      {% endfor %}
+                                  </div>
+                              {% else %}
+                                  <div class="source-remote-banner">
+                                      <span class="material-symbols-outlined">cloud_sync</span>
+                                      <p>Fuente de datos: Tablero externo interactivo conectado en vivo de forma remota.</p>
+                                  </div>
+                              {% endif %}
+                          {% endwith %}
+                      </div>
+                  {% endfor %}
+              {% else %}
+                  <p class="visualization-empty">Este proyecto aún no tiene fuentes de datos asociadas.</p>
+              {% endif %}
+          </div>
+      </details>
   </main>
 
   <!-- Footer -->

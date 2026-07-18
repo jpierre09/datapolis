@@ -496,22 +496,63 @@ main {
     margin-bottom: 8px;
 }
 
-/* Sources Section */
-.sources-section {
-    padding: 80px 0;
-    background-color: #effcff;
+/* Technical Details (Data Sources) Accordion */
+.project-technical-details {
+    width: 100%;
+    max-width: 1120px;
+    margin: 3rem auto;
+    padding: 0 32px;
 }
 
-.sources-heading {
-    font-family: 'Libre Caslon Text', Georgia, serif;
-    font-size: 32px;
-    font-weight: 400;
-    line-height: 1.3;
+.project-technical-summary {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    list-style: none;
+    cursor: pointer;
+    background-color: #ffffff;
+    border: 1px solid rgba(191, 200, 199, 0.4);
+    border-radius: 999px;
+    padding: 14px 28px;
+    text-align: center;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    font-weight: 600;
     color: #226362;
-    margin-bottom: 48px;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
+}
+
+.project-technical-summary::-webkit-details-marker {
+    display: none;
+}
+
+.project-technical-summary:hover {
+    background-color: #e9f6f9;
+    border-color: rgba(34, 99, 98, 0.35);
+}
+
+.project-technical-summary .material-symbols-outlined {
+    font-size: 20px;
+}
+
+.project-technical-summary-arrow {
+    transition: transform 0.2s ease;
+}
+
+.project-technical-details[open] .project-technical-summary-arrow {
+    transform: rotate(180deg);
+}
+
+.sources-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 32px;
 }
 
 .source-item {
+    width: 100%;
     background-color: #ffffff;
     border: 1px solid rgba(191, 200, 199, 0.3);
     border-radius: 12px;
@@ -528,20 +569,105 @@ main {
     margin-bottom: 16px;
 }
 
-.source-meta {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-    gap: 16px;
+.source-pills-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
     margin-bottom: 24px;
 }
 
-.source-meta-item {
-    font-size: 14px;
+.source-pill {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    background-color: #e9f6f9;
+    border-radius: 999px;
+    padding: 6px 14px;
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 13px;
     color: #3f4948;
 }
 
-.source-meta-item strong {
+.source-pill strong {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
     color: #2d666d;
+}
+
+.source-remote-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 12px;
+    width: 100%;
+    padding: 40px 24px;
+    border: 1px dashed #B7C4C7;
+    border-radius: 12px;
+    background-color: #fafcfd;
+}
+
+.source-remote-banner .material-symbols-outlined {
+    font-size: 32px;
+    color: #226362;
+}
+
+.source-remote-banner p {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 14px;
+    color: #3f4948;
+    max-width: 420px;
+    line-height: 1.5;
+}
+
+.source-schema-table {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.source-schema-row {
+    display: grid;
+    grid-template-columns: 1.4fr 0.8fr 1fr 1fr;
+    gap: 16px;
+    align-items: center;
+    padding: 12px 4px;
+    border-bottom: 1px solid rgba(183, 196, 199, 0.25);
+}
+
+.source-schema-row--head {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: #6f7978;
+    border-bottom: 1px solid rgba(183, 196, 199, 0.4);
+}
+
+.source-schema-field {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-weight: 600;
+    color: #121d20;
+    font-size: 14px;
+}
+
+.source-schema-badge {
+    display: inline-flex;
+    background-color: rgba(127, 183, 190, 0.15);
+    color: #226362;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+    padding: 3px 10px;
+    border-radius: 999px;
+}
+
+.source-schema-meta {
+    font-family: 'Manrope', system-ui, sans-serif;
+    font-size: 13px;
+    color: #6f7978;
 }
 
 /* Findings Section */
