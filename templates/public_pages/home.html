@@ -1,9 +1,346 @@
-{% extends "base/base.html" %}
+{% load static %}
+<!doctype html>
+<html class="scroll-smooth" lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datapolis | Portafolios de análisis de datos</title>
+<link rel="icon" type="image/svg+xml" sizes="any" href="{% static 'images/brand/datapolis-icono.svg' %}">
+<link rel="icon" type="image/png" href="{% static 'images/brand/datapolis-icono.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "on-secondary-fixed-variant": "#0d4e55",
+          "inverse-primary": "#93d2d0",
+          "secondary-fixed-dim": "#98d0d7",
+          "on-secondary-container": "#346d73",
+          "tertiary-fixed-dim": "#ecb9c4",
+          "secondary-container": "#b3ecf4",
+          "on-tertiary-container": "#fff7f7",
+          "surface-container-high": "#ddeaee",
+          "on-secondary": "#ffffff",
+          "primary-container": "#3e7c7b",
+          "on-tertiary-fixed": "#2f121a",
+          "tertiary-container": "#916770",
+          "primary-fixed-dim": "#93d2d0",
+          "surface-container-lowest": "#ffffff",
+          "outline-variant": "#bfc8c7",
+          "on-primary": "#ffffff",
+          "surface-variant": "#d8e5e8",
+          "primary-fixed": "#afeeec",
+          "surface-dim": "#cfdcdf",
+          "inverse-on-surface": "#e6f3f6",
+          "outline": "#6f7978",
+          "on-surface": "#121d20",
+          "on-tertiary-fixed-variant": "#613c45",
+          "on-primary-fixed": "#002020",
+          "error-container": "#ffdad6",
+          "on-tertiary": "#ffffff",
+          "on-surface-variant": "#3f4948",
+          "surface-container": "#e3f0f3",
+          "surface": "#effcff",
+          "on-primary-fixed-variant": "#024f4f",
+          "on-background": "#121d20",
+          "on-error-container": "#93000a",
+          "surface-container-highest": "#d8e5e8",
+          "secondary-fixed": "#b3ecf4",
+          "on-error": "#ffffff",
+          "background": "#effcff",
+          "error": "#ba1a1a",
+          "tertiary-fixed": "#ffd9e0",
+          "primary": "#226362",
+          "surface-bright": "#effcff",
+          "on-secondary-fixed": "#001f23",
+          "secondary": "#2d666d",
+          "tertiary": "#764f58",
+          "surface-tint": "#276867",
+          "surface-container-low": "#e9f6f9",
+          "on-primary-container": "#dffffe",
+          "inverse-surface": "#263235"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "xl": "80px",
+          "container-max": "1120px",
+          "xs": "4px",
+          "lg": "48px",
+          "base": "8px",
+          "gutter": "32px",
+          "sm": "12px",
+          "md": "24px"
+        },
+        "fontFamily": {
+          "label-sm": ["Manrope"],
+          "display-lg": ["Libre Caslon Text"],
+          "headline-sm": ["Libre Caslon Text"],
+          "headline-md": ["Libre Caslon Text"],
+          "label-caps": ["Manrope"],
+          "body-md": ["Manrope"],
+          "body-lg": ["Manrope"],
+          "display-lg-mobile": ["Libre Caslon Text"]
+        },
+        "fontSize": {
+          "label-sm": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+          "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+          "headline-sm": ["24px", {"lineHeight": "1.4", "fontWeight": "400"}],
+          "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "400"}],
+          "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+          "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+          "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+          "display-lg-mobile": ["36px", {"lineHeight": "1.2", "fontWeight": "400"}]
+        }
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+  .text-huge {
+    font-size: clamp(4rem, 15vw, 12rem);
+    line-height: 0.85;
+  }
+  .kerning-tight { letter-spacing: -0.05em; }
+  .z-negative { z-index: -1; }
+  .clip-path-asymmetric {
+    clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 95%);
+  }
+  .glass-dark {
+    background: rgba(38, 50, 53, 0.7);
+    backdrop-filter: blur(12px);
+    border: 1px solid rgba(183, 196, 199, 0.1);
+  }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
 
-{% block content %}
-  <main>
-    <h1>Datapolis</h1>
-    <p>Portafolio interactivo para analistas de datos</p>
-    <p>Cada proyecto cuenta una pregunta, muestra visualizaciones y presenta conclusiones.</p>
-  </main>
-{% endblock %}
+<!-- Barra de navegación -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md">
+  <div class="flex justify-between items-center px-gutter py-base max-w-container-max mx-auto w-full">
+    <a class="font-headline-md text-headline-md text-primary tracking-tighter" href="/">Datapolis</a>
+    <div class="hidden md:flex gap-md items-center">
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#pulso">El Pulso</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#protocolo">Metodología</a>
+    </div>
+    <div class="flex items-center gap-sm">
+      <a href="{% url 'login' %}" class="bg-primary text-on-primary px-md py-xs rounded-full font-label-sm hover:opacity-90 transition-opacity">Iniciar sesión</a>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO: tipografía masiva asimétrica -->
+<header class="relative min-h-screen flex flex-col justify-end pt-xl overflow-hidden">
+  <div class="max-w-container-max mx-auto w-full px-gutter relative z-10 pb-xl">
+    <p class="font-label-caps text-label-caps text-primary mb-base tracking-widest">EL PORTAFOLIO EDITORIAL DE LOS ANALISTAS DE DATOS</p>
+    <h1 class="text-huge font-display-lg kerning-tight text-on-surface select-none">
+      DATA<br>
+      <span class="text-primary italic">POLIS</span>
+    </h1>
+    <div class="grid grid-cols-12 gap-gutter mt-md">
+      <div class="col-span-12 md:col-span-5 md:col-start-7">
+        <p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+          Convierte tus análisis en historias publicables. Datapolis es la plataforma donde cada proyecto parte de una pregunta, presenta su evidencia con visualizaciones interactivas y cierra con conclusiones que cualquiera puede leer.
+        </p>
+        <div class="mt-md flex flex-wrap gap-md items-center">
+          <a href="{% url 'login' %}" class="bg-primary text-on-primary px-lg py-sm rounded-lg font-label-caps text-label-caps tracking-widest hover:bg-primary-container transform hover:-translate-y-1 transition-all duration-300">CREA TU PORTAFOLIO</a>
+          <span class="w-12 h-[1px] bg-outline hidden md:block"></span>
+          <a class="font-label-caps text-label-caps hover:text-primary transition-colors" href="{% url 'platform:project_explore' %}">EXPLORAR PROYECTOS</a>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="absolute right-0 top-1/4 w-1/3 h-2/3 opacity-20 pointer-events-none md:block hidden z-negative">
+    <div class="w-full h-full rounded-l-full bg-gradient-to-br from-primary-fixed via-secondary-fixed-dim to-surface-variant blur-2xl"></div>
+  </div>
+</header>
+
+<!-- EL PULSO: bloque oscuro de métricas -->
+<section class="bg-inverse-surface text-inverse-on-surface py-xl relative overflow-hidden" id="pulso">
+  <div class="max-w-container-max mx-auto px-gutter relative z-10">
+    <div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
+      <div>
+        <h2 class="font-headline-md text-headline-md italic mb-xs text-primary-fixed">El Pulso</h2>
+        <p class="font-label-caps text-label-caps text-secondary-fixed">LO QUE OCURRE DENTRO DE DATAPOLIS</p>
+      </div>
+      <a href="{% url 'platform:project_explore' %}" class="border border-outline-variant/30 px-md py-base font-label-caps text-label-caps hover:bg-surface-variant hover:text-on-surface transition-all">VER PORTAFOLIOS PÚBLICOS</a>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div class="glass-dark p-lg rounded-xl transform hover:-translate-y-2 transition-transform duration-500">
+        <p class="font-label-caps text-label-caps text-primary-fixed mb-sm">PROYECTOS PUBLICADOS</p>
+        <p class="font-display-lg text-7xl md:text-8xl leading-none text-secondary-fixed-dim">+120</p>
+        <p class="mt-base font-body-md opacity-70">Historias analíticas completas: pregunta, evidencia visual y conclusión, listas para compartir con un enlace.</p>
+      </div>
+      <div class="glass-dark p-lg rounded-xl transform hover:-translate-y-2 transition-transform duration-500">
+        <p class="font-label-caps text-label-caps text-primary-fixed mb-sm">VISUALIZACIONES ACTIVAS</p>
+        <p class="font-display-lg text-7xl md:text-8xl leading-none text-secondary-fixed-dim">480</p>
+        <p class="mt-base font-body-md opacity-70">Gráficas, tablas, KPIs y tableros externos de Tableau, Power BI y Looker Studio embebidos en vivo.</p>
+      </div>
+      <div class="glass-dark p-lg rounded-xl transform hover:-translate-y-2 transition-transform duration-500">
+        <p class="font-label-caps text-label-caps text-primary-fixed mb-sm">FUENTES CONECTADAS</p>
+        <p class="font-display-lg text-7xl md:text-8xl leading-none text-secondary-fixed-dim">3 <span class="text-3xl align-baseline">tipos</span></p>
+        <p class="mt-base font-body-md opacity-70">CSV, Excel y Google Sheets procesados automáticamente con su esquema de columnas documentado.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- MOSAICO EDITORIAL DE PROYECTOS -->
+<section class="py-xl bg-surface" id="proyectos">
+  <div class="max-w-container-max mx-auto px-gutter">
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-lg mb-xl items-center">
+      <div class="md:col-span-7 group overflow-hidden rounded-xl">
+        <div class="aspect-video w-full rounded-xl bg-gradient-to-br from-primary via-primary-container to-secondary flex items-end p-lg transition-transform duration-700 group-hover:scale-105">
+          <span class="material-symbols-outlined text-white/60 text-7xl">monitoring</span>
+        </div>
+      </div>
+      <div class="md:col-span-5 md:pl-lg">
+        <span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">CASO DESTACADO</span>
+        <h3 class="font-headline-md text-headline-md mt-sm leading-tight hover:text-primary transition-colors cursor-pointer">Cada proyecto es un caso de estudio editorial</h3>
+        <p class="mt-base font-body-md text-on-surface-variant">Una pregunta de investigación como portada, la narrativa del análisis, la evidencia de datos como galería y los hallazgos como cierre. Así se lee un proyecto en Datapolis.</p>
+        <a class="mt-md inline-block font-label-caps text-label-caps text-primary group" href="{% url 'platform:project_explore' %}">
+          VER PROYECTOS
+          <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+        </a>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-12 gap-md">
+      <div class="md:col-span-4 bg-surface-container-low p-md rounded-lg flex flex-col justify-between h-[450px] transform hover:-translate-y-1 transition-all duration-300">
+        <div>
+          <div class="w-full h-48 rounded mb-md bg-gradient-to-tr from-surface-variant via-secondary-fixed-dim/40 to-primary-fixed flex items-center justify-center">
+            <span class="material-symbols-outlined text-primary text-5xl">table_chart</span>
+          </div>
+          <h4 class="font-headline-sm text-headline-sm leading-tight">Datasets con esquema documentado</h4>
+          <p class="text-sm font-body-md mt-sm text-on-surface-variant">Sube tu CSV o Excel y Datapolis detecta columnas, tipos y nulos para que tu ficha técnica hable por ti.</p>
+        </div>
+        <span class="font-label-caps text-[10px] opacity-50">PROCESAMIENTO AUTOMÁTICO</span>
+      </div>
+      <div class="md:col-span-4 relative group rounded-lg overflow-hidden h-[450px]">
+        <div class="absolute inset-0 bg-gradient-to-br from-inverse-surface via-secondary to-primary transition-transform duration-700 group-hover:scale-110"></div>
+        <div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent"></div>
+        <div class="absolute bottom-0 p-md text-white">
+          <h4 class="font-headline-sm text-headline-sm">Perfil público de analista</h4>
+          <p class="text-sm opacity-80">Tu bio, habilidades y enlaces profesionales junto a cada proyecto que publicas.</p>
+        </div>
+      </div>
+      <div class="md:col-span-4 flex flex-col gap-md">
+        <div class="bg-primary text-on-primary p-md rounded-lg flex-1 transform hover:-translate-y-1 transition-all duration-300">
+          <span class="material-symbols-outlined text-4xl mb-base">insert_chart</span>
+          <h4 class="font-headline-sm text-headline-sm">Visualizaciones sin código</h4>
+          <p class="text-sm mt-xs opacity-90">Barras, líneas, dispersión, torta, tablas y KPIs configurados desde el dashboard.</p>
+        </div>
+        <div class="bg-tertiary-container/10 border border-outline-variant/30 p-md rounded-lg flex-1 transform hover:-translate-y-1 transition-all duration-300">
+          <h4 class="font-label-caps text-label-caps text-tertiary mb-xs">TABLEROS EXTERNOS</h4>
+          <p class="font-body-md text-on-surface-variant mt-base">¿Ya trabajas en Tableau, Power BI o Looker Studio? Embebe tus tableros en vivo dentro de tu historia.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- NUESTRO PROTOCOLO: bloque oscuro numerado -->
+<section class="bg-on-surface text-surface py-xl clip-path-asymmetric mt-lg" id="protocolo">
+  <div class="max-w-container-max mx-auto px-gutter py-xl">
+    <div class="text-center mb-xl">
+      <h2 class="font-display-lg text-display-lg mb-base">Nuestro Protocolo</h2>
+      <div class="w-16 h-1 bg-primary mx-auto"></div>
+    </div>
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-xl">
+      <div class="text-center md:text-left">
+        <span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">01</span>
+        <h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">PREGUNTA</h5>
+        <p class="font-body-md opacity-80">Todo proyecto nace de una pregunta de análisis clara que guía la investigación de principio a fin.</p>
+      </div>
+      <div class="text-center md:text-left">
+        <span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">02</span>
+        <h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">DATOS</h5>
+        <p class="font-body-md opacity-80">Conecta tus fuentes: CSV, Excel o Google Sheets. Datapolis procesa y documenta el esquema por ti.</p>
+      </div>
+      <div class="text-center md:text-left">
+        <span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">03</span>
+        <h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">EVIDENCIA</h5>
+        <p class="font-body-md opacity-80">Construye visualizaciones interactivas o embebe tus tableros para sostener cada hallazgo.</p>
+      </div>
+      <div class="text-center md:text-left">
+        <span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">04</span>
+        <h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">PUBLICACIÓN</h5>
+        <p class="font-body-md opacity-80">Publica tu historia con un enlace propio y compártela como parte de tu portafolio profesional.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CTA / NEWSLETTER -->
+<section class="py-xl">
+  <div class="max-w-3xl mx-auto px-gutter text-center">
+    <h2 class="font-display-lg text-headline-md mb-md">Tu análisis merece ser leído.</h2>
+    <p class="font-body-lg text-on-surface-variant mb-lg">Únete a la comunidad de analistas que ya publican sus historias de datos en Datapolis.</p>
+    <form method="post" action="#" class="flex flex-col md:flex-row gap-base justify-center">
+      {% csrf_token %}
+      <input class="border-b border-outline bg-transparent py-base px-md w-full md:w-80 focus:outline-none focus:border-primary font-body-md" placeholder="correo@ejemplo.com" type="email" name="email" autocomplete="email">
+      <button type="submit" class="bg-primary text-on-primary px-lg py-base font-label-caps text-label-caps tracking-widest hover:bg-primary-container transition-all">SUSCRIBIRME</button>
+    </form>
+    <div class="mt-lg">
+      <a href="{% url 'login' %}" class="inline-block border border-primary text-primary px-lg py-sm rounded-lg font-label-caps text-label-caps tracking-widest hover:bg-primary hover:text-on-primary transform hover:-translate-y-1 transition-all duration-300">EMPEZAR AHORA</a>
+    </div>
+  </div>
+</section>
+
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant/30">
+  <div class="max-w-container-max mx-auto w-full px-gutter py-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+    <div class="flex flex-col gap-sm">
+      <span class="font-headline-sm text-headline-sm text-on-surface">Datapolis</span>
+      <p class="font-body-md text-on-surface-variant max-w-xs">La plataforma donde los analistas de datos publican sus historias.</p>
+    </div>
+    <div class="flex flex-wrap gap-md">
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="{% url 'platform:project_explore' %}">Explorar</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="{% url 'login' %}">Iniciar sesión</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Privacidad</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Términos</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Contacto</a>
+    </div>
+  </div>
+  <div class="max-w-container-max mx-auto px-gutter pb-md">
+    <p class="font-label-caps text-[10px] text-on-surface-variant opacity-60">© 2026 Datapolis Editorial Research. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+<script>
+  const observerOptions = { threshold: 0.1 };
+
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('opacity-100');
+        entry.target.classList.remove('opacity-0', 'translate-y-10');
+      }
+    });
+  }, observerOptions);
+
+  document.querySelectorAll('section, .glass-dark').forEach(el => {
+    el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+    observer.observe(el);
+  });
+
+  window.addEventListener('scroll', () => {
+    const scroll = window.scrollY;
+    const heroText = document.querySelector('header .text-huge');
+    if (heroText) {
+      heroText.style.transform = `translateX(-${scroll * 0.1}px)`;
+    }
+  });
+</script>
+</body>
+</html>

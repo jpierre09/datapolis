@@ -1,0 +1,224 @@
+{% load static %}
+<!doctype html>
+<html class="scroll-smooth" lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Datapolis | Explorar proyectos</title>
+<link rel="icon" type="image/svg+xml" sizes="any" href="{% static 'images/brand/datapolis-icono.svg' %}">
+<link rel="icon" type="image/png" href="{% static 'images/brand/datapolis-icono.png' %}">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+  tailwind.config = {
+    darkMode: "class",
+    theme: {
+      extend: {
+        "colors": {
+          "surface": "#effcff",
+          "surface-container-lowest": "#ffffff",
+          "surface-container-low": "#e9f6f9",
+          "surface-container": "#e3f0f3",
+          "surface-variant": "#d8e5e8",
+          "surface-dim": "#cfdcdf",
+          "on-surface": "#121d20",
+          "on-surface-variant": "#3f4948",
+          "inverse-surface": "#263235",
+          "inverse-on-surface": "#e6f3f6",
+          "outline": "#6f7978",
+          "outline-variant": "#bfc8c7",
+          "background": "#effcff",
+          "primary": "#226362",
+          "on-primary": "#ffffff",
+          "primary-container": "#3e7c7b",
+          "on-primary-container": "#dffffe",
+          "primary-fixed": "#afeeec",
+          "primary-fixed-dim": "#93d2d0",
+          "secondary": "#2d666d",
+          "secondary-container": "#b3ecf4",
+          "secondary-fixed": "#b3ecf4",
+          "secondary-fixed-dim": "#98d0d7",
+          "tertiary": "#764f58",
+          "tertiary-container": "#916770",
+          "error": "#ba1a1a"
+        },
+        "borderRadius": {
+          "DEFAULT": "0.125rem",
+          "lg": "0.25rem",
+          "xl": "0.5rem",
+          "full": "0.75rem"
+        },
+        "spacing": {
+          "xl": "80px",
+          "container-max": "1120px",
+          "xs": "4px",
+          "lg": "48px",
+          "base": "8px",
+          "gutter": "32px",
+          "sm": "12px",
+          "md": "24px"
+        },
+        "fontFamily": {
+          "label-sm": ["Manrope"],
+          "display-lg": ["Libre Caslon Text"],
+          "headline-sm": ["Libre Caslon Text"],
+          "headline-md": ["Libre Caslon Text"],
+          "label-caps": ["Manrope"],
+          "body-md": ["Manrope"],
+          "body-lg": ["Manrope"]
+        },
+        "fontSize": {
+          "label-sm": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+          "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+          "headline-sm": ["24px", {"lineHeight": "1.4", "fontWeight": "400"}],
+          "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "400"}],
+          "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+          "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+          "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}]
+        }
+      },
+    },
+  }
+</script>
+<style>
+  .material-symbols-outlined {
+    font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+  }
+</style>
+</head>
+<body class="bg-background text-on-surface font-body-md">
+
+<!-- Barra de navegación -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md">
+  <div class="flex justify-between items-center px-gutter py-base max-w-container-max mx-auto w-full">
+    <a class="font-headline-md text-headline-md text-primary tracking-tighter" href="/">Datapolis</a>
+    <div class="hidden md:flex gap-md items-center">
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="/">Inicio</a>
+      <a class="font-label-caps text-label-caps text-primary border-b-2 border-primary pb-1" href="{% url 'platform:project_explore' %}">Explorar</a>
+    </div>
+    <a href="{% url 'login' %}" class="bg-primary text-on-primary px-md py-xs rounded-full font-label-sm hover:opacity-90 transition-opacity">Iniciar sesión</a>
+  </div>
+</nav>
+
+<main class="pt-24">
+
+  <!-- Hero: caso de estudio destacado -->
+  {% if featured_project %}
+      <section class="max-w-container-max mx-auto px-gutter py-lg">
+          <p class="font-label-caps text-label-caps text-secondary mb-md tracking-widest">CASO DE ESTUDIO DESTACADO</p>
+          <div class="grid grid-cols-1 md:grid-cols-12 gap-lg items-center">
+              <div class="md:col-span-7 group overflow-hidden rounded-xl">
+                  <img
+                      src="{{ featured_project.cover_image.url }}"
+                      alt="Imagen de portada de {{ featured_project.title }}"
+                      class="w-full aspect-video object-cover rounded-xl shadow-sm transition-transform duration-700 group-hover:scale-105"
+                  >
+              </div>
+              <div class="md:col-span-5 md:pl-lg">
+                  <div class="flex flex-wrap gap-xs mb-sm">
+                      <span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">{{ featured_project.category.name }}</span>
+                      <span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">{{ featured_project.project_type.name }}</span>
+                  </div>
+                  <h1 class="font-headline-md text-headline-md leading-tight hover:text-primary transition-colors">
+                      <a href="{% url 'portfolio_projects:project_detail' featured_project.slug %}">{{ featured_project.title }}</a>
+                  </h1>
+                  <p class="font-label-caps text-label-caps text-secondary mt-sm mb-base">SÍNTESIS DEL ANÁLISIS</p>
+                  <p class="font-body-md text-on-surface-variant">{{ featured_project.description|truncatewords:40 }}</p>
+                  <a class="mt-md inline-block font-label-caps text-label-caps text-primary group" href="{% url 'portfolio_projects:project_detail' featured_project.slug %}">
+                      LEER CASO DE ESTUDIO
+                      <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+                  </a>
+              </div>
+          </div>
+      </section>
+  {% else %}
+      <section class="max-w-container-max mx-auto px-gutter py-lg">
+          <h1 class="font-display-lg text-display-lg text-primary">Explorar proyectos</h1>
+          <p class="font-body-lg text-on-surface-variant mt-sm max-w-2xl">La galería colectiva de los analistas de datos que ya publican sus historias en Datapolis.</p>
+      </section>
+  {% endif %}
+
+  <!-- Filtros -->
+  <section class="max-w-container-max mx-auto px-gutter pt-md pb-lg">
+      <div class="flex flex-wrap gap-sm items-center">
+          <span class="font-label-caps text-label-caps text-on-surface-variant mr-sm">FILTRAR POR EVIDENCIA</span>
+          <a href="{% url 'platform:project_explore' %}"
+             class="px-md py-base rounded-lg font-label-sm text-label-sm border transition-all duration-300 {% if current_filter == 'todos' %}bg-primary-container text-on-primary border-primary-container{% else %}border-outline-variant/60 text-on-surface-variant hover:border-primary hover:text-primary{% endif %}">
+              Todos
+          </a>
+          <a href="{% url 'platform:project_explore' %}?tipo=embed"
+             class="px-md py-base rounded-lg font-label-sm text-label-sm border transition-all duration-300 {% if current_filter == 'embed' %}bg-primary-container text-on-primary border-primary-container{% else %}border-outline-variant/60 text-on-surface-variant hover:border-primary hover:text-primary{% endif %}">
+              Tableros Externos
+          </a>
+          <a href="{% url 'platform:project_explore' %}?tipo=dataset"
+             class="px-md py-base rounded-lg font-label-sm text-label-sm border transition-all duration-300 {% if current_filter == 'dataset' %}bg-primary-container text-on-primary border-primary-container{% else %}border-outline-variant/60 text-on-surface-variant hover:border-primary hover:text-primary{% endif %}">
+              Datasets Locales
+          </a>
+      </div>
+  </section>
+
+  <!-- Mosaico editorial de portafolios -->
+  <section class="max-w-container-max mx-auto px-gutter pb-xl">
+      {% if projects %}
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+              {% for project in projects %}
+                  <a href="{% url 'portfolio_projects:project_detail' project.slug %}"
+                     class="bg-surface-container-lowest border border-outline-variant/40 rounded-xl overflow-hidden flex flex-col shadow-sm transform hover:-translate-y-2 transition-all duration-300 hover:shadow-lg hover:border-primary/40">
+                      {% if project.cover_image %}
+                          <img src="{{ project.cover_image.url }}" alt="Imagen de portada de {{ project.title }}" class="w-full h-44 object-cover">
+                      {% else %}
+                          <div class="w-full h-44 bg-gradient-to-br from-surface-variant via-secondary-fixed-dim/40 to-primary-fixed flex items-center justify-center">
+                              <span class="material-symbols-outlined text-primary text-5xl">monitoring</span>
+                          </div>
+                      {% endif %}
+                      <div class="p-md flex flex-col flex-1">
+                          <div class="flex flex-wrap gap-xs mb-sm">
+                              <span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">{{ project.category.name }}</span>
+                              <span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">{{ project.project_type.name }}</span>
+                          </div>
+                          <h3 class="font-headline-sm text-headline-sm leading-tight text-primary">{{ project.title }}</h3>
+                          <p class="font-body-md text-on-surface-variant italic mt-sm flex-1">"{{ project.question|truncatewords:18 }}"</p>
+                          <div class="flex items-center justify-between mt-md pt-sm border-t border-outline-variant/30">
+                              <span class="font-label-caps text-[10px] text-on-surface-variant">
+                                  {% if project.owner.public_profile.display_name %}POR {{ project.owner.public_profile.display_name|upper }}{% else %}POR {{ project.owner.username|upper }}{% endif %}
+                              </span>
+                              <span class="font-label-caps text-label-caps text-primary">VER CASO →</span>
+                          </div>
+                      </div>
+                  </a>
+              {% endfor %}
+          </div>
+      {% else %}
+          <div class="text-center border border-dashed border-outline-variant/60 rounded-xl py-xl px-gutter max-w-2xl mx-auto">
+              <span class="material-symbols-outlined text-primary text-5xl mb-md">search_off</span>
+              <h3 class="font-headline-sm text-headline-sm text-primary mb-sm">Sin resultados para este filtro</h3>
+              <p class="font-body-md text-on-surface-variant">Aún no hay proyectos publicados que coincidan con el criterio seleccionado. Explora todos los casos de estudio o vuelve pronto: la comunidad publica constantemente.</p>
+              <a href="{% url 'platform:project_explore' %}" class="mt-md inline-block font-label-caps text-label-caps text-primary">VER TODOS LOS PROYECTOS →</a>
+          </div>
+      {% endif %}
+  </section>
+
+</main>
+
+<!-- Footer -->
+<footer class="bg-surface-container-low border-t border-outline-variant/30">
+  <div class="max-w-container-max mx-auto w-full px-gutter py-lg flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+    <div class="flex flex-col gap-sm">
+      <span class="font-headline-sm text-headline-sm text-on-surface">Datapolis</span>
+      <p class="font-body-md text-on-surface-variant max-w-xs">La plataforma donde los analistas de datos publican sus historias.</p>
+    </div>
+    <div class="flex flex-wrap gap-md">
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="/">Inicio</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="{% url 'login' %}">Iniciar sesión</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Privacidad</a>
+      <a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Contacto</a>
+    </div>
+  </div>
+  <div class="max-w-container-max mx-auto px-gutter pb-md">
+    <p class="font-label-caps text-[10px] text-on-surface-variant opacity-60">© 2026 Datapolis Editorial Research. Todos los derechos reservados.</p>
+  </div>
+</footer>
+
+</body>
+</html>

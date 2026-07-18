@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+
+<html class="scroll-smooth" lang="en"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>Datapolis | Disruptive Editorial Journalism</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Libre+Caslon+Text:ital,wght@0,400;0,700;1,400&amp;family=Manrope:wght@200..800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-secondary-fixed-variant": "#0d4e55",
+                    "inverse-primary": "#93d2d0",
+                    "secondary-fixed-dim": "#98d0d7",
+                    "on-secondary-container": "#346d73",
+                    "tertiary-fixed-dim": "#ecb9c4",
+                    "secondary-container": "#b3ecf4",
+                    "on-tertiary-container": "#fff7f7",
+                    "surface-container-high": "#ddeaee",
+                    "on-secondary": "#ffffff",
+                    "primary-container": "#3e7c7b",
+                    "on-tertiary-fixed": "#2f121a",
+                    "tertiary-container": "#916770",
+                    "primary-fixed-dim": "#93d2d0",
+                    "surface-container-lowest": "#ffffff",
+                    "outline-variant": "#bfc8c7",
+                    "on-primary": "#ffffff",
+                    "surface-variant": "#d8e5e8",
+                    "primary-fixed": "#afeeec",
+                    "surface-dim": "#cfdcdf",
+                    "inverse-on-surface": "#e6f3f6",
+                    "outline": "#6f7978",
+                    "on-surface": "#121d20",
+                    "on-tertiary-fixed-variant": "#613c45",
+                    "on-primary-fixed": "#002020",
+                    "error-container": "#ffdad6",
+                    "on-tertiary": "#ffffff",
+                    "on-surface-variant": "#3f4948",
+                    "surface-container": "#e3f0f3",
+                    "surface": "#effcff",
+                    "on-primary-fixed-variant": "#024f4f",
+                    "on-background": "#121d20",
+                    "on-error-container": "#93000a",
+                    "surface-container-highest": "#d8e5e8",
+                    "secondary-fixed": "#b3ecf4",
+                    "on-error": "#ffffff",
+                    "background": "#effcff",
+                    "error": "#ba1a1a",
+                    "tertiary-fixed": "#ffd9e0",
+                    "primary": "#226362",
+                    "surface-bright": "#effcff",
+                    "on-secondary-fixed": "#001f23",
+                    "secondary": "#2d666d",
+                    "tertiary": "#764f58",
+                    "surface-tint": "#276867",
+                    "surface-container-low": "#e9f6f9",
+                    "on-primary-container": "#dffffe",
+                    "inverse-surface": "#263235"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.125rem",
+                    "lg": "0.25rem",
+                    "xl": "0.5rem",
+                    "full": "0.75rem"
+            },
+            "spacing": {
+                    "xl": "80px",
+                    "container-max": "1120px",
+                    "xs": "4px",
+                    "lg": "48px",
+                    "base": "8px",
+                    "gutter": "32px",
+                    "sm": "12px",
+                    "md": "24px"
+            },
+            "fontFamily": {
+                    "label-sm": ["Manrope"],
+                    "display-lg": ["Libre Caslon Text"],
+                    "headline-sm": ["Libre Caslon Text"],
+                    "headline-md": ["Libre Caslon Text"],
+                    "label-caps": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "body-lg": ["Manrope"],
+                    "display-lg-mobile": ["Libre Caslon Text"]
+            },
+            "fontSize": {
+                    "label-sm": ["14px", {"lineHeight": "1.2", "fontWeight": "500"}],
+                    "display-lg": ["48px", {"lineHeight": "1.1", "letterSpacing": "-0.02em", "fontWeight": "400"}],
+                    "headline-sm": ["24px", {"lineHeight": "1.4", "fontWeight": "400"}],
+                    "headline-md": ["32px", {"lineHeight": "1.3", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "1", "letterSpacing": "0.1em", "fontWeight": "600"}],
+                    "body-md": ["16px", {"lineHeight": "1.5", "fontWeight": "400"}],
+                    "body-lg": ["18px", {"lineHeight": "1.6", "fontWeight": "400"}],
+                    "display-lg-mobile": ["36px", {"lineHeight": "1.2", "fontWeight": "400"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .text-huge {
+            font-size: clamp(4rem, 15vw, 12rem);
+            line-height: 0.85;
+        }
+        .kerning-tight { letter-spacing: -0.05em; }
+        .parallax-overlay {
+            mix-blend-mode: overlay;
+        }
+        .z-negative { z-index: -1; }
+        .clip-path-asymmetric {
+            clip-path: polygon(0 0, 100% 5%, 100% 100%, 0 95%);
+        }
+        .glass-dark {
+            background: rgba(38, 50, 53, 0.7);
+            backdrop-filter: blur(12px);
+            border: 1px solid rgba(183, 196, 199, 0.1);
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+<!-- Top Navigation Bar (Shared Component Strategy) -->
+<nav class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md">
+<div class="flex justify-between items-center px-gutter py-base max-w-container-max mx-auto w-full">
+<a class="font-display-lg text-display-lg text-primary tracking-tighter" href="#">Datapolis</a>
+<div class="hidden md:flex gap-md items-center">
+<a class="font-label-caps text-label-caps text-primary border-b-2 border-primary pb-1 active:opacity-80 transition-opacity" href="#">Research</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Projects</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors duration-300" href="#">Archive</a>
+</div>
+<div class="flex items-center gap-sm">
+<button class="material-symbols-outlined text-on-surface-variant hover:text-primary transition-colors">search</button>
+<button class="bg-primary text-on-primary px-md py-xs rounded-full font-label-sm hover:opacity-90 transition-opacity">Subscribe</button>
+</div>
+</div>
+</nav>
+<!-- HERO SECTION: Massive Overlapping Typography -->
+<header class="relative min-h-screen flex flex-col justify-end pt-xl overflow-hidden">
+<div class="absolute inset-0 z-negative">
+
+</div>
+<div class="max-w-container-max mx-auto w-full px-gutter relative z-10 pb-xl">
+<p class="font-label-caps text-label-caps text-primary mb-base tracking-widest">VOLUME 04 // THE ARCHITECTURAL PULSE</p>
+<h1 class="text-huge font-display-lg kerning-tight text-on-surface select-none">
+                DATA<br/>
+<span class="text-primary italic">POLIS</span>
+</h1>
+<div class="grid grid-cols-12 gap-gutter mt-md">
+<div class="col-span-12 md:col-span-5 md:col-start-7">
+<p class="font-body-lg text-body-lg text-on-surface-variant leading-relaxed">
+                        An investigation into the invisible structures of urban existence. We decode the city through high-impact journalism, leveraging the intersection of architectural precision and algorithmic data narrative.
+                    </p>
+<div class="mt-md flex gap-md items-center">
+<span class="w-12 h-[1px] bg-outline"></span>
+<a class="font-label-caps text-label-caps hover:text-primary transition-colors" href="#featured">EXPLORE INVESTIGATIONS</a>
+</div>
+</div>
+</div>
+</div>
+<div class="absolute right-0 top-1/4 w-1/3 h-2/3 opacity-20 pointer-events-none md:block hidden">
+<div class="w-full h-full bg-cover bg-center" data-alt="A macro photography shot of highly detailed circuit patterns etched into glass, glowing with soft cyan and teal light against a pristine white background. The composition is extremely minimalist, emphasizing precision and high-tech editorial elegance with a shallow depth of field." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAdTqB-_9P27Ah4jgupzToqGrpoxbW664IecokOiwlhI_0-hTYRViCi_KQM-whGGNAn0tYw05y8ySd0pNo-QT_K491nmdD84cd69njdoFeRY6FhIMF0ucjVcoXRoZMf_6UxTCCqAO0SJIk3d2rc09t5ECyDMyU8MROEE-VFlsHDDLQjMDvUMhk3wTY2_8iDHJ0LHvfQPotAcvTuzEL_ZotAohuvfb0KnMwBhHCa-bviySIZki0mW2FF')"></div>
+</div>
+</header>
+<!-- THE PULSE (El Pulso): Dark Mode Immersive Section -->
+<section class="bg-inverse-surface text-inverse-on-surface py-xl relative overflow-hidden">
+<div class="absolute inset-0 opacity-10">
+
+</div>
+<div class="max-w-container-max mx-auto px-gutter relative z-10">
+<div class="flex flex-col md:flex-row md:items-end justify-between gap-md mb-lg">
+<div>
+<h2 class="font-headline-md text-headline-md italic mb-xs text-primary-fixed">The Pulse</h2>
+<p class="font-label-caps text-label-caps text-secondary-fixed">REAL-TIME URBAN METRICS</p>
+</div>
+<button class="border border-outline-variant/30 px-md py-base font-label-caps text-label-caps hover:bg-surface-variant hover:text-on-surface transition-all">ACCESS LIVE FEED</button>
+</div>
+<!-- Floating Metrics -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-lg">
+<div class="glass-dark p-lg rounded-xl transform hover:-translate-y-2 transition-transform duration-500">
+<p class="font-label-caps text-label-caps text-primary-fixed mb-sm">CONGESTION INDEX</p>
+<span class="text-huge font-display-lg text-secondary-fixed-dim">84.2</span>
+<p class="mt-base font-body-md opacity-70">Saturation levels in metropolitan transit hubs reaching peak seasonal thresholds.</p>
+</div>
+<div class="glass-dark p-lg rounded-xl mt-md md:mt-xl transform hover:-translate-y-2 transition-transform duration-500">
+<p class="font-label-caps text-label-caps text-primary-fixed mb-sm">THERMAL FOOTPRINT</p>
+<span class="text-huge font-display-lg text-secondary-fixed-dim">1.4<span class="text-display-lg ml-xs">°C</span></span>
+<p class="mt-base font-body-md opacity-70">Average increase in heat island effect recorded across concrete-dense districts.</p>
+</div>
+<div class="glass-dark p-lg rounded-xl transform hover:-translate-y-2 transition-transform duration-500">
+<p class="font-label-caps text-label-caps text-primary-fixed mb-sm">DATA FLOW RATE</p>
+<span class="text-huge font-display-lg text-secondary-fixed-dim">PB/s</span>
+<p class="mt-base font-body-md opacity-70">The sheer volume of digital exhaust emitted by urban infrastructure every second.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- FEATURED RESEARCH: Collage / Asymmetric Grid -->
+<section class="py-xl bg-surface" id="featured">
+<div class="max-w-container-max mx-auto px-gutter">
+<!-- Large Featured Article (Z-Pattern Start) -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-lg mb-xl items-center">
+<div class="md:col-span-7 group overflow-hidden rounded-xl">
+<div class="aspect-video w-full bg-cover bg-center transition-transform duration-700 group-hover:scale-105" data-alt="An aerial, wide-angle shot of a futuristic city grid at dusk. The streets are illuminated by a glowing network of bioluminescent paths in shades of deep teal and soft emerald. High-rise buildings are sleek and minimalist, casting long shadows. The mood is sophisticated and eerily calm, emphasizing a data-driven urban planning aesthetic." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAGmvvJA8kiHIkadKqi9H_mnqpahygGdk-3t3aGYJkhHFYEO89Byqm5ZPxPYf4fpjypD9Nfgm2XE1kzjziM-hpICzN1HktpUH-dZOU3uNcQ5owKxgaXE-0O-sHuaLHMXNXf11cVjch2RMW9bZB01vyCLuN4g-wbT9pDdlqCNUU-j6hXebCWUvRRhnriunbp0gW-PDSUpoOMkUUR9vm-V1KURd_P6U1p03ARrG1ThueuEtSxoSCnprws')"></div>
+</div>
+<div class="md:col-span-5 md:pl-lg">
+<span class="bg-secondary-container/20 text-secondary px-sm py-xs font-label-caps text-[10px] tracking-widest rounded-full">COVER STORY</span>
+<h3 class="font-headline-md text-headline-md mt-sm leading-tight hover:text-primary transition-colors cursor-pointer">The Algorithmic Ghost: How Prediction Shapes the Street</h3>
+<p class="mt-base font-body-md text-on-surface-variant">A deep dive into the predictive models that determine where police patrol, where stores open, and who gets to breathe clean air.</p>
+<a class="mt-md inline-block font-label-caps text-label-caps text-primary group" href="#">
+                        READ ARTICLE 
+                        <span class="inline-block transition-transform group-hover:translate-x-1">→</span>
+</a>
+</div>
+</div>
+<!-- Cluster Collage -->
+<div class="grid grid-cols-1 md:grid-cols-12 gap-md">
+<!-- Small Card 1 -->
+<div class="md:col-span-4 bg-surface-container-low p-md rounded-lg flex flex-col justify-between h-[450px]">
+<div>
+<div class="w-full h-48 bg-cover bg-center rounded mb-md" data-alt="A minimalist architectural detail of a concrete facade with sharp, geometric shadows and a single streak of golden sunlight. The aesthetic is extremely clean and editorial, utilizing a palette of cool greys and warm amber. Professional photography with high contrast." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuDugUk2q_m-67KsOywsan2sisRkZ1oQuu0xjMPHkJ_MJ0FFho8c--LMDc1oKe1AP2zrgtOiC29NwSqb3RL5WPq-gBKpugiDizVMWky4U3UvHw_NaZ8kX4YrnyKzDkCj3p3NTcVSSW8fefuxxdeF5B7zl-ExfLQAb7ptAhP2CAT3U4fD_PuK1SSPeTr3Z0qDJMDr3AHeif4xAJ5YSEsFY-YQecxfJ47aNqP1CY2F6GwObXg6tHDcBc7A')"></div>
+<h4 class="font-headline-sm text-headline-sm leading-tight">Shadow Economies</h4>
+<p class="text-sm font-body-md mt-sm text-on-surface-variant">Mapping the informal networks that keep the city breathing under the radar.</p>
+</div>
+<span class="font-label-caps text-[10px] opacity-50">6 MIN READ</span>
+</div>
+<!-- Tall Image Card -->
+<div class="md:col-span-4 relative group rounded-lg overflow-hidden h-[450px]">
+<div class="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-110" data-alt="A portrait of a data scientist in a dark studio, with soft blue and green data visualizations projected directly onto their face and clothing. The lighting is dramatic and cinematic, capturing a mood of intense focus and intellectual depth. Premium editorial magazine style." style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuA3ZmRy27vdd7tnpThnvF_m3tPQnfamXG-P-qkRscircBKMGpI9o9sNH49iXOxcd1P87cCRQfVVR3cHlynOL28vyOOeW_GilDJhFIec-Gm7IZ2K6q45gwqBy2s1-HfPX_j93DsM8omOBIwO28YZlcDWjjpezoK3Ghne-E6ZLFFR08sysAotH6YI_cP3Q_mgfEEP48zuuglKkOvzA2t6ixfZAfoiQFmJH-Jg4HcKTQeTXgfoNY-T6Uq3')"></div>
+<div class="absolute inset-0 bg-gradient-to-t from-on-surface/80 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 p-md text-white">
+<h4 class="font-headline-sm text-headline-sm">Voices of the Void</h4>
+<p class="text-sm opacity-80">Interviews with the architects of automated governance.</p>
+</div>
+</div>
+<!-- Wide Info Card -->
+<div class="md:col-span-4 flex flex-col gap-md">
+<div class="bg-primary text-on-primary p-md rounded-lg flex-1">
+<span class="material-symbols-outlined text-4xl mb-base">architecture</span>
+<h4 class="font-headline-sm text-headline-sm">The Blueprint</h4>
+<p class="text-sm mt-xs opacity-90">Download our latest dataset on urban infrastructure decay.</p>
+</div>
+<div class="bg-tertiary-container/10 border border-outline-variant/30 p-md rounded-lg flex-1">
+<h4 class="font-label-caps text-label-caps text-tertiary mb-xs">ARCHIVE SEARCH</h4>
+<div class="relative mt-base">
+<input class="w-full bg-transparent border-b border-outline py-xs focus:outline-none focus:border-primary font-label-sm" placeholder="Search keywords..." type="text"/>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- METHODOLOGY: High Contrast Dark Section -->
+<section class="bg-on-surface text-surface py-xl clip-path-asymmetric mt-lg">
+<div class="max-w-container-max mx-auto px-gutter py-xl">
+<div class="text-center mb-xl">
+<h2 class="font-display-lg text-display-lg mb-base">Our Protocol</h2>
+<div class="w-16 h-1 bg-primary mx-auto"></div>
+</div>
+<div class="grid grid-cols-1 md:grid-cols-4 gap-xl">
+<div class="text-center md:text-left">
+<span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">01</span>
+<h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">EXTRACTION</h5>
+<p class="font-body-md opacity-80">We harvest massive datasets from government APIs, sensor networks, and satellite imagery.</p>
+</div>
+<div class="text-center md:text-left">
+<span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">02</span>
+<h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">REFINEMENT</h5>
+<p class="font-body-md opacity-80">Algorithmic cleaning to remove bias and noise, isolating the core urban narratives.</p>
+</div>
+<div class="text-center md:text-left">
+<span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">03</span>
+<h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">SYNTHESIS</h5>
+<p class="font-body-md opacity-80">Our editorial team bridges the gap between cold data and human experience.</p>
+</div>
+<div class="text-center md:text-left">
+<span class="text-huge font-display-lg opacity-20 block mb-xs leading-none">04</span>
+<h5 class="font-label-caps text-label-caps text-primary-fixed mb-sm">IMPACT</h5>
+<p class="font-body-md opacity-80">Visualizations designed to provoke civic engagement and policy reconsiderations.</p>
+</div>
+</div>
+</div>
+</section>
+<!-- NEWSLETTER / CTA -->
+<section class="py-xl">
+<div class="max-w-3xl mx-auto px-gutter text-center">
+<h2 class="font-display-lg text-headline-md mb-md">Stay ahead of the urban curve.</h2>
+<p class="font-body-lg text-on-surface-variant mb-lg">Join 45,000+ urbanists, architects, and data scientists receiving our weekly digest.</p>
+<form class="flex flex-col md:flex-row gap-base justify-center">
+<input class="border-b border-outline bg-transparent py-base px-md w-full md:w-80 focus:outline-none focus:border-primary font-body-md" placeholder="email@address.com" type="email"/>
+<button class="bg-primary text-on-primary px-lg py-base font-label-caps text-label-caps tracking-widest hover:bg-primary-container transition-all">SIGN UP</button>
+</form>
+</div>
+</section>
+<!-- FOOTER (Shared Component Strategy) -->
+<footer class="bg-surface-container-low border-t border-outline-variant/30">
+<div class="max-w-container-max mx-auto w-full px-gutter py-xl flex flex-col md:flex-row justify-between items-start md:items-center gap-md">
+<div class="flex flex-col gap-sm">
+<span class="font-headline-sm text-headline-sm text-on-surface">Datapolis</span>
+<p class="font-body-md text-on-surface-variant max-w-xs">A collective focused on the data-driven future of our cities.</p>
+</div>
+<div class="flex flex-wrap gap-md">
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">About</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Institutional</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Ethics Policy</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Privacy</a>
+<a class="font-label-caps text-label-caps text-on-surface-variant hover:text-primary transition-colors underline decoration-1 underline-offset-4" href="#">Contact</a>
+</div>
+</div>
+<div class="max-w-container-max mx-auto px-gutter pb-md">
+<p class="font-label-caps text-[10px] text-on-surface-variant opacity-60">© 2024 Datapolis Journalism Collective. All rights reserved.</p>
+</div>
+</footer>
+<script>
+        // Smooth reveal on scroll interaction
+        const observerOptions = {
+            threshold: 0.1
+        };
+
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.classList.add('opacity-100');
+                    entry.target.classList.remove('opacity-0', 'translate-y-10');
+                }
+            });
+        }, observerOptions);
+
+        document.querySelectorAll('section, .glass-dark').forEach(el => {
+            el.classList.add('transition-all', 'duration-1000', 'opacity-0', 'translate-y-10');
+            observer.observe(el);
+        });
+
+        // Horizontal scroll effect for the header text
+        window.addEventListener('scroll', () => {
+            const scroll = window.scrollY;
+            const heroText = document.querySelector('.text-huge');
+            if (heroText) {
+                heroText.style.transform = `translateX(-${scroll * 0.1}px)`;
+            }
+        });
+    </script>
+</body></html>
