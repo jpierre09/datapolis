@@ -22,7 +22,7 @@ class ProjectCreateForm(forms.ModelForm):
             "title": "Da un nombre a tu proyecto",
             "question": "Pregunta de análisis",
             "description": "Pequeña descripción",
-            "cover_image": "Imagen de portada",
+            "cover_image": "Imagen de referencia",
             "project_type": "Tipo de proyecto",
             "category": "Categoría",
             "status": "Estado del proyecto",
