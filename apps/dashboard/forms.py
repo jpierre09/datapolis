@@ -17,16 +17,20 @@ PROFILE_EXTERNAL_LINK_SLOTS = 4
 class ProjectCreateForm(forms.ModelForm):
     class Meta:
         model = PortfolioProject
-        fields = ["title", "question", "description", "project_type", "category", "status", "findings", "conclusion"]
+        fields = ["title", "question", "description", "cover_image", "project_type", "category", "status", "findings", "conclusion"]
         labels = {
             "title": "Da un nombre a tu proyecto",
             "question": "Pregunta de análisis",
             "description": "Pequeña descripción",
+            "cover_image": "Imagen de portada",
             "project_type": "Tipo de proyecto",
             "category": "Categoría",
             "status": "Estado del proyecto",
             "findings": "Hallazgos iniciales",
             "conclusion": "Conclusión inicial",
+        }
+        help_texts = {
+            "cover_image": "Opcional. Se muestra debajo de la pregunta de análisis en la vista pública del proyecto.",
         }
 
         widgets = {
@@ -38,6 +42,7 @@ class ProjectCreateForm(forms.ModelForm):
                 }
             ),
             "description": forms.Textarea(attrs={"rows": 4, "placeholder": "Resume el contexto del análisis en pocas líneas."}),
+            "cover_image": forms.ClearableFileInput(attrs={"accept": "image/*"}),
             "project_type": forms.Select(),
             "category": forms.Select(),
             "status": forms.Select(),

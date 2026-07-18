@@ -10,7 +10,7 @@
   </header>
 
   <div class="dashboard-form-shell">
-    <form method="post" class="dashboard-form">
+    <form method="post" class="dashboard-form" enctype="multipart/form-data">
       {% csrf_token %}
 
       {% if form.non_field_errors %}
@@ -46,6 +46,14 @@
             {{ form.description }}
             <p class="dashboard-help-text">{{ form.description.help_text }}</p>
             {% for error in form.description.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
+          </div>
+
+          <div class="dashboard-field dashboard-field--full">
+            <label class="dashboard-label" for="{{ form.cover_image.id_for_label }}">{{ form.cover_image.label }}</label>
+            {{ form.cover_image }}
+            {% if form.instance.cover_image %}<p class="dashboard-help-text">Imagen actual: {{ form.instance.cover_image.name }}</p>{% endif %}
+            <p class="dashboard-help-text">{{ form.cover_image.help_text }}</p>
+            {% for error in form.cover_image.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
           </div>
         </div>
       </section>

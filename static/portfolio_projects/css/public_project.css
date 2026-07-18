@@ -205,6 +205,45 @@ main {
     color: #121d20;
 }
 
+/* Project Cover Image */
+.project-cover-section {
+    display: block;
+    position: relative;
+    width: 100%;
+    max-width: 1120px;
+    margin: 2.5rem auto;
+    padding: 0 32px;
+}
+
+.project-cover-image {
+    display: block;
+    width: 100%;
+    max-height: 60vh;
+    margin: 0 auto;
+    object-fit: cover;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(34, 99, 98, 0.08);
+}
+
+.project-cover-badge-card {
+    position: absolute;
+    top: 32px;
+    left: 32px;
+    z-index: 10;
+    background-color: #ffffff;
+    border-radius: 12px;
+    padding: 10px 18px;
+    box-shadow: 0 8px 24px rgba(34, 99, 98, 0.12);
+}
+
+.cover-badge-title {
+    font-family: 'Libre Caslon Text', Georgia, serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: 1.3;
+    color: #226362;
+}
+
 /* Pull Quote Section */
 .pull-quote-section {
     padding: 80px 0;

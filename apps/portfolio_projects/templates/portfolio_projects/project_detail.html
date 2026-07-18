@@ -89,6 +89,15 @@
           </div>
       </section>
 
+      {% if project.cover_image %}
+          <section class="project-cover-section">
+              <img class="project-cover-image" src="{{ project.cover_image.url }}" alt="Imagen de portada de {{ project.title }}">
+              <div class="project-cover-badge-card">
+                  <h3 class="cover-badge-title">{{ project.title }}</h3>
+              </div>
+          </section>
+      {% endif %}
+
       <!-- Narrative Section -->
       <section class="container-max narrative-section">
           <div class="narrative-container">

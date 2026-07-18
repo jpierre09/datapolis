@@ -58,6 +58,7 @@ class PortfolioProject(models.Model):
 	slug = models.SlugField(max_length=220, unique=True)
 	question = models.TextField()
 	description = models.TextField()
+	cover_image = models.ImageField(upload_to="project_covers/", blank=True, null=True)
 	findings = models.TextField(blank=True)
 	conclusion = models.TextField(blank=True)
 	status = models.CharField(

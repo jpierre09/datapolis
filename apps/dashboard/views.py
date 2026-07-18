@@ -427,7 +427,7 @@ def project_detail(request, slug):
 @login_required
 def project_create(request):
     if request.method == "POST":
-        form = ProjectCreateForm(request.POST)
+        form = ProjectCreateForm(request.POST, request.FILES)
         if form.is_valid():
             project = form.save(commit=False)
             project.owner = request.user
@@ -465,7 +465,7 @@ def project_edit(request, slug):
     )
 
     if request.method == "POST":
-        form = ProjectCreateForm(request.POST, instance=project)
+        form = ProjectCreateForm(request.POST, request.FILES, instance=project)
         if form.is_valid():
             updated_project = form.save()
             return redirect("dashboard:project_detail", slug=updated_project.slug)
