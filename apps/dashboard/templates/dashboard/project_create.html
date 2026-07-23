@@ -80,12 +80,6 @@
             {% for error in form.category.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
           </div>
 
-          <div class="dashboard-field dashboard-field--full">
-            <label class="dashboard-label" for="{{ form.status.id_for_label }}">{{ form.status.label }}</label>
-            {{ form.status }}
-            <p class="dashboard-help-text">{{ form.status.help_text }}</p>
-            {% for error in form.status.errors %}<p class="dashboard-error">{{ error }}</p>{% endfor %}
-          </div>
         </div>
       </section>
 

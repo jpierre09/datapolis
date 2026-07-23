@@ -17,7 +17,7 @@ PROFILE_EXTERNAL_LINK_SLOTS = 4
 class ProjectCreateForm(forms.ModelForm):
     class Meta:
         model = PortfolioProject
-        fields = ["title", "question", "description", "cover_image", "project_type", "category", "status", "findings", "conclusion"]
+        fields = ["title", "question", "description", "cover_image", "project_type", "category", "findings", "conclusion"]
         labels = {
             "title": "Da un nombre a tu proyecto",
             "question": "Pregunta de análisis",
@@ -25,7 +25,6 @@ class ProjectCreateForm(forms.ModelForm):
             "cover_image": "Imagen de referencia",
             "project_type": "Tipo de proyecto",
             "category": "Categoría",
-            "status": "Estado del proyecto",
             "findings": "Hallazgos iniciales",
             "conclusion": "Conclusión inicial",
         }
@@ -45,7 +44,6 @@ class ProjectCreateForm(forms.ModelForm):
             "cover_image": forms.ClearableFileInput(attrs={"accept": "image/*"}),
             "project_type": forms.Select(),
             "category": forms.Select(),
-            "status": forms.Select(),
             "findings": forms.Textarea(
                 attrs={
                     "rows": 4,
@@ -62,9 +60,6 @@ class ProjectCreateForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-
-        if not self.instance.pk:
-            self.fields["status"].initial = PortfolioProject.Status.DRAFT
 
         for field_name, field in self.fields.items():
             widget_class = "dashboard-input"
