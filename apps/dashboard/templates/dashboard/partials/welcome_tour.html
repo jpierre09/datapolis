@@ -1,0 +1,141 @@
+<div id="dashboard-tour-overlay" class="dashboard-tour-overlay"></div>
+<div id="dashboard-tour-tooltip" class="dashboard-tour-tooltip">
+  <span class="dashboard-tour-step-label"></span>
+  <h4 class="dashboard-tour-title"></h4>
+  <p class="dashboard-tour-text"></p>
+  <div class="dashboard-tour-actions">
+    <button type="button" id="dashboard-tour-skip" class="dashboard-button-secondary">Omitir</button>
+    <button type="button" id="dashboard-tour-next" class="dashboard-button-primary">Siguiente</button>
+  </div>
+</div>
+
+<script>
+  (function () {
+    var STORAGE_KEY = 'datapolisDashboardTourSeen';
+    if (sessionStorage.getItem(STORAGE_KEY)) {
+      return;
+    }
+
+    var steps = [
+      { selector: '[data-tour="overview"]', title: 'Mi portafolio', text: 'Aquí ves el resumen general de tu actividad y tus proyectos en Datapolis.' },
+      { selector: '[data-tour="profile"]', title: 'Perfil público', text: 'Edita los datos de tu perfil analítico que se muestran en tu portafolio público.' },
+      { selector: '[data-tour="projects"]', title: 'Proyectos', text: 'Gestiona la creación, edición y publicación de tus proyectos.' },
+      { selector: '[data-tour="datasets"]', title: 'Datasets', text: 'Carga y procesa las fuentes de datos que alimentan tus visualizaciones.' },
+      { selector: '[data-tour="public"]', title: 'Ver mi portafolio público', text: 'Visualiza el resultado final tal como lo verán tus visitantes.' }
+    ];
+
+    var MOBILE_BREAKPOINT = 768;
+    var currentStep = 0;
+    var overlay = document.getElementById('dashboard-tour-overlay');
+    var tooltip = document.getElementById('dashboard-tour-tooltip');
+    var stepLabel = tooltip.querySelector('.dashboard-tour-step-label');
+    var titleEl = tooltip.querySelector('.dashboard-tour-title');
+    var textEl = tooltip.querySelector('.dashboard-tour-text');
+    var nextBtn = document.getElementById('dashboard-tour-next');
+    var skipBtn = document.getElementById('dashboard-tour-skip');
+    var layout = document.querySelector('.layout');
+    var menuToggle = document.getElementById('menu-toggle');
+    var spotlighted = null;
+
+    function isMobile() {
+      return window.innerWidth < MOBILE_BREAKPOINT;
+    }
+
+    function ensureSidebarOpen() {
+      if (isMobile() && layout && !layout.classList.contains('sidebar-open')) {
+        if (menuToggle) {
+          menuToggle.click();
+        } else {
+          layout.classList.add('sidebar-open');
+        }
+      }
+    }
+
+    function clearSpotlight() {
+      if (spotlighted) {
+        spotlighted.classList.remove('tour-highlight');
+        spotlighted = null;
+      }
+    }
+
+    function positionTooltip(target) {
+      if (isMobile()) {
+        tooltip.style.top = '50%';
+        tooltip.style.left = '50%';
+        tooltip.style.transform = 'translate(-50%, -50%)';
+        return;
+      }
+
+      var rect = target.getBoundingClientRect();
+      var tooltipTop = rect.top;
+      var tooltipLeft = rect.right + 16;
+
+      if (tooltipLeft + 320 > window.innerWidth) {
+        tooltipLeft = rect.left;
+        tooltipTop = rect.bottom + 12;
+      }
+
+      tooltip.style.transform = 'none';
+      tooltip.style.top = Math.max(16, tooltipTop) + 'px';
+      tooltip.style.left = tooltipLeft + 'px';
+    }
+
+    function renderStep() {
+      var step = steps[currentStep];
+      var target = document.querySelector(step.selector);
+
+      if (!target) {
+        goNext();
+        return;
+      }
+
+      ensureSidebarOpen();
+      clearSpotlight();
+      target.classList.add('tour-highlight');
+      spotlighted = target;
+
+      stepLabel.textContent = 'Paso ' + (currentStep + 1) + ' de ' + steps.length;
+      titleEl.textContent = step.title;
+      textEl.textContent = step.text;
+      nextBtn.textContent = currentStep === steps.length - 1 ? 'Finalizar' : 'Siguiente';
+
+      positionTooltip(target);
+    }
+
+    function goNext() {
+      currentStep += 1;
+      if (currentStep >= steps.length) {
+        endTour();
+        return;
+      }
+      renderStep();
+    }
+
+    function endTour() {
+      clearSpotlight();
+      overlay.classList.remove('dashboard-tour-overlay-visible');
+      tooltip.classList.remove('dashboard-tour-tooltip-visible');
+      sessionStorage.setItem(STORAGE_KEY, 'true');
+      setTimeout(function () {
+        overlay.remove();
+        tooltip.remove();
+      }, 300);
+    }
+
+    nextBtn.addEventListener('click', goNext);
+    skipBtn.addEventListener('click', endTour);
+    window.addEventListener('resize', function () {
+      if (spotlighted) {
+        positionTooltip(spotlighted);
+      }
+    });
+
+    requestAnimationFrame(function () {
+      if (!isMobile()) {
+        overlay.classList.add('dashboard-tour-overlay-visible');
+      }
+      tooltip.classList.add('dashboard-tour-tooltip-visible');
+      renderStep();
+    });
+  })();
+</script>

@@ -35,15 +35,7 @@
 
         <main class="content">
           <div id="dashboard-subtle-shimmer"></div>
-          {% if messages %}
-            <div class="dashboard-messages">
-              {% for message in messages %}
-                <div class="dashboard-message {% if 'error' in message.tags %}dashboard-message-error{% elif 'warning' in message.tags %}dashboard-message-warning{% else %}dashboard-message-success{% endif %}">
-                  {{ message }}
-                </div>
-              {% endfor %}
-            </div>
-          {% endif %}
+          {% include "dashboard/partials/flash_messages.html" %}
           {% include "dashboard/partials/breadcrumbs.html" %}
           {% block dashboard_content %}{% endblock %}
         </main>
@@ -104,5 +96,7 @@
         }, 200);
       });
     </script>
+
+    {% include "dashboard/partials/welcome_tour.html" %}
   </body>
 </html>

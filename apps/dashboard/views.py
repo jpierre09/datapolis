@@ -390,6 +390,7 @@ def project_detail(request, slug):
     if request.method == "POST" and request.POST.get("action") == "publish_project" and project_publish_checklist["all_ready"]:
         project.status = PortfolioProject.Status.PUBLISHED
         project.save(update_fields=["status", "updated_at"])
+        messages.success(request, f"El proyecto {project.title} ha sido publicado exitosamente.")
         return redirect("dashboard:project_detail", slug=project.slug)
 
     main_dataset = project.project_data_sources[0] if project.project_data_sources else None
@@ -772,6 +773,7 @@ def visualization_create(request, project_slug, dataset_id):
                     pass
                 else:
                     visualization.save()
+                    messages.success(request, f"La visualización {visualization.title} ha sido creada exitosamente.")
                     return redirect("dashboard:project_detail", slug=project.slug)
     else:
         form = VisualizationCreateForm(
@@ -837,6 +839,7 @@ def visualization_edit(request, project_slug, visualization_id):
                     pass
                 else:
                     updated_visualization.save()
+                    messages.success(request, f"La visualización {updated_visualization.title} ha sido actualizada exitosamente.")
                     return redirect("dashboard:project_detail", slug=project.slug)
     else:
         form = VisualizationCreateForm(

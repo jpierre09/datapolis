@@ -1,0 +1,55 @@
+{% if messages %}
+  <div class="dashboard-flash-stack">
+    {% for message in messages %}
+      <div class="dashboard-flash dashboard-flash-{% if 'error' in message.tags %}error{% elif 'warning' in message.tags %}warning{% elif 'info' in message.tags or 'debug' in message.tags %}info{% else %}success{% endif %}">
+        <div class="dashboard-flash-icon">
+          {% if 'error' in message.tags %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+          {% elif 'warning' in message.tags %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+          {% elif 'info' in message.tags or 'debug' in message.tags %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>
+          {% else %}
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg>
+          {% endif %}
+        </div>
+        <div class="dashboard-flash-body">
+          <h4 class="dashboard-flash-title">
+            {% if 'error' in message.tags %}Error
+            {% elif 'warning' in message.tags %}Advertencia
+            {% elif 'info' in message.tags or 'debug' in message.tags %}Información
+            {% else %}Éxito{% endif %}
+          </h4>
+          <p class="dashboard-flash-text">{{ message }}</p>
+        </div>
+        <button type="button" class="dashboard-flash-close" aria-label="Descartar mensaje">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+        </button>
+      </div>
+    {% endfor %}
+  </div>
+  <script>
+    (function () {
+      function dismiss(toast) {
+        if (!toast || toast.dataset.dismissed) return;
+        toast.dataset.dismissed = 'true';
+        toast.classList.add('dashboard-flash-out');
+        setTimeout(function () {
+          toast.remove();
+        }, 300);
+      }
+
+      document.querySelectorAll('.dashboard-flash').forEach(function (toast) {
+        var closeBtn = toast.querySelector('.dashboard-flash-close');
+        if (closeBtn) {
+          closeBtn.addEventListener('click', function () {
+            dismiss(toast);
+          });
+        }
+        setTimeout(function () {
+          dismiss(toast);
+        }, 4000);
+      });
+    })();
+  </script>
+{% endif %}
