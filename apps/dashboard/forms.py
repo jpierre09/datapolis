@@ -280,18 +280,47 @@ class PublicProfileForm(forms.ModelForm):
         return instance
 
 
+# for slot in range(1, PROFILE_EXTERNAL_LINK_SLOTS + 1):
+#     PublicProfileForm.base_fields[f"external_link_{slot}_label"] = forms.CharField(
+#         label=f"Enlace {slot} - texto",
+#         required=False,
+#         help_text="Ej. Sitio web, GitHub o LinkedIn.",
+#         widget=forms.TextInput(attrs={"placeholder": "GitHub"}),
+#     )
+#     PublicProfileForm.base_fields[f"external_link_{slot}_url"] = forms.URLField(
+#         label=f"Enlace {slot} - URL",
+#         required=False,
+#         help_text="Pega la URL completa del enlace.",
+#         widget=forms.URLInput(attrs={"placeholder": "https://github.com/usuario"}),
+#     )
+
+# Definimos las listas de sugerencias en orden (slot 1, slot 2, etc.)
+PLACEHOLDER_LABELS = ["Sitio web", "LinkedIn", "YouTube", "GitHub"]
+PLACEHOLDER_URLS = [
+    "https://tuweb.com",
+    "https://linkedin.com",
+    "https://youtube.com",
+    "https://github.com/usuario"
+]
+
 for slot in range(1, PROFILE_EXTERNAL_LINK_SLOTS + 1):
+    # Conseguimos el índice correspondiente (0 para el slot 1, 1 para el slot 2, etc.)
+    # Si hay más slots que elementos en la lista, usamos "Sitio web" por defecto
+    idx = slot - 1
+    label_placeholder = PLACEHOLDER_LABELS[idx] if idx < len(PLACEHOLDER_LABELS) else "Sitio web"
+    url_placeholder = PLACEHOLDER_URLS[idx] if idx < len(PLACEHOLDER_URLS) else "https://enlace.com"
+
     PublicProfileForm.base_fields[f"external_link_{slot}_label"] = forms.CharField(
         label=f"Enlace {slot} - texto",
         required=False,
         help_text="Ej. Sitio web, GitHub o LinkedIn.",
-        widget=forms.TextInput(attrs={"placeholder": "GitHub"}),
+        widget=forms.TextInput(attrs={"placeholder": label_placeholder}),
     )
     PublicProfileForm.base_fields[f"external_link_{slot}_url"] = forms.URLField(
         label=f"Enlace {slot} - URL",
         required=False,
         help_text="Pega la URL completa del enlace.",
-        widget=forms.URLInput(attrs={"placeholder": "https://github.com/usuario"}),
+        widget=forms.URLInput(attrs={"placeholder": url_placeholder}),
     )
 
 
